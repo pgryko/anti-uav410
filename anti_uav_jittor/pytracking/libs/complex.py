@@ -1,4 +1,5 @@
 import jittor as jt
+
 from pytracking.libs.tensorlist import tensor_operation
 
 
@@ -16,12 +17,12 @@ def mult(a: jt.Var, b: jt.Var):
 
     if is_real(a):
         if a.dim() >= b.dim():
-            raise ValueError('Incorrect dimensions.')
+            raise ValueError("Incorrect dimensions.")
         # a is real
         return mult_real_cplx(a, b)
     if is_real(b):
         if b.dim() >= a.dim():
-            raise ValueError('Incorrect dimensions.')
+            raise ValueError("Incorrect dimensions.")
         # b is real
         return mult_real_cplx(b, a)
 
@@ -38,17 +39,17 @@ def mult_conj(a: jt.Var, b: jt.Var):
 
     if is_real(a):
         if a.dim() >= b.dim():
-            raise ValueError('Incorrect dimensions.')
+            raise ValueError("Incorrect dimensions.")
         # a is real
         return mult_real_cplx(a, conj(b))
     if is_real(b):
         if b.dim() >= a.dim():
-            raise ValueError('Incorrect dimensions.')
+            raise ValueError("Incorrect dimensions.")
         # b is real
         return mult_real_cplx(b, a)
 
     # Both complex
-    c = mult_real_cplx(b[...,0], a)
+    c = mult_real_cplx(b[..., 0], a)
     c[..., 0] += a[..., 1] * b[..., 1]
     c[..., 1] -= a[..., 0] * b[..., 1]
     return c
@@ -59,7 +60,7 @@ def mult_real_cplx(a: jt.Var, b: jt.Var):
     """Pointwise complex multiplication of real tensor a with complex tensor b."""
 
     if is_real(b):
-        raise ValueError('Last dimension must have length 2.')
+        raise ValueError("Last dimension must have length 2.")
 
     return a.unsqueeze(-1) * b
 
@@ -70,7 +71,7 @@ def div(a: jt.Var, b: jt.Var):
 
     if is_real(b):
         if b.dim() >= a.dim():
-            raise ValueError('Incorrect dimensions.')
+            raise ValueError("Incorrect dimensions.")
         # b is real
         return div_cplx_real(a, b)
 
@@ -82,7 +83,7 @@ def div_cplx_real(a: jt.Var, b: jt.Var):
     """Pointwise complex division of complex tensor a with real tensor b."""
 
     if is_real(a):
-        raise ValueError('Last dimension must have length 2.')
+        raise ValueError("Last dimension must have length 2.")
 
     return a / b.unsqueeze(-1)
 
@@ -92,9 +93,9 @@ def abs_sqr(a: jt.Var):
     """Squared absolute value."""
 
     if is_real(a):
-        raise ValueError('Last dimension must have length 2.')
+        raise ValueError("Last dimension must have length 2.")
 
-    return jt.sum(a*a, -1)
+    return jt.sum(a * a, -1)
 
 
 @tensor_operation
@@ -102,7 +103,7 @@ def abs(a: jt.Var):
     """Absolute value."""
 
     if is_real(a):
-        raise ValueError('Last dimension must have length 2.')
+        raise ValueError("Last dimension must have length 2.")
 
     return jt.sqrt(abs_sqr(a))
 
@@ -112,10 +113,10 @@ def conj(a: jt.Var):
     """Complex conjugate."""
 
     if is_real(a):
-        raise ValueError('Last dimension must have length 2.')
+        raise ValueError("Last dimension must have length 2.")
 
     # return a * jt.Var([1, -1], device=a.device)
-    return complex(a[...,0], -a[...,1])
+    return complex(a[..., 0], -a[..., 1])
 
 
 @tensor_operation
@@ -123,7 +124,7 @@ def real(a: jt.Var):
     """Real part."""
 
     if is_real(a):
-        raise ValueError('Last dimension must have length 2.')
+        raise ValueError("Last dimension must have length 2.")
 
     return a[..., 0]
 
@@ -133,7 +134,7 @@ def imag(a: jt.Var):
     """Imaginary part."""
 
     if is_real(a):
-        raise ValueError('Last dimension must have length 2.')
+        raise ValueError("Last dimension must have length 2.")
 
     return a[..., 1]
 
@@ -157,31 +158,39 @@ def mtimes(a: jt.Var, b: jt.Var, conj_a=False, conj_b=False):
 
     if is_real(a):
         if a.dim() >= b.dim():
-            raise ValueError('Incorrect dimensions.')
+            raise ValueError("Incorrect dimensions.")
         return mtimes_real_complex(a, b, conj_b=conj_b)
     if is_real(b):
         if b.dim() >= a.dim():
-            raise ValueError('Incorrect dimensions.')
+            raise ValueError("Incorrect dimensions.")
         return mtimes_complex_real(a, b, conj_a=conj_a)
 
     if not conj_a and not conj_b:
-        return complex(jt.matmul(a[..., 0], b[..., 0]) - jt.matmul(a[..., 1], b[..., 1]),
-                       jt.matmul(a[..., 0], b[..., 1]) + jt.matmul(a[..., 1], b[..., 0]))
+        return complex(
+            jt.matmul(a[..., 0], b[..., 0]) - jt.matmul(a[..., 1], b[..., 1]),
+            jt.matmul(a[..., 0], b[..., 1]) + jt.matmul(a[..., 1], b[..., 0]),
+        )
     if conj_a and not conj_b:
-        return complex(jt.matmul(a[..., 0], b[..., 0]) + jt.matmul(a[..., 1], b[..., 1]),
-                       jt.matmul(a[..., 0], b[..., 1]) - jt.matmul(a[..., 1], b[..., 0]))
+        return complex(
+            jt.matmul(a[..., 0], b[..., 0]) + jt.matmul(a[..., 1], b[..., 1]),
+            jt.matmul(a[..., 0], b[..., 1]) - jt.matmul(a[..., 1], b[..., 0]),
+        )
     if not conj_a and conj_b:
-        return complex(jt.matmul(a[..., 0], b[..., 0]) + jt.matmul(a[..., 1], b[..., 1]),
-                       jt.matmul(a[..., 1], b[..., 0]) - jt.matmul(a[..., 0], b[..., 1]))
+        return complex(
+            jt.matmul(a[..., 0], b[..., 0]) + jt.matmul(a[..., 1], b[..., 1]),
+            jt.matmul(a[..., 1], b[..., 0]) - jt.matmul(a[..., 0], b[..., 1]),
+        )
     if conj_a and conj_b:
-        return complex(jt.matmul(a[..., 0], b[..., 0]) - jt.matmul(a[..., 1], b[..., 1]),
-                       -jt.matmul(a[..., 0], b[..., 1]) - jt.matmul(a[..., 1], b[..., 0]))
+        return complex(
+            jt.matmul(a[..., 0], b[..., 0]) - jt.matmul(a[..., 1], b[..., 1]),
+            -jt.matmul(a[..., 0], b[..., 1]) - jt.matmul(a[..., 1], b[..., 0]),
+        )
 
 
 @tensor_operation
 def mtimes_real_complex(a: jt.Var, b: jt.Var, conj_b=False):
     if is_real(b):
-        raise ValueError('Incorrect dimensions.')
+        raise ValueError("Incorrect dimensions.")
 
     if not conj_b:
         return complex(jt.matmul(a, b[..., 0]), jt.matmul(a, b[..., 1]))
@@ -192,7 +201,7 @@ def mtimes_real_complex(a: jt.Var, b: jt.Var, conj_b=False):
 @tensor_operation
 def mtimes_complex_real(a: jt.Var, b: jt.Var, conj_a=False):
     if is_real(a):
-        raise ValueError('Incorrect dimensions.')
+        raise ValueError("Incorrect dimensions.")
 
     if not conj_a:
         return complex(jt.matmul(a[..., 0], b), jt.matmul(a[..., 1], b))
@@ -206,6 +215,3 @@ def exp_imag(a: jt.Var):
 
     a = a.unsqueeze(-1)
     return jt.concat((jt.cos(a), jt.sin(a)), -1)
-
-
-

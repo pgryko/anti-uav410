@@ -1,26 +1,25 @@
-
-from __future__ import absolute_import
-import os
 import glob
-import json
-import cv2
-import numpy as np
 import io
+import json
+import os
+
+import numpy as np
 
 """
 Experiments Setup
 """
 # set the dataset path
-dataset_path = 'path/to/Anti-UAV410'
+dataset_path = "path/to/Anti-UAV410"
 # set 'test' or 'val' for evaluation
-evaluation_mode = 'test'
+evaluation_mode = "test"
 # set the path for the predicted tracking results
-pred_path = './Tracking_results/Trained_with_antiuav410/SiamDT/'
+pred_path = "./Tracking_results/Trained_with_antiuav410/SiamDT/"
 
 
 # mode 1 means the results is formatted by (x,y,w,h)
 # mode 2 means the results is formatted by (x1,y1,x2,y2)
 mode = 1
+
 
 def iou(bbox1, bbox2):
     """
@@ -60,28 +59,23 @@ def iou(bbox1, bbox2):
 
 
 def not_exist(pred):
-
     if len(pred) == 1 or len(pred) == 0:
         return 1.0
     else:
         return 0.0
 
 
-
 def eval(out_res, label_res):
-
     measure_per_frame = []
 
-    for _pred, _gt, _exist in zip(out_res, label_res['gt_rect'], label_res['exist']):
-
+    for _pred, _gt, _exist in zip(out_res, label_res["gt_rect"], label_res["exist"], strict=False):
         if not _exist:
             measure_per_frame.append(not_exist(_pred))
         else:
-
-            if len(_gt)<4 or sum(_gt)==0:
+            if len(_gt) < 4 or sum(_gt) == 0:
                 continue
 
-            if len(_pred)==4:
+            if len(_pred) == 4:
                 measure_per_frame.append(iou(_pred, _gt))
             else:
                 measure_per_frame.append(0.0)
@@ -91,56 +85,45 @@ def eval(out_res, label_res):
             # except:
             #     measure_per_frame.append(0)
 
-
         # measure_per_frame.append(not_exist(_pred) if not _exist else iou(_pred, _gt))
-
 
     return np.mean(measure_per_frame)
 
 
-
-
 def main():
-
-    evaluation_metrics=['SA Score', 'P Score', 'AUC Score']
+    evaluation_metrics = ["SA Score", "P Score", "AUC Score"]
 
     datasetpath = dataset_path + evaluation_mode
 
-
-    label_files = sorted(glob.glob(
-        os.path.join(datasetpath, '*/IR_label.json')))
+    label_files = sorted(glob.glob(os.path.join(datasetpath, "*/IR_label.json")))
 
     video_num = len(label_files)
     overall_performance = []
 
-
-    if (os.path.exists('eval_details.txt')):
-        os.remove('eval_details.txt')
+    if os.path.exists("eval_details.txt"):
+        os.remove("eval_details.txt")
 
     for video_id, label_file in enumerate(label_files, start=1):
-
         video_name = os.path.basename(label_file)
 
-        with open(label_file, 'r') as f:
+        with open(label_file) as f:
             label_res = json.load(f)
 
-        video_dirs=os.path.dirname(label_file)
+        video_dirs = os.path.dirname(label_file)
 
         video_dirsbase = os.path.basename(video_dirs)
 
-        pred_file = os.path.join(pred_path, video_dirsbase+'.txt')
-
+        pred_file = os.path.join(pred_path, video_dirsbase + ".txt")
 
         try:
-            with open(pred_file, 'r') as f:
+            with open(pred_file) as f:
                 pred_res = json.load(f)
-                pred_res=pred_res['res']
+                pred_res = pred_res["res"]
         except:
-            with open(pred_file, 'r') as f:
-                pred_res = np.loadtxt(io.StringIO(f.read().replace(',', ' ')))
+            with open(pred_file) as f:
+                pred_res = np.loadtxt(io.StringIO(f.read().replace(",", " ")))
 
-
-        if mode==1:
+        if mode == 1:
             pass
         else:
             pred_res[:, 2:] = pred_res[:, 2:] - pred_res[:, :2] + 1
@@ -148,17 +131,27 @@ def main():
         SA_Score = eval(pred_res, label_res)
         overall_performance.append(SA_Score)
 
-        text = '[%03d/%03d] %25s %15s: %.04f' % (video_id, video_num, video_dirsbase, evaluation_metrics[0], SA_Score)
-        with open('eval_details.txt', 'a', encoding='utf-8') as f:
+        text = "[%03d/%03d] %25s %15s: %.04f" % (
+            video_id,
+            video_num,
+            video_dirsbase,
+            evaluation_metrics[0],
+            SA_Score,
+        )
+        with open("eval_details.txt", "a", encoding="utf-8") as f:
             f.write(text)
-            f.write('\n')
+            f.write("\n")
         print(text)
 
-    text='[Overall] %25s %15s: %.04f\n' % ('------', evaluation_metrics[0], np.mean(overall_performance))
-    with open('eval_details.txt', 'a', encoding='utf-8') as f:
+    text = "[Overall] %25s %15s: %.04f\n" % (
+        "------",
+        evaluation_metrics[0],
+        np.mean(overall_performance),
+    )
+    with open("eval_details.txt", "a", encoding="utf-8") as f:
         f.write(text)
     print(text)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

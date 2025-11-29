@@ -1,23 +1,23 @@
 import warnings
+from math import floor
+
 import numpy as np
 from skimage.morphology import binary_dilation, disk
-from math import floor
 
 
 def text_bargraph(values):
-
-    blocks = np.array(('u', ' ', '▁', '▂', '▃', '▄', '▅', '▆', '▇', '█', 'o'))
-    nsteps = len(blocks)-2-1
-    hstep = 1 / (2*nsteps)
+    blocks = np.array(("u", " ", "▁", "▂", "▃", "▄", "▅", "▆", "▇", "█", "o"))
+    nsteps = len(blocks) - 2 - 1
+    hstep = 1 / (2 * nsteps)
     values = np.array(values)
     nans = np.isnan(values)
     values[nans] = 0  # '░'
     indices = ((values + hstep) * nsteps + 1).astype(np.int)
     indices[values < 0] = 0
-    indices[values > 1] = len(blocks)-1
+    indices[values > 1] = len(blocks) - 1
     graph = blocks[indices]
-    graph[nans] = '░'
-    graph = str.join('', graph)
+    graph[nans] = "░"
+    graph = str.join("", graph)
     return graph
 
 
@@ -30,9 +30,10 @@ def text_bargraph(values):
 # Adapted from DAVIS 2016 (Federico Perazzi)
 # ----------------------------------------------------------------------------
 
+
 # Originally db_eval_iou() in the davis challenge got10k_toolkit:
 def davis_jaccard_measure(fg_mask, gt_mask):
-    """ Compute region similarity as the Jaccard Index.
+    """Compute region similarity as the Jaccard Index.
 
     :param fg_mask: (ndarray): binary segmentation map.
     :param gt_mask: (ndarray): binary annotation map.
@@ -45,26 +46,25 @@ def davis_jaccard_measure(fg_mask, gt_mask):
     if np.isclose(np.sum(gt_mask), 0) and np.isclose(np.sum(fg_mask), 0):
         return 1
     else:
-        return np.sum((gt_mask & fg_mask)) / \
-               np.sum((gt_mask | fg_mask), dtype=np.float32)
+        return np.sum(gt_mask & fg_mask) / np.sum((gt_mask | fg_mask), dtype=np.float32)
 
 
 def davis_jaccard_measure_torch(fg_mask, gt_mask):
-    """ Compute region similarity as the Jaccard Index.
+    """Compute region similarity as the Jaccard Index.
 
     :param fg_mask: (ndarray): binary segmentation map.
     :param gt_mask: (ndarray): binary annotation map.
     :return: jaccard (float): region similarity
     """
 
-    #gt_mask = gt_mask.astype(np.bool)
-    #fg_mask = fg_mask.astype(np.bool)
+    # gt_mask = gt_mask.astype(np.bool)
+    # fg_mask = fg_mask.astype(np.bool)
 
     if gt_mask.sum() == 0 and fg_mask.sum() == 0:
         return 1
     else:
-        return (gt_mask & fg_mask).sum() / \
-               (gt_mask | fg_mask).sum().float()
+        return (gt_mask & fg_mask).sum() / (gt_mask | fg_mask).sum().float()
+
 
 # Originally db_eval_boundary() in the davis challenge got10k_toolkit:
 def davis_f_measure(foreground_mask, gt_mask, bound_th=0.008):
@@ -84,8 +84,9 @@ def davis_f_measure(foreground_mask, gt_mask, bound_th=0.008):
     """
     assert np.atleast_3d(foreground_mask).shape[2] == 1
 
-    bound_pix = bound_th if bound_th >= 1 else \
-        np.ceil(bound_th * np.linalg.norm(foreground_mask.shape))
+    bound_pix = (
+        bound_th if bound_th >= 1 else np.ceil(bound_th * np.linalg.norm(foreground_mask.shape))
+    )
 
     # Get the pixel boundaries of both masks
     fg_boundary = seg2bmap(foreground_mask)
@@ -141,7 +142,7 @@ def seg2bmap(seg, width=None, height=None):
 
      David Martin <dmartin@eecs.berkeley.edu>
      January 2003
- """
+    """
 
     seg = seg.astype(np.bool)
     seg[seg > 0] = 1
@@ -156,8 +157,9 @@ def seg2bmap(seg, width=None, height=None):
     ar1 = float(width) / float(height)
     ar2 = float(w) / float(h)
 
-    assert not (width > w | height > h | abs(ar1 - ar2) > 0.01), \
-        'Can''t convert %dx%d seg to %dx%d bmap.' % (w, h, width, height)
+    assert not (width > w | height > h | abs(ar1 - ar2) > 0.01), (
+        "Can" "t convert %dx%d seg to %dx%d bmap." % (w, h, width, height)
+    )
 
     e = np.zeros_like(seg)
     s = np.zeros_like(seg)
@@ -218,7 +220,7 @@ def decay(X, n_bins=4):
     ids = np.round(np.linspace(1, len(X), n_bins + 1) + 1e-10) - 1
     ids = ids.astype(np.uint8)
 
-    D_bins = [X[ids[i]:ids[i + 1] + 1] for i in range(0, 4)]
+    D_bins = [X[ids[i] : ids[i + 1] + 1] for i in range(0, 4)]
 
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", category=RuntimeWarning)
@@ -231,5 +233,3 @@ def std(X):
     Compute standard deviation.
     """
     return np.nanstd(X)
-
-

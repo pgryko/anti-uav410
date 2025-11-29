@@ -1,2 +1,2 @@
-from .tracker import *
 from .model import *
+from .tracker import *

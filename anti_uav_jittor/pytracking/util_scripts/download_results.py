@@ -1,12 +1,13 @@
+import argparse
 import os
-import sys
-import gdown
 import re
 import shutil
-import argparse
+import sys
 import tempfile
 
-env_path = os.path.join(os.path.dirname(__file__), '../..')
+import gdown
+
+env_path = os.path.join(os.path.dirname(__file__), "../..")
 if env_path not in sys.path:
     sys.path.append(env_path)
 
@@ -55,11 +56,11 @@ results_link_dict = {
 
 
 def _download_file(file_id, path):
-    link = 'https://drive.google.com/uc?id=' + file_id
+    link = "https://drive.google.com/uc?id=" + file_id
     gdown.download(link, path, quiet=True)
 
 
-def download_results(download_path, trackers='all'):
+def download_results(download_path, trackers="all"):
     """
     Script to automatically download tracker results for PyTracking.
 
@@ -71,41 +72,42 @@ def download_results(download_path, trackers='all'):
                    downloaded. The value can be set to either 'all', in which case all available results for the
                     tracker are downloaded. Else the value should be a list of parameter file names.
     """
-    print('Using download path ''{}'''.format(download_path))
+    print("Using download path " f"{download_path}")
 
     os.makedirs(download_path, exist_ok=True)
 
     if isinstance(trackers, str):
-        if trackers == 'all':
-            trackers = {k: 'all' for k in results_link_dict.keys()}
+        if trackers == "all":
+            trackers = {k: "all" for k in results_link_dict.keys()}
         elif trackers in results_link_dict:
-            trackers = {trackers: 'all'}
+            trackers = {trackers: "all"}
         else:
-            raise Exception('tracker_list must be set to ''all'', a tracker name, or be a dict')
+            raise Exception("tracker_list must be set to " "all" ", a tracker name, or be a dict")
     elif isinstance(trackers, dict):
         pass
     else:
-        raise Exception('tracker_list must be set to ''all'', or be a dict')
+        raise Exception("tracker_list must be set to " "all" ", or be a dict")
 
     for trk, runfiles in trackers.items():
         trk_path = os.path.join(download_path, trk)
         if not os.path.exists(trk_path):
             os.makedirs(trk_path)
 
-        if runfiles == 'all':
+        if runfiles == "all":
             for params, fileid in results_link_dict[trk].items():
-                print('Downloading: {}/{}'.format(trk, params))
+                print(f"Downloading: {trk}/{params}")
                 _download_file(fileid, os.path.join(trk_path, params))
         elif isinstance(runfiles, (list, tuple)):
             for p in runfiles:
                 for params, fileid in results_link_dict[trk].items():
-                    if re.match(r'{}(|_(\d\d\d)).zip'.format(p), params) is not None:
-                        print('Downloading: {}/{}'.format(trk, params))
+                    if re.match(rf"{p}(|_(\d\d\d)).zip", params) is not None:
+                        print(f"Downloading: {trk}/{params}")
                         _download_file(fileid, os.path.join(trk_path, params))
 
         else:
-            raise Exception('tracker_list values must either be set to ''all'', or be a list of param names')
-
+            raise Exception(
+                "tracker_list values must either be set to " "all" ", or be a list of param names"
+            )
 
 
 def unpack_tracking_results(download_path, output_path=None):
@@ -144,24 +146,42 @@ def unpack_tracking_results(download_path, output_path=None):
             save_path = os.path.join(output_path, t)
             if not os.path.exists(save_path):
                 os.makedirs(save_path)
-            shutil.unpack_archive(os.path.join(download_path, t, r), os.path.join(save_path, r[:-4]), 'zip')
+            shutil.unpack_archive(
+                os.path.join(download_path, t, r), os.path.join(save_path, r[:-4]), "zip"
+            )
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Download and unpack zipped results')
-    parser.add_argument('--tracker', type=str, default='all',
-                        help='Name of tracker results to download, or ''all''.')
-    parser.add_argument('--output_path', type=str, default=None,
-                        help='Path to the directory where the results will be unpacked.')
-    parser.add_argument('--temp_download_path', type=str, default=None,
-                        help='Temporary path used for downloading the Zip files.')
-    parser.add_argument('--download', type=bool, default=True,
-                        help='Whether to download results or unpack existing downloaded files.')
+    parser = argparse.ArgumentParser(description="Download and unpack zipped results")
+    parser.add_argument(
+        "--tracker",
+        type=str,
+        default="all",
+        help="Name of tracker results to download, or " "all" ".",
+    )
+    parser.add_argument(
+        "--output_path",
+        type=str,
+        default=None,
+        help="Path to the directory where the results will be unpacked.",
+    )
+    parser.add_argument(
+        "--temp_download_path",
+        type=str,
+        default=None,
+        help="Temporary path used for downloading the Zip files.",
+    )
+    parser.add_argument(
+        "--download",
+        type=bool,
+        default=True,
+        help="Whether to download results or unpack existing downloaded files.",
+    )
     args = parser.parse_args()
 
     download_path = args.temp_download_path
     if download_path is None:
-        download_path = '{}/pytracking_results/'.format(tempfile.gettempdir())
+        download_path = f"{tempfile.gettempdir()}/pytracking_results/"
 
     if args.download:
         download_results(download_path, args.tracker)
@@ -169,5 +189,5 @@ def main():
     unpack_tracking_results(download_path, args.output_path)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

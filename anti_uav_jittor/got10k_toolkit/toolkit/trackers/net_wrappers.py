@@ -1,9 +1,12 @@
 import ltr_torch.admin.loading as ltr_loading
 
+
 class NetWrapper:
     """Used for wrapping networks in pytracking.
     Network modules and functions can be accessed directly as if they were members of this class."""
-    _rec_iter=0
+
+    _rec_iter = 0
+
     def __init__(self, net_path, use_gpu=True, initialize=False, **kwargs):
         self.net_path = net_path
         self.use_gpu = use_gpu

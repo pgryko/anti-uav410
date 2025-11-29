@@ -4,14 +4,13 @@ Misc functions, including distributed helpers.
 
 Mostly copy-paste from torchvision references.
 """
+
+import datetime
 import os
+import pickle
 import subprocess
 import time
 from collections import defaultdict, deque
-import datetime
-import pickle
-from typing import Optional, List
-
 
 import jittor as jt
 
@@ -21,7 +20,7 @@ import jittor as jt
 #     # from torchvision.ops.misc import _output_size
 
 
-class SmoothedValue(object):
+class SmoothedValue:
     """Track a series of values and provide access to smoothed values over a
     window or the global series average.
     """
@@ -45,7 +44,7 @@ class SmoothedValue(object):
         """
         if not is_dist_avail_and_initialized():
             return
-        t = jt.var([self.count, self.total], dtype=jt.float64, device='cuda')
+        t = jt.var([self.count, self.total], dtype=jt.float64, device="cuda")
         # dist.barrier()
         jt.sync_all()
         # dist.all_reduce(t)
@@ -82,7 +81,8 @@ class SmoothedValue(object):
             avg=self.avg,
             global_avg=self.global_avg,
             max=self.max,
-            value=self.value)
+            value=self.value,
+        )
 
 
 def all_gather(data):
@@ -122,7 +122,7 @@ def all_gather(data):
     jt.all_gather(tensor_list, tensor)
 
     data_list = []
-    for size, tensor in zip(size_list, tensor_list):
+    for size, tensor in zip(size_list, tensor_list, strict=False):
         buffer = tensor.cpu().numpy().tobytes()[:size]
         data_list.append(pickle.loads(buffer))
 
@@ -152,11 +152,11 @@ def reduce_dict(input_dict, average=True):
         jt.all_reduce(values)
         if average:
             values /= world_size
-        reduced_dict = {k: v for k, v in zip(names, values)}
+        reduced_dict = {k: v for k, v in zip(names, values, strict=False)}
     return reduced_dict
 
 
-class MetricLogger(object):
+class MetricLogger:
     def __init__(self, delimiter="\t"):
         self.meters = defaultdict(SmoothedValue)
         self.delimiter = delimiter
@@ -173,15 +173,12 @@ class MetricLogger(object):
             return self.meters[attr]
         if attr in self.__dict__:
             return self.__dict__[attr]
-        raise AttributeError("'{}' object has no attribute '{}'".format(
-            type(self).__name__, attr))
+        raise AttributeError(f"'{type(self).__name__}' object has no attribute '{attr}'")
 
     def __str__(self):
         loss_str = []
         for name, meter in self.meters.items():
-            loss_str.append(
-                "{}: {}".format(name, str(meter))
-            )
+            loss_str.append(f"{name}: {str(meter)}")
         return self.delimiter.join(loss_str)
 
     def synchronize_between_processes(self):
@@ -194,32 +191,36 @@ class MetricLogger(object):
     def log_every(self, iterable, print_freq, header=None):
         i = 0
         if not header:
-            header = ''
+            header = ""
         start_time = time.time()
         end = time.time()
-        iter_time = SmoothedValue(fmt='{avg:.4f}')
-        data_time = SmoothedValue(fmt='{avg:.4f}')
-        space_fmt = ':' + str(len(str(len(iterable)))) + 'd'
+        iter_time = SmoothedValue(fmt="{avg:.4f}")
+        data_time = SmoothedValue(fmt="{avg:.4f}")
+        space_fmt = ":" + str(len(str(len(iterable)))) + "d"
         if jt.has_cuda:
             jt.flags.use_cuda = 1
-            log_msg = self.delimiter.join([
-                header,
-                '[{0' + space_fmt + '}/{1}]',
-                'eta: {eta}',
-                '{meters}',
-                'time: {time}',
-                'data: {data}',
-                'max mem: {memory:.0f}'
-            ])
+            log_msg = self.delimiter.join(
+                [
+                    header,
+                    "[{0" + space_fmt + "}/{1}]",
+                    "eta: {eta}",
+                    "{meters}",
+                    "time: {time}",
+                    "data: {data}",
+                    "max mem: {memory:.0f}",
+                ]
+            )
         else:
-            log_msg = self.delimiter.join([
-                header,
-                '[{0' + space_fmt + '}/{1}]',
-                'eta: {eta}',
-                '{meters}',
-                'time: {time}',
-                'data: {data}'
-            ])
+            log_msg = self.delimiter.join(
+                [
+                    header,
+                    "[{0" + space_fmt + "}/{1}]",
+                    "eta: {eta}",
+                    "{meters}",
+                    "time: {time}",
+                    "data: {data}",
+                ]
+            )
         MB = 1024.0 * 1024.0
         for obj in iterable:
             data_time.update(time.time() - end)
@@ -229,38 +230,50 @@ class MetricLogger(object):
                 eta_seconds = iter_time.global_avg * (len(iterable) - i)
                 eta_string = str(datetime.timedelta(seconds=int(eta_seconds)))
                 if jt.has_cuda:
-                    print(log_msg.format(
-                        i, len(iterable), eta=eta_string,
-                        meters=str(self),
-                        time=str(iter_time), data=str(data_time)))
-                        # memory=torch.cuda.max_memory_allocated() / MB) 暂时无法实现
+                    print(
+                        log_msg.format(
+                            i,
+                            len(iterable),
+                            eta=eta_string,
+                            meters=str(self),
+                            time=str(iter_time),
+                            data=str(data_time),
+                        )
+                    )
+                # memory=torch.cuda.max_memory_allocated() / MB) 暂时无法实现
                 else:
-                    print(log_msg.format(
-                        i, len(iterable), eta=eta_string,
-                        meters=str(self),
-                        time=str(iter_time), data=str(data_time)))
+                    print(
+                        log_msg.format(
+                            i,
+                            len(iterable),
+                            eta=eta_string,
+                            meters=str(self),
+                            time=str(iter_time),
+                            data=str(data_time),
+                        )
+                    )
             i += 1
             end = time.time()
         total_time = time.time() - start_time
         total_time_str = str(datetime.timedelta(seconds=int(total_time)))
-        print('{} Total time: {} ({:.4f} s / it)'.format(
-            header, total_time_str, total_time / len(iterable)))
+        print(f"{header} Total time: {total_time_str} ({total_time / len(iterable):.4f} s / it)")
 
 
 def get_sha():
     cwd = os.path.dirname(os.path.abspath(__file__))
 
     def _run(command):
-        return subprocess.check_output(command, cwd=cwd).decode('ascii').strip()
-    sha = 'N/A'
+        return subprocess.check_output(command, cwd=cwd).decode("ascii").strip()
+
+    sha = "N/A"
     diff = "clean"
-    branch = 'N/A'
+    branch = "N/A"
     try:
-        sha = _run(['git', 'rev-parse', 'HEAD'])
-        subprocess.check_output(['git', 'diff'], cwd=cwd)
-        diff = _run(['git', 'diff-index', 'HEAD'])
+        sha = _run(["git", "rev-parse", "HEAD"])
+        subprocess.check_output(["git", "diff"], cwd=cwd)
+        diff = _run(["git", "diff-index", "HEAD"])
         diff = "has uncommited changes" if diff else "clean"
-        branch = _run(['git', 'rev-parse', '--abbrev-ref', 'HEAD'])
+        branch = _run(["git", "rev-parse", "--abbrev-ref", "HEAD"])
     except Exception:
         pass
     message = f"sha: {sha}, status: {diff}, branch: {branch}"
@@ -268,7 +281,7 @@ def get_sha():
 
 
 def collate_fn(batch):
-    batch = list(zip(*batch))
+    batch = list(zip(*batch, strict=False))
     batch[0] = nested_tensor_from_tensor_list(batch[0])
     return tuple(batch)
 
@@ -280,6 +293,7 @@ def _max_by_axis(the_list):
         for index, item in enumerate(sublist):
             maxes[index] = max(maxes[index], item)
     return maxes
+
 
 def nested_tensor_from_tensor(tensor1: jt.Var):
     # TODO make this more general
@@ -293,12 +307,13 @@ def nested_tensor_from_tensor(tensor1: jt.Var):
         device = tensor1.device
         tensor = jt.zeros(batch_shape, dtype=dtype, device=device)
         mask = jt.ones((b, h, w), dtype=jt.bool, device=device)
-        for img, pad_img, m in zip(tensor1, tensor, mask):
+        for img, pad_img, m in zip(tensor1, tensor, mask, strict=False):
             pad_img[: img.shape[0], : img.shape[1], : img.shape[2]].copy_(img)
-            m[: img.shape[1], :img.shape[2]] = False
+            m[: img.shape[1], : img.shape[2]] = False
     else:
-        raise ValueError('not supported')
+        raise ValueError("not supported")
     return NestedTensor(tensor, mask)
+
 
 def nested_tensor_from_tensor_2(tensor1: jt.Var):
     # TODO make this more general
@@ -312,14 +327,15 @@ def nested_tensor_from_tensor_2(tensor1: jt.Var):
         device = tensor1.device
         tensor = jt.zeros(batch_shape, dtype=dtype, device=device)
         mask = jt.ones((b, h, w), dtype=jt.bool, device=device)
-        for img, pad_img, m in zip(tensor1, tensor, mask):
+        for img, pad_img, m in zip(tensor1, tensor, mask, strict=False):
             pad_img[: img.shape[0], : img.shape[1], : img.shape[2]].copy_(img)
-            m[: img.shape[1], :img.shape[2]] = False
+            m[: img.shape[1], : img.shape[2]] = False
     else:
-        raise ValueError('not supported')
+        raise ValueError("not supported")
     return NestedTensor(tensor, mask)
 
-def nested_tensor_from_tensor_list(tensor_list: List[jt.Var]):
+
+def nested_tensor_from_tensor_list(tensor_list: list[jt.Var]):
     # TODO make this more general
     if tensor_list[0].ndim == 3:
         # TODO make it support different-sized images
@@ -331,16 +347,16 @@ def nested_tensor_from_tensor_list(tensor_list: List[jt.Var]):
         device = tensor_list[0].device
         tensor = jt.zeros(batch_shape, dtype=dtype, device=device)
         mask = jt.ones((b, h, w), dtype=jt.bool, device=device)
-        for img, pad_img, m in zip(tensor_list, tensor, mask):
+        for img, pad_img, m in zip(tensor_list, tensor, mask, strict=False):
             pad_img[: img.shape[0], : img.shape[1], : img.shape[2]].copy_(img)
-            m[: img.shape[1], :img.shape[2]] = False
+            m[: img.shape[1], : img.shape[2]] = False
     else:
-        raise ValueError('not supported')
+        raise ValueError("not supported")
     return NestedTensor(tensor, mask)
 
 
-class NestedTensor(object):
-    def __init__(self, tensors, mask: Optional[jt.Var]):
+class NestedTensor:
+    def __init__(self, tensors, mask: jt.Var | None):
         self.tensors = tensors
         self.mask = mask
 
@@ -366,10 +382,11 @@ def setup_for_distributed(is_master):
     This function disables printing when not in master process
     """
     import builtins as __builtin__
+
     builtin_print = __builtin__.print
 
     def print(*args, **kwargs):
-        force = kwargs.pop('force', False)
+        force = kwargs.pop("force", False)
         if is_master or force:
             builtin_print(*args, **kwargs)
 
@@ -406,26 +423,29 @@ def save_on_master(*args, **kwargs):
 
 
 def init_distributed_mode(args):
-    if 'RANK' in os.environ and 'WORLD_SIZE' in os.environ:
+    if "RANK" in os.environ and "WORLD_SIZE" in os.environ:
         args.rank = int(os.environ["RANK"])
-        args.world_size = int(os.environ['WORLD_SIZE'])
-        args.gpu = int(os.environ['LOCAL_RANK'])
-    elif 'SLURM_PROCID' in os.environ:
-        args.rank = int(os.environ['SLURM_PROCID'])
+        args.world_size = int(os.environ["WORLD_SIZE"])
+        args.gpu = int(os.environ["LOCAL_RANK"])
+    elif "SLURM_PROCID" in os.environ:
+        args.rank = int(os.environ["SLURM_PROCID"])
         args.gpu = args.rank % jt.cuda_device_count()
     else:
-        print('Not using distributed mode')
+        print("Not using distributed mode")
         args.distributed = False
         return
 
     args.distributed = True
 
     jt.set_cuda_device(args.gpu)
-    args.dist_backend = 'nccl'
-    print('| distributed init (rank {}): {}'.format(
-        args.rank, args.dist_url), flush=True)
-    jt.init_distributed(backend=args.dist_backend, init_method=args.dist_url,
-                                         world_size=args.world_size, rank=args.rank)
+    args.dist_backend = "nccl"
+    print(f"| distributed init (rank {args.rank}): {args.dist_url}", flush=True)
+    jt.init_distributed(
+        backend=args.dist_backend,
+        init_method=args.dist_url,
+        world_size=args.world_size,
+        rank=args.rank,
+    )
     # torch.distributed.barrier()
     jt.sync_all()
     setup_for_distributed(args.rank == 0)
@@ -468,19 +488,20 @@ def interpolate(input, size=None, scale_factor=None, mode="nearest", align_corne
     # else:
     return jt.nn.interpolate(input, size, scale_factor, mode, align_corners)
 
-def generate_mask(batch_tensor:jt.Var):
-    '''
+
+def generate_mask(batch_tensor: jt.Var):
+    """
 
     Args:
         tensor:  torch.Size([H*W*, batch_size, hidden]) or torch.Size([batch_size, hidden, h, w])
 
     Returns:
         tensor : torch.Size([batch_size, H*W])
-    '''
+    """
     if len(batch_tensor.shape) == 4:
         batch_size, hidden, h, w = batch_tensor.shape
-        mask = jt.zeros((batch_size, h,w), dtype=jt.bool)
+        mask = jt.zeros((batch_size, h, w), dtype=jt.bool)
     else:
-        length,batch_size,hidden = batch_tensor.shape
-        mask = jt.zeros((batch_size,length),dtype=jt.bool)
+        length, batch_size, hidden = batch_tensor.shape
+        mask = jt.zeros((batch_size, length), dtype=jt.bool)
     return mask

@@ -1,10 +1,13 @@
 import os
-from .base_image_dataset import BaseImageDataset
-from ltr.data.image_loader import jpeg4py_loader, opencv_loader, imread_indexed
-import jittor as jt 
 from collections import OrderedDict
+
+import jittor as jt
+
 from ltr.admin.environment import env_settings
 from ltr.data.bounding_box_utils import masks_to_bboxes
+from ltr.data.image_loader import imread_indexed, jpeg4py_loader, opencv_loader
+
+from .base_image_dataset import BaseImageDataset
 
 
 class HKUIS(BaseImageDataset):
@@ -30,7 +33,7 @@ class HKUIS(BaseImageDataset):
             min_area - Objects with area less than min_area are filtered out. Default is 0.0
         """
         root = env_settings().hkuis_dir if root is None else root
-        super().__init__('HKUIS', root, image_loader)
+        super().__init__("HKUIS", root, image_loader)
 
         self.image_list, self.anno_list = self._load_dataset(min_area=min_area)
 
@@ -38,24 +41,24 @@ class HKUIS(BaseImageDataset):
             raise NotImplementedError
 
     def _load_dataset(self, min_area=None):
-        files_list = os.listdir(os.path.join(self.root, 'imgs'))
+        files_list = os.listdir(os.path.join(self.root, "imgs"))
         image_list = [f[:-4] for f in files_list]
 
         images = []
         annos = []
 
         for f in image_list:
-            a = imread_indexed(os.path.join(self.root, 'gt', '{}.png'.format(f)))
+            a = imread_indexed(os.path.join(self.root, "gt", f"{f}.png"))
 
             if min_area is None or (a > 0).sum() > min_area:
-                im = opencv_loader(os.path.join(self.root, 'imgs', '{}.png'.format(f)))
+                im = opencv_loader(os.path.join(self.root, "imgs", f"{f}.png"))
                 images.append(im)
                 annos.append(a)
 
         return images, annos
 
     def get_name(self):
-        return 'hku-is'
+        return "hku-is"
 
     def has_segmentation_info(self):
         return True
@@ -63,19 +66,25 @@ class HKUIS(BaseImageDataset):
     def get_image_info(self, im_id):
         mask = self.anno_list[im_id]
         mask = jt.var(mask == 255)
-        bbox = masks_to_bboxes(mask, fmt='t').view(4,)
+        bbox = masks_to_bboxes(mask, fmt="t").view(
+            4,
+        )
 
         valid = (bbox[2] > 0) & (bbox[3] > 0)
         visible = valid.clone().byte()
 
-        return {'bbox': bbox, 'mask': mask, 'valid': valid, 'visible': visible}
+        return {"bbox": bbox, "mask": mask, "valid": valid, "visible": visible}
 
     def get_meta_info(self, im_id):
-        object_meta = OrderedDict({'object_class_name': None,
-                                   'motion_class': None,
-                                   'major_class': None,
-                                   'root_class': None,
-                                   'motion_adverb': None})
+        object_meta = OrderedDict(
+            {
+                "object_class_name": None,
+                "motion_class": None,
+                "major_class": None,
+                "root_class": None,
+                "motion_adverb": None,
+            }
+        )
 
         return object_meta
 

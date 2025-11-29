@@ -39,17 +39,14 @@ Author: Anti-UAV Project
 
 import argparse
 import json
-import os
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
 
 import cv2
-import numpy as np
 from tqdm import tqdm
 
 
-def parse_annotation_json(json_path: Path) -> Dict:
+def parse_annotation_json(json_path: Path) -> dict:
     """
     Parse Anti-UAV JSON annotation file.
 
@@ -59,12 +56,12 @@ def parse_annotation_json(json_path: Path) -> Dict:
         "gt_rect": [[x, y, w, h], [x, y, w, h], ...]  # bounding boxes
     }
     """
-    with open(json_path, 'r') as f:
+    with open(json_path) as f:
         data = json.load(f)
     return data
 
 
-def bbox_to_yolo(bbox: List[float], img_width: int, img_height: int) -> Optional[str]:
+def bbox_to_yolo(bbox: list[float], img_width: int, img_height: int) -> str | None:
     """
     Convert [x, y, w, h] to YOLO format [class, x_center, y_center, width, height].
 
@@ -100,8 +97,8 @@ def extract_frames_with_annotations(
     sequence_name: str,
     modality: str,
     sample_rate: int = 1,
-    max_frames: Optional[int] = None
-) -> Tuple[int, int]:
+    max_frames: int | None = None,
+) -> tuple[int, int]:
     """
     Extract frames from video and create YOLO label files.
 
@@ -110,8 +107,8 @@ def extract_frames_with_annotations(
     """
     # Parse annotations
     annotations = parse_annotation_json(json_path)
-    exist_flags = annotations.get('exist', [])
-    gt_rects = annotations.get('gt_rect', [])
+    exist_flags = annotations.get("exist", [])
+    gt_rects = annotations.get("gt_rect", [])
 
     # Open video
     cap = cv2.VideoCapture(str(video_path))
@@ -163,8 +160,8 @@ def extract_frames_with_annotations(
                 yolo_line = bbox_to_yolo(bbox, img_width, img_height)
                 if yolo_line:
                     has_object = True
-                    with open(label_path, 'w') as f:
-                        f.write(yolo_line + '\n')
+                    with open(label_path, "w") as f:
+                        f.write(yolo_line + "\n")
 
         # Create empty label file if no object (optional for YOLO)
         if not has_object:
@@ -186,8 +183,8 @@ def process_split(
     split: str,
     modality: str,
     sample_rate: int,
-    max_frames_per_sequence: Optional[int]
-) -> Dict:
+    max_frames_per_sequence: int | None,
+) -> dict:
     """Process all sequences in a split (train/val/test)."""
     split_dir = input_dir / split
     if not split_dir.exists():
@@ -218,16 +215,20 @@ def process_split(
             # Both modalities
             for mod, vid, ann in [
                 ("ir", "infrared.mp4", "infrared.json"),
-                ("rgb", "visible.mp4", "visible.json")
+                ("rgb", "visible.mp4", "visible.json"),
             ]:
                 v_path = seq_dir / vid
                 a_path = seq_dir / ann
                 if v_path.exists() and a_path.exists():
                     frames, objects = extract_frames_with_annotations(
-                        v_path, a_path,
-                        output_images, output_labels,
-                        seq_dir.name, mod,
-                        sample_rate, max_frames_per_sequence
+                        v_path,
+                        a_path,
+                        output_images,
+                        output_labels,
+                        seq_dir.name,
+                        mod,
+                        sample_rate,
+                        max_frames_per_sequence,
                     )
                     total_frames += frames
                     total_objects += objects
@@ -236,21 +237,21 @@ def process_split(
         # Single modality processing
         if video_file.exists() and json_file.exists():
             frames, objects = extract_frames_with_annotations(
-                video_file, json_file,
-                output_images, output_labels,
-                seq_dir.name, mod_name,
-                sample_rate, max_frames_per_sequence
+                video_file,
+                json_file,
+                output_images,
+                output_labels,
+                seq_dir.name,
+                mod_name,
+                sample_rate,
+                max_frames_per_sequence,
             )
             total_frames += frames
             total_objects += objects
         else:
             print(f"  ⚠️  Missing files in {seq_dir.name}")
 
-    return {
-        "sequences": len(sequences),
-        "frames": total_frames,
-        "objects": total_objects
-    }
+    return {"sequences": len(sequences), "frames": total_frames, "objects": total_objects}
 
 
 def create_dataset_yaml(output_dir: Path, dataset_name: str = "drone") -> Path:
@@ -277,50 +278,50 @@ names: ['drone']
 def main():
     parser = argparse.ArgumentParser(
         description="Convert Anti-UAV dataset to YOLO format",
-        formatter_class=argparse.RawDescriptionHelpFormatter
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument(
-        "--input", "-i",
+        "--input",
+        "-i",
         type=Path,
         default=Path("data/raw/Anti-UAV-RGBT"),
-        help="Input directory containing Anti-UAV dataset"
+        help="Input directory containing Anti-UAV dataset",
     )
     parser.add_argument(
-        "--output", "-o",
+        "--output",
+        "-o",
         type=Path,
         default=Path("data/processed"),
-        help="Output directory for YOLO format data"
+        help="Output directory for YOLO format data",
     )
     parser.add_argument(
-        "--modality", "-m",
+        "--modality",
+        "-m",
         choices=["ir", "rgb", "both"],
         default="ir",
-        help="Which modality to extract (default: ir for thermal)"
+        help="Which modality to extract (default: ir for thermal)",
     )
     parser.add_argument(
-        "--sample-rate", "-s",
-        type=int,
-        default=5,
-        help="Extract every Nth frame (default: 5)"
+        "--sample-rate", "-s", type=int, default=5, help="Extract every Nth frame (default: 5)"
     )
     parser.add_argument(
         "--max-frames",
         type=int,
         default=None,
-        help="Maximum frames per sequence (default: unlimited)"
+        help="Maximum frames per sequence (default: unlimited)",
     )
     parser.add_argument(
         "--splits",
         nargs="+",
         default=["train", "val"],
-        help="Which splits to process (default: train val)"
+        help="Which splits to process (default: train val)",
     )
 
     args = parser.parse_args()
 
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("Anti-UAV Data Preparation")
-    print("="*60)
+    print("=" * 60)
     print(f"\n  Input:       {args.input}")
     print(f"  Output:      {args.output}")
     print(f"  Modality:    {args.modality}")
@@ -330,14 +331,15 @@ def main():
     # Check input exists
     if not args.input.exists():
         # Try to extract from zip
-        zip_path = args.input.with_suffix('.zip')
+        zip_path = args.input.with_suffix(".zip")
         if not zip_path.exists():
             zip_path = args.input.parent / "Anti-UAV-RGBT.zip"
 
         if zip_path.exists():
             print(f"\n📦 Extracting {zip_path}...")
             import zipfile
-            with zipfile.ZipFile(zip_path, 'r') as z:
+
+            with zipfile.ZipFile(zip_path, "r") as z:
                 z.extractall(args.input.parent)
             print("  ✅ Extraction complete")
         else:
@@ -349,17 +351,16 @@ def main():
     stats = {}
     for split in args.splits:
         stats[split] = process_split(
-            args.input, args.output, split,
-            args.modality, args.sample_rate, args.max_frames
+            args.input, args.output, split, args.modality, args.sample_rate, args.max_frames
         )
 
     # Create dataset YAML
     yaml_path = create_dataset_yaml(args.output)
 
     # Print summary
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("Summary")
-    print("="*60)
+    print("=" * 60)
     total_frames = 0
     total_objects = 0
     for split, s in stats.items():
@@ -367,20 +368,20 @@ def main():
         print(f"    Sequences: {s['sequences']}")
         print(f"    Frames:    {s['frames']}")
         print(f"    With UAV:  {s['objects']}")
-        total_frames += s['frames']
-        total_objects += s['objects']
+        total_frames += s["frames"]
+        total_objects += s["objects"]
 
     print(f"\n  Total frames:  {total_frames}")
     print(f"  Total with UAV: {total_objects}")
     print(f"  Dataset YAML:  {yaml_path}")
 
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("✅ Data preparation complete!")
     print("\nNext steps:")
     print(f"  1. Verify images in: {args.output / 'images'}")
     print(f"  2. Verify labels in: {args.output / 'labels'}")
     print(f"  3. Train with: python scripts/train.py --data {yaml_path}")
-    print("="*60 + "\n")
+    print("=" * 60 + "\n")
 
 
 if __name__ == "__main__":

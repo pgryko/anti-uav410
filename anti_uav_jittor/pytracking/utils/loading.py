@@ -1,5 +1,7 @@
 import os
+
 import ltr_torch.admin.loading as ltr_loading
+
 from pytracking.evaluation.environment import env_settings
 
 
@@ -21,11 +23,11 @@ def load_network(net_path, **kwargs):
             try:
                 net, _ = ltr_loading.load_network(path_full, **kwargs)
                 break
-            except Exception as e:
+            except Exception:
                 # print(e)
                 pass
 
-        assert net is not None, 'Failed to load network'
+        assert net is not None, "Failed to load network"
     else:
         path_full = os.path.join(env_settings().network_path, net_path)
         net, _ = ltr_loading.load_network(path_full, **kwargs)

@@ -1,9 +1,5 @@
 # Copyright (c) SenseTime. All Rights Reserved.
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
 
 from yacs.config import CfgNode as CN
 
@@ -16,7 +12,7 @@ cfg = __C
 # ------------------------------------------------------------------------ #
 __C.TRACK = CN()
 
-__C.TRACK.TYPE = ''
+__C.TRACK.TYPE = ""
 
 # Scale penalty
 __C.TRACK.PENALTY_K = 0

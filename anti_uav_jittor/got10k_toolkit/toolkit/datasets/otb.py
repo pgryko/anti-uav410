@@ -1,21 +1,20 @@
-from __future__ import absolute_import, print_function, unicode_literals
-
-import os
 import glob
-import numpy as np
 import io
-import six
+import os
 from itertools import chain
+
+import numpy as np
+import six
 
 from ..utils.ioutils import download, extract
 
 
-class OTB(object):
+class OTB:
     r"""`OTB <http://cvlab.hanyang.ac.kr/tracker_benchmark/>`_ Datasets.
 
     Publication:
         ``Object Tracking Benchmark``, Y. Wu, J. Lim and M.-H. Yang, IEEE TPAMI 2015.
-    
+
     Args:
         root_dir (string): Root directory of dataset where sequence
             folders exist.
@@ -25,49 +24,174 @@ class OTB(object):
             and puts it in root directory. If dataset is downloaded, it is not
             downloaded again.
     """
-    __otb13_seqs = ['Basketball', 'Bolt', 'Boy', 'Car4', 'CarDark',
-                    'CarScale', 'Coke', 'Couple', 'Crossing', 'David',
-                    'David2', 'David3', 'Deer', 'Dog1', 'Doll', 'Dudek',
-                    'FaceOcc1', 'FaceOcc2', 'Fish', 'FleetFace',
-                    'Football', 'Football1', 'Freeman1', 'Freeman3',
-                    'Freeman4', 'Girl', 'Ironman', 'Jogging', 'Jumping',
-                    'Lemming', 'Liquor', 'Matrix', 'Mhyang', 'MotorRolling',
-                    'MountainBike', 'Shaking', 'Singer1', 'Singer2',
-                    'Skating1', 'Skiing', 'Soccer', 'Subway', 'Suv',
-                    'Sylvester', 'Tiger1', 'Tiger2', 'Trellis', 'Walking',
-                    'Walking2', 'Woman']
 
-    __tb50_seqs = ['Basketball', 'Biker', 'Bird1', 'BlurBody', 'BlurCar2',
-                   'BlurFace', 'BlurOwl', 'Bolt', 'Box', 'Car1', 'Car4',
-                   'CarDark', 'CarScale', 'ClifBar', 'Couple', 'Crowds',
-                   'David', 'Deer', 'Diving', 'DragonBaby', 'Dudek',
-                   'Football', 'Freeman4', 'Girl', 'Human3', 'Human4',
-                   'Human6', 'Human9', 'Ironman', 'Jump', 'Jumping',
-                   'Liquor', 'Matrix', 'MotorRolling', 'Panda', 'RedTeam',
-                   'Shaking', 'Singer2', 'Skating1', 'Skating2', 'Skiing',
-                   'Soccer', 'Surfer', 'Sylvester', 'Tiger2', 'Trellis',
-                   'Walking', 'Walking2', 'Woman']
+    __otb13_seqs = [
+        "Basketball",
+        "Bolt",
+        "Boy",
+        "Car4",
+        "CarDark",
+        "CarScale",
+        "Coke",
+        "Couple",
+        "Crossing",
+        "David",
+        "David2",
+        "David3",
+        "Deer",
+        "Dog1",
+        "Doll",
+        "Dudek",
+        "FaceOcc1",
+        "FaceOcc2",
+        "Fish",
+        "FleetFace",
+        "Football",
+        "Football1",
+        "Freeman1",
+        "Freeman3",
+        "Freeman4",
+        "Girl",
+        "Ironman",
+        "Jogging",
+        "Jumping",
+        "Lemming",
+        "Liquor",
+        "Matrix",
+        "Mhyang",
+        "MotorRolling",
+        "MountainBike",
+        "Shaking",
+        "Singer1",
+        "Singer2",
+        "Skating1",
+        "Skiing",
+        "Soccer",
+        "Subway",
+        "Suv",
+        "Sylvester",
+        "Tiger1",
+        "Tiger2",
+        "Trellis",
+        "Walking",
+        "Walking2",
+        "Woman",
+    ]
 
-    __tb100_seqs = ['Bird2', 'BlurCar1', 'BlurCar3', 'BlurCar4', 'Board',
-                    'Bolt2', 'Boy', 'Car2', 'Car24', 'Coke', 'Coupon',
-                    'Crossing', 'Dancer', 'Dancer2', 'David2', 'David3',
-                    'Dog', 'Dog1', 'Doll', 'FaceOcc1', 'FaceOcc2', 'Fish',
-                    'FleetFace', 'Football1', 'Freeman1', 'Freeman3',
-                    'Girl2', 'Gym', 'Human2', 'Human5', 'Human7', 'Human8',
-                    'Jogging', 'KiteSurf', 'Lemming', 'Man', 'Mhyang',
-                    'MountainBike', 'Rubik', 'Singer1', 'Skater',
-                    'Skater2', 'Subway', 'Suv', 'Tiger1', 'Toy', 'Trans',
-                    'Twinnings', 'Vase'] + __tb50_seqs
+    __tb50_seqs = [
+        "Basketball",
+        "Biker",
+        "Bird1",
+        "BlurBody",
+        "BlurCar2",
+        "BlurFace",
+        "BlurOwl",
+        "Bolt",
+        "Box",
+        "Car1",
+        "Car4",
+        "CarDark",
+        "CarScale",
+        "ClifBar",
+        "Couple",
+        "Crowds",
+        "David",
+        "Deer",
+        "Diving",
+        "DragonBaby",
+        "Dudek",
+        "Football",
+        "Freeman4",
+        "Girl",
+        "Human3",
+        "Human4",
+        "Human6",
+        "Human9",
+        "Ironman",
+        "Jump",
+        "Jumping",
+        "Liquor",
+        "Matrix",
+        "MotorRolling",
+        "Panda",
+        "RedTeam",
+        "Shaking",
+        "Singer2",
+        "Skating1",
+        "Skating2",
+        "Skiing",
+        "Soccer",
+        "Surfer",
+        "Sylvester",
+        "Tiger2",
+        "Trellis",
+        "Walking",
+        "Walking2",
+        "Woman",
+    ]
+
+    __tb100_seqs = [
+        "Bird2",
+        "BlurCar1",
+        "BlurCar3",
+        "BlurCar4",
+        "Board",
+        "Bolt2",
+        "Boy",
+        "Car2",
+        "Car24",
+        "Coke",
+        "Coupon",
+        "Crossing",
+        "Dancer",
+        "Dancer2",
+        "David2",
+        "David3",
+        "Dog",
+        "Dog1",
+        "Doll",
+        "FaceOcc1",
+        "FaceOcc2",
+        "Fish",
+        "FleetFace",
+        "Football1",
+        "Freeman1",
+        "Freeman3",
+        "Girl2",
+        "Gym",
+        "Human2",
+        "Human5",
+        "Human7",
+        "Human8",
+        "Jogging",
+        "KiteSurf",
+        "Lemming",
+        "Man",
+        "Mhyang",
+        "MountainBike",
+        "Rubik",
+        "Singer1",
+        "Skater",
+        "Skater2",
+        "Subway",
+        "Suv",
+        "Tiger1",
+        "Toy",
+        "Trans",
+        "Twinnings",
+        "Vase",
+    ] + __tb50_seqs
 
     __otb15_seqs = __tb100_seqs
 
     __version_dict = {
         2013: __otb13_seqs,
         2015: __otb15_seqs,
-        'otb2013': __otb13_seqs,
-        'otb2015': __otb15_seqs,
-        'tb50': __tb50_seqs,
-        'tb100': __tb100_seqs}
+        "otb2013": __otb13_seqs,
+        "otb2015": __otb15_seqs,
+        "tb50": __tb50_seqs,
+        "tb100": __tb100_seqs,
+    }
 
     def __init__(self, root_dir, version=2015, download=True):
         super(OTB, self).__init__()
@@ -80,8 +204,13 @@ class OTB(object):
         self._check_integrity(root_dir, version)
 
         valid_seqs = self.__version_dict[version]
-        self.anno_files = sorted(list(chain.from_iterable(glob.glob(
-            os.path.join(root_dir, s, 'groundtruth*.txt')) for s in valid_seqs)))
+        self.anno_files = sorted(
+            list(
+                chain.from_iterable(
+                    glob.glob(os.path.join(root_dir, s, "groundtruth*.txt")) for s in valid_seqs
+                )
+            )
+        )
         # remove empty annotation files
         # (e.g., groundtruth_rect.1.txt of Human4)
         self.anno_files = self._filter_files(self.anno_files)
@@ -92,39 +221,38 @@ class OTB(object):
         self.seq_names = self._rename_seqs(self.seq_names)
 
     def __getitem__(self, index):
-        r"""        
+        r"""
         Args:
             index (integer or string): Index or name of a sequence.
-        
+
         Returns:
             tuple: (img_files, anno), where ``img_files`` is a list of
                 file names and ``anno`` is a N x 4 (rectangles) numpy array.
         """
         if isinstance(index, six.string_types):
-            if not index in self.seq_names:
-                raise Exception('Sequence {} not found.'.format(index))
+            if index not in self.seq_names:
+                raise Exception(f"Sequence {index} not found.")
             index = self.seq_names.index(index)
 
-        img_files = sorted(glob.glob(
-            os.path.join(self.seq_dirs[index], 'img/*.jpg')))
+        img_files = sorted(glob.glob(os.path.join(self.seq_dirs[index], "img/*.jpg")))
 
         # special sequences
         # (visit http://cvlab.hanyang.ac.kr/tracker_benchmark/index.html for detail)
         seq_name = self.seq_names[index]
-        if seq_name.lower() == 'david':
-            img_files = img_files[300-1:770]
-        elif seq_name.lower() == 'football1':
+        if seq_name.lower() == "david":
+            img_files = img_files[300 - 1 : 770]
+        elif seq_name.lower() == "football1":
             img_files = img_files[:74]
-        elif seq_name.lower() == 'freeman3':
+        elif seq_name.lower() == "freeman3":
             img_files = img_files[:460]
-        elif seq_name.lower() == 'freeman4':
+        elif seq_name.lower() == "freeman4":
             img_files = img_files[:283]
-        elif seq_name.lower() == 'diving':
+        elif seq_name.lower() == "diving":
             img_files = img_files[:215]
 
         # to deal with different delimeters
-        with open(self.anno_files[index], 'r') as f:
-            anno = np.loadtxt(io.StringIO(f.read().replace(',', ' ')))
+        with open(self.anno_files[index]) as f:
+            anno = np.loadtxt(io.StringIO(f.read().replace(",", " ")))
         assert len(img_files) == len(anno)
         assert anno.shape[1] == 4
 
@@ -136,9 +264,9 @@ class OTB(object):
     def _filter_files(self, filenames):
         filtered_files = []
         for filename in filenames:
-            with open(filename, 'r') as f:
-                if f.read().strip() == '':
-                    print('Warning: %s is empty.' % filename)
+            with open(filename) as f:
+                if f.read().strip() == "":
+                    print("Warning: %s is empty." % filename)
                 else:
                     filtered_files.append(filename)
 
@@ -151,8 +279,8 @@ class OTB(object):
             if seq_names.count(seq_name) == 1:
                 renamed_seqs.append(seq_name)
             else:
-                ind = seq_names[:i + 1].count(seq_name)
-                renamed_seqs.append('%s.%d' % (seq_name, ind))
+                ind = seq_names[: i + 1].count(seq_name)
+                renamed_seqs.append("%s.%d" % (seq_name, ind))
 
         return renamed_seqs
 
@@ -163,19 +291,19 @@ class OTB(object):
         if not os.path.isdir(root_dir):
             os.makedirs(root_dir)
         elif all([os.path.isdir(os.path.join(root_dir, s)) for s in seq_names]):
-            print('Files already downloaded.')
+            print("Files already downloaded.")
             return
 
-        url_fmt = 'http://cvlab.hanyang.ac.kr/tracker_benchmark/seq/%s.zip'
+        url_fmt = "http://cvlab.hanyang.ac.kr/tracker_benchmark/seq/%s.zip"
         for seq_name in seq_names:
             seq_dir = os.path.join(root_dir, seq_name)
             if os.path.isdir(seq_dir):
                 continue
             url = url_fmt % seq_name
-            zip_file = os.path.join(root_dir, seq_name + '.zip')
-            print('Downloading to %s...' % zip_file)
+            zip_file = os.path.join(root_dir, seq_name + ".zip")
+            print("Downloading to %s..." % zip_file)
             download(url, zip_file)
-            print('\nExtracting to %s...' % root_dir)
+            print("\nExtracting to %s..." % root_dir)
             extract(zip_file, root_dir)
 
         return root_dir
@@ -189,8 +317,9 @@ class OTB(object):
             for seq_name in seq_names:
                 seq_dir = os.path.join(root_dir, seq_name)
                 if not os.path.isdir(seq_dir):
-                    print('Warning: sequence %s not exists.' % seq_name)
+                    print("Warning: sequence %s not exists." % seq_name)
         else:
             # dataset not exists
-            raise Exception('Dataset not found or corrupted. ' +
-                            'You can use download=True to download it.')
+            raise Exception(
+                "Dataset not found or corrupted. " + "You can use download=True to download it."
+            )

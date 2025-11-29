@@ -1,12 +1,14 @@
-from .base_image_dataset import BaseImageDataset
-from ltr.data.image_loader import jpeg4py_loader_w_failsafe
-import jittor as jt 
-from collections import OrderedDict
 import os
+from collections import OrderedDict
+
+import jittor as jt
 from scipy.io import loadmat
-from ltr.data.bounding_box_utils import masks_to_bboxes
 
 from ltr.admin.environment import env_settings
+from ltr.data.bounding_box_utils import masks_to_bboxes
+from ltr.data.image_loader import jpeg4py_loader_w_failsafe
+
+from .base_image_dataset import BaseImageDataset
 
 
 class SBD(BaseImageDataset):
@@ -21,7 +23,10 @@ class SBD(BaseImageDataset):
 
     Download dataset from: http://home.bharathh.info/pubs/codes/SBD/download.html
     """
-    def __init__(self, root=None, image_loader=jpeg4py_loader_w_failsafe, data_fraction=None, split="train"):
+
+    def __init__(
+        self, root=None, image_loader=jpeg4py_loader_w_failsafe, data_fraction=None, split="train"
+    ):
         """
         args:
             root - path to SBD root folder
@@ -31,7 +36,7 @@ class SBD(BaseImageDataset):
             split - dataset split ("train", "train_noval", "val")
         """
         root = env_settings().sbd_dir if root is None else root
-        super().__init__('SBD', root, image_loader)
+        super().__init__("SBD", root, image_loader)
 
         assert split in ["train", "train_noval", "val"]
 
@@ -47,20 +52,20 @@ class SBD(BaseImageDataset):
             raise NotImplementedError
 
     def _load_dataset(self, split):
-        split_f = os.path.join(self.root, split.rstrip('\n') + '.txt')
+        split_f = os.path.join(self.root, split.rstrip("\n") + ".txt")
 
-        with open(os.path.join(split_f), "r") as f:
+        with open(os.path.join(split_f)) as f:
             file_names = [x.strip() for x in f.readlines()]
 
-        image_list = [os.path.join(self.root, 'img', x + ".jpg") for x in file_names]
-        anno_list = [os.path.join(self.root, 'inst', x + ".mat") for x in file_names]
+        image_list = [os.path.join(self.root, "img", x + ".jpg") for x in file_names]
+        anno_list = [os.path.join(self.root, "inst", x + ".mat") for x in file_names]
 
-        assert (len(image_list) == len(anno_list))
+        assert len(image_list) == len(anno_list)
 
         return image_list, anno_list
 
     def _get_mask_from_mat(self, mat):
-        return jt.var(mat['GTinst'][0]['Segmentation'][0])
+        return jt.var(mat["GTinst"][0]["Segmentation"][0])
 
     def _construct_image_list(self, anno_list):
         image_list = []
@@ -73,7 +78,7 @@ class SBD(BaseImageDataset):
         return image_list
 
     def get_name(self):
-        return 'sbd'
+        return "sbd"
 
     def has_segmentation_info(self):
         return True
@@ -84,11 +89,11 @@ class SBD(BaseImageDataset):
         mask = self._get_mask_from_mat(anno_mat)
 
         mask = (mask == instance_id).float()
-        bbox = masks_to_bboxes(mask, fmt='t')
+        bbox = masks_to_bboxes(mask, fmt="t")
         valid = (bbox[2] > 0) & (bbox[3] > 0)
         visible = valid.clone().byte()
 
-        return {'bbox': bbox, 'mask': mask, 'valid': valid, 'visible': visible}
+        return {"bbox": bbox, "mask": mask, "valid": valid, "visible": visible}
 
     def _get_image(self, im_id):
         image_id, _ = self.image_list[im_id]
@@ -97,11 +102,15 @@ class SBD(BaseImageDataset):
         return img
 
     def get_meta_info(self, im_id):
-        object_meta = OrderedDict({'object_class_name': None,
-                                   'motion_class': None,
-                                   'major_class': None,
-                                   'root_class': None,
-                                   'motion_adverb': None})
+        object_meta = OrderedDict(
+            {
+                "object_class_name": None,
+                "motion_class": None,
+                "major_class": None,
+                "root_class": None,
+                "motion_adverb": None,
+            }
+        )
         return object_meta
 
     def get_image(self, image_id, anno=None):

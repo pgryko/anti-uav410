@@ -1,22 +1,16 @@
-from __future__ import absolute_import
-
-import unittest
-import os
-
-from trackers.SiamFC.siamfc import TrackerSiamFC
 from experiments import ExperimentAntiUAV410
-
+from trackers.SiamFC.siamfc import TrackerSiamFC
 
 """
 Experiments Setup
 """
 
-dataset_path='path/to/Anti-UAV410'
+dataset_path = "path/to/Anti-UAV410"
 
 # test or val
-subset='test'
+subset = "test"
 
-net_path = './Trackers/SiamFC/model.pth'
+net_path = "./Trackers/SiamFC/model.pth"
 tracker = TrackerSiamFC(net_path=net_path)
 
 # run experiment

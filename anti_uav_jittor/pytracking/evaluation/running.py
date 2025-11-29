@@ -1,11 +1,13 @@
-import numpy as np
 import multiprocessing
 import os
 import sys
-from itertools import product
 from collections import OrderedDict
-from pytracking.evaluation import Sequence, Tracker
+from itertools import product
+
+import numpy as np
 from ltr.data.image_loader import imwrite_indexed
+
+from pytracking.evaluation import Sequence, Tracker
 
 
 def _save_tracker_output(seq: Sequence, tracker: Tracker, output: dict):
@@ -21,11 +23,11 @@ def _save_tracker_output(seq: Sequence, tracker: Tracker, output: dict):
 
     def save_bb(file, data):
         tracked_bb = np.array(data).astype(int)
-        np.savetxt(file, tracked_bb, delimiter='\t', fmt='%d')
+        np.savetxt(file, tracked_bb, delimiter="\t", fmt="%d")
 
     def save_time(file, data):
         exec_times = np.array(data).astype(float)
-        np.savetxt(file, exec_times, delimiter='\t', fmt='%f')
+        np.savetxt(file, exec_times, delimiter="\t", fmt="%f")
 
     def _convert_dict(input_dict):
         data_dict = {}
@@ -34,7 +36,9 @@ def _save_tracker_output(seq: Sequence, tracker: Tracker, output: dict):
                 if k in data_dict.keys():
                     data_dict[k].append(v)
                 else:
-                    data_dict[k] = [v, ]
+                    data_dict[k] = [
+                        v,
+                    ]
         return data_dict
 
     for key, data in output.items():
@@ -42,35 +46,35 @@ def _save_tracker_output(seq: Sequence, tracker: Tracker, output: dict):
         if not data:
             continue
 
-        if key == 'target_bbox':
+        if key == "target_bbox":
             if isinstance(data[0], (dict, OrderedDict)):
                 data_dict = _convert_dict(data)
 
                 for obj_id, d in data_dict.items():
-                    bbox_file = '{}_{}.txt'.format(base_results_path, obj_id)
+                    bbox_file = f"{base_results_path}_{obj_id}.txt"
                     save_bb(bbox_file, d)
             else:
                 # Single-object mode
-                bbox_file = '{}.txt'.format(base_results_path)
+                bbox_file = f"{base_results_path}.txt"
                 save_bb(bbox_file, data)
 
-        elif key == 'time':
+        elif key == "time":
             if isinstance(data[0], dict):
                 data_dict = _convert_dict(data)
 
                 for obj_id, d in data_dict.items():
-                    timings_file = '{}_{}_time.txt'.format(base_results_path, obj_id)
+                    timings_file = f"{base_results_path}_{obj_id}_time.txt"
                     save_time(timings_file, d)
             else:
-                timings_file = '{}_time.txt'.format(base_results_path)
+                timings_file = f"{base_results_path}_time.txt"
                 save_time(timings_file, data)
 
-        elif key == 'segmentation':
+        elif key == "segmentation":
             assert len(frame_names) == len(data)
             if not os.path.exists(segmentation_path):
                 os.makedirs(segmentation_path)
-            for frame_name, frame_seg in zip(frame_names, data):
-                imwrite_indexed(os.path.join(segmentation_path, '{}.png'.format(frame_name)), frame_seg)
+            for frame_name, frame_seg in zip(frame_names, data, strict=False):
+                imwrite_indexed(os.path.join(segmentation_path, f"{frame_name}.png"), frame_seg)
 
 
 def run_sequence(seq: Sequence, tracker: Tracker, debug=False, visdom_info=None):
@@ -78,20 +82,24 @@ def run_sequence(seq: Sequence, tracker: Tracker, debug=False, visdom_info=None)
 
     def _results_exist():
         if seq.object_ids is None:
-            bbox_file = '{}/{}.txt'.format(tracker.results_dir, seq.name)
+            bbox_file = f"{tracker.results_dir}/{seq.name}.txt"
             return os.path.isfile(bbox_file)
         else:
-            bbox_files = ['{}/{}_{}.txt'.format(tracker.results_dir, seq.name, obj_id) for obj_id in seq.object_ids]
+            bbox_files = [
+                f"{tracker.results_dir}/{seq.name}_{obj_id}.txt" for obj_id in seq.object_ids
+            ]
             missing = [not os.path.isfile(f) for f in bbox_files]
             return sum(missing) == 0
 
     visdom_info = {} if visdom_info is None else visdom_info
 
     if _results_exist() and not debug:
-        print('FPS: {}'.format(-1))
+        print(f"FPS: {-1}")
         return
 
-    print('Tracker: {} {} {} ,  Sequence: {}'.format(tracker.name, tracker.parameter_name, tracker.run_id, seq.name))
+    print(
+        f"Tracker: {tracker.name} {tracker.parameter_name} {tracker.run_id} ,  Sequence: {seq.name}"
+    )
 
     if debug:
         output = tracker.run_sequence(seq, debug=debug, visdom_info=visdom_info)
@@ -104,14 +112,14 @@ def run_sequence(seq: Sequence, tracker: Tracker, debug=False, visdom_info=None)
 
     sys.stdout.flush()
 
-    if isinstance(output['time'][0], (dict, OrderedDict)):
-        exec_time = sum([sum(times.values()) for times in output['time']])
-        num_frames = len(output['time'])
+    if isinstance(output["time"][0], (dict, OrderedDict)):
+        exec_time = sum([sum(times.values()) for times in output["time"]])
+        num_frames = len(output["time"])
     else:
-        exec_time = sum(output['time'])
-        num_frames = len(output['time'])
+        exec_time = sum(output["time"])
+        num_frames = len(output["time"])
 
-    print('FPS: {}'.format(num_frames / exec_time))
+    print(f"FPS: {num_frames / exec_time}")
 
     if not debug:
         _save_tracker_output(seq, tracker, output)
@@ -126,25 +134,28 @@ def run_dataset(dataset, trackers, debug=False, threads=0, visdom_info=None):
         threads: Number of threads to use (default 0).
         visdom_info: Dict containing information about the server for visdom
     """
-    multiprocessing.set_start_method('spawn', force=True)
+    multiprocessing.set_start_method("spawn", force=True)
 
-    print('Evaluating {:4d} trackers on {:5d} sequences'.format(len(trackers), len(dataset)))
+    print(f"Evaluating {len(trackers):4d} trackers on {len(dataset):5d} sequences")
 
-    multiprocessing.set_start_method('spawn', force=True)
+    multiprocessing.set_start_method("spawn", force=True)
 
     visdom_info = {} if visdom_info is None else visdom_info
 
     if threads == 0:
-        mode = 'sequential'
+        mode = "sequential"
     else:
-        mode = 'parallel'
+        mode = "parallel"
 
-    if mode == 'sequential':
+    if mode == "sequential":
         for seq in dataset:
             for tracker_info in trackers:
                 run_sequence(seq, tracker_info, debug=debug, visdom_info=visdom_info)
-    elif mode == 'parallel':
-        param_list = [(seq, tracker_info, debug, visdom_info) for seq, tracker_info in product(dataset, trackers)]
+    elif mode == "parallel":
+        param_list = [
+            (seq, tracker_info, debug, visdom_info)
+            for seq, tracker_info in product(dataset, trackers)
+        ]
         with multiprocessing.Pool(processes=threads) as pool:
             pool.starmap(run_sequence, param_list)
-    print('Done')
+    print("Done")

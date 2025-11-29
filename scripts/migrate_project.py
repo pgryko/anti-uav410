@@ -15,8 +15,6 @@ import argparse
 import os
 import shutil
 from pathlib import Path
-from typing import List, Tuple
-
 
 # Project root
 ROOT = Path(__file__).parent.parent.absolute()
@@ -24,7 +22,7 @@ ROOT = Path(__file__).parent.parent.absolute()
 
 # Migration mapping: (source, destination, action)
 # action: 'copy' = copy files, 'move' = move files, 'merge' = merge into existing
-MIGRATIONS: List[Tuple[str, str, str]] = [
+MIGRATIONS: list[tuple[str, str, str]] = [
     # Detection module
     ("Codes/detect_wrapper/Detectoruav.py", "src/detection/detector.py", "copy"),
     ("Codes/detect_wrapper/detect_drone.py", "src/detection/detect.py", "copy"),
@@ -35,22 +33,18 @@ MIGRATIONS: List[Tuple[str, str, str]] = [
     ("Codes/detect_wrapper/utils/torch_utils.py", "src/detection/utils/torch_utils.py", "copy"),
     ("Codes/detect_wrapper/utils/datasets.py", "src/detection/utils/datasets.py", "copy"),
     ("Codes/detect_wrapper/utils/activations.py", "src/detection/utils/activations.py", "copy"),
-
     # Training scripts
     ("Codes/detect_wrapper/train_drone.py", "scripts/train.py", "copy"),
     ("Codes/detect_wrapper/test_drone.py", "scripts/evaluate.py", "copy"),
-
     # Tracking module
     ("Codes/tracking_wrapper/runtracker.py", "src/tracking/runner.py", "copy"),
     ("Codes/tracking_wrapper/dronetracker", "src/tracking/dronetracker", "copy"),
     ("Codes/tracking_wrapper/drtracker", "src/tracking/drtracker", "copy"),
-
     # Evaluation
     ("anti_uav_jittor/pysot_toolkit/test.py", "src/evaluation/test_tracker.py", "copy"),
     ("anti_uav_jittor/pysot_toolkit/eval.py", "src/evaluation/eval.py", "copy"),
     ("anti_uav_jittor/pysot_toolkit/bbox.py", "src/evaluation/bbox.py", "copy"),
     ("anti_uav_jittor/pysot_toolkit/toolkit", "src/evaluation/toolkit", "copy"),
-
     # Configs
     ("Codes/detect_wrapper/data/drone.yaml", "configs/data/drone.yaml", "copy"),
     ("Codes/detect_wrapper/data/hyp.scratch.yaml", "configs/training/default.yaml", "copy"),
@@ -59,26 +53,21 @@ MIGRATIONS: List[Tuple[str, str, str]] = [
     ("Codes/detect_wrapper/models/detectm.yaml", "configs/models/yolov5m.yaml", "copy"),
     ("Codes/detect_wrapper/models/detectl.yaml", "configs/models/yolov5l.yaml", "copy"),
     ("Codes/detect_wrapper/models/detectx.yaml", "configs/models/yolov5x.yaml", "copy"),
-
     # Notebooks
     ("anti_uav_jittor/demo.ipynb", "notebooks/demo.ipynb", "copy"),
-
     # Documentation images
     ("Fig", "docs/images", "copy"),
-
     # Datasets (for reference, actual data stays in data/)
     ("anti_uav_jittor/anti_uav410_jit/datasets/antiuav410.py", "src/data/antiuav410.py", "copy"),
-
     # Data converter
     ("cvat_converter.py", "src/data/cvat_converter.py", "copy"),
-
     # Archive legacy code
     ("Codes/CameralinkApplication", "archive/CameralinkApplication", "move"),
     ("Codes/metric_uav", "archive/metric_uav", "move"),
 ]
 
 # Files/directories to delete after migration
-CLEANUP: List[str] = [
+CLEANUP: list[str] = [
     "Codes/testvideo",
     "Codes/result",
     "anti_uav_jittor/result",
@@ -87,7 +76,7 @@ CLEANUP: List[str] = [
 ]
 
 # Data files to move to data/ directory
-DATA_MOVES: List[Tuple[str, str]] = [
+DATA_MOVES: list[tuple[str, str]] = [
     ("Anti-UAV-RGBT.zip", "data/raw/Anti-UAV-RGBT.zip"),
     ("Codes/detect_wrapper/drone_data", "data/samples/drone_data"),
 ]
@@ -180,8 +169,17 @@ def create_init_files(dry_run: bool = False) -> None:
 
 def create_gitkeep_files(dry_run: bool = False) -> None:
     """Create .gitkeep files in empty directories."""
-    keep_dirs = ["data", "data/raw", "data/processed", "weights", "weights/pretrained",
-                 "weights/trained", "outputs", "outputs/runs", "outputs/results"]
+    keep_dirs = [
+        "data",
+        "data/raw",
+        "data/processed",
+        "weights",
+        "weights/pretrained",
+        "weights/trained",
+        "outputs",
+        "outputs/runs",
+        "outputs/results",
+    ]
 
     for dir_name in keep_dirs:
         dir_path = ROOT / dir_name
@@ -198,9 +196,9 @@ def create_gitkeep_files(dry_run: bool = False) -> None:
 
 def run_migration(dry_run: bool = False) -> None:
     """Execute the full migration."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("Anti-UAV410 Project Migration")
-    print("="*60)
+    print("=" * 60)
 
     if dry_run:
         print("\n🔍 DRY RUN MODE - No changes will be made\n")
@@ -242,7 +240,7 @@ def run_migration(dry_run: bool = False) -> None:
         path = ROOT / path_str
         delete_item(path, dry_run)
 
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     if dry_run:
         print("✅ Dry run complete. Run without --dry-run to apply changes.")
     else:
@@ -251,22 +249,16 @@ def run_migration(dry_run: bool = False) -> None:
         print("  1. Review the new structure")
         print("  2. Run: pip install -e .")
         print("  3. Test imports: python -c 'from src.detection import detector'")
-    print("="*60 + "\n")
+    print("=" * 60 + "\n")
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Migrate Anti-UAV410 project to new structure"
+    parser = argparse.ArgumentParser(description="Migrate Anti-UAV410 project to new structure")
+    parser.add_argument(
+        "--dry-run", "-n", action="store_true", help="Preview changes without applying them"
     )
     parser.add_argument(
-        "--dry-run", "-n",
-        action="store_true",
-        help="Preview changes without applying them"
-    )
-    parser.add_argument(
-        "--skip-cleanup",
-        action="store_true",
-        help="Skip deletion of old directories"
+        "--skip-cleanup", action="store_true", help="Skip deletion of old directories"
     )
 
     args = parser.parse_args()

@@ -6,6 +6,7 @@ Utilities for bounding box manipulation and GIoU.
 
 import jittor as jt
 
+
 def box_area_jittor(boxes):
     x1 = boxes[:, 0]
     y1 = boxes[:, 1]
@@ -15,17 +16,16 @@ def box_area_jittor(boxes):
     area = (x2 - x1) * (y2 - y1)
     return area
 
+
 def box_cxcywh_to_xyxy(x):
     x_c, y_c, w, h = x.unbind(-1)
-    b = [(x_c - 0.5 * w), (y_c - 0.5 * h),
-         (x_c + 0.5 * w), (y_c + 0.5 * h)]
+    b = [(x_c - 0.5 * w), (y_c - 0.5 * h), (x_c + 0.5 * w), (y_c + 0.5 * h)]
     return jt.stack(b, dim=-1)
 
 
 def box_xyxy_to_cxcywh(x):
     x0, y0, x1, y1 = x.unbind(-1)
-    b = [(x0 + x1) / 2, (y0 + y1) / 2,
-         (x1 - x0), (y1 - y0)]
+    b = [(x0 + x1) / 2, (y0 + y1) / 2, (x1 - x0), (y1 - y0)]
     return jt.stack(b, dim=-1)
 
 
@@ -85,11 +85,11 @@ def masks_to_boxes(masks):
     x = jt.arange(0, w, dtype=jt.float)
     y, x = jt.meshgrid(y, x)
 
-    x_mask = (masks * x.unsqueeze(0))
+    x_mask = masks * x.unsqueeze(0)
     x_max = x_mask.flatten(1).max(-1)[0]
     x_min = x_mask.masked_fill(~(masks.bool()), 1e8).flatten(1).min(-1)[0]
 
-    y_mask = (masks * y.unsqueeze(0))
+    y_mask = masks * y.unsqueeze(0)
     y_max = y_mask.flatten(1).max(-1)[0]
     y_min = y_mask.masked_fill(~(masks.bool()), 1e8).flatten(1).min(-1)[0]
 

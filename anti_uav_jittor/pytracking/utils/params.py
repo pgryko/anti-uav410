@@ -1,9 +1,11 @@
-from pytracking import TensorList
 import random
+
+from pytracking import TensorList
 
 
 class TrackerParams:
     """Class for tracker parameters."""
+
     def set_default_values(self, default_vals: dict):
         for name, val in default_vals.items():
             if not hasattr(self, name):
@@ -13,7 +15,7 @@ class TrackerParams:
         """Get a parameter value with the given name. If it does not exists, it return the default value given as a
         second argument or returns an error if no default value is given."""
         if len(default) > 1:
-            raise ValueError('Can only give one default value.')
+            raise ValueError("Can only give one default value.")
 
         if not default:
             return getattr(self, name)
@@ -27,6 +29,7 @@ class TrackerParams:
 
 class FeatureParams:
     """Class for feature specific parameters"""
+
     def __init__(self, *args, **kwargs):
         if len(args) > 0:
             raise ValueError

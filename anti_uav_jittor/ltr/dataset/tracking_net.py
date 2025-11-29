@@ -1,18 +1,20 @@
-import jittor as jt
 import os
 import os.path
-import numpy as np
-import pandas
 import random
 from collections import OrderedDict
 
-from ltr.data.image_loader import jpeg4py_loader
-from .base_video_dataset import BaseVideoDataset
+import jittor as jt
+import numpy as np
+import pandas
+
 from ltr.admin.environment import env_settings
+from ltr.data.image_loader import jpeg4py_loader
+
+from .base_video_dataset import BaseVideoDataset
 
 
 def list_sequences(root, set_ids):
-    """ Lists all the videos in the input set_ids. Returns a list of tuples (set_id, video_name)
+    """Lists all the videos in the input set_ids. Returns a list of tuples (set_id, video_name)
 
     args:
         root: Root directory to TrackingNet
@@ -26,14 +28,16 @@ def list_sequences(root, set_ids):
     for s in set_ids:
         anno_dir = os.path.join(root, "TRAIN_" + str(s), "anno")
 
-        sequences_cur_set = [(s, os.path.splitext(f)[0]) for f in os.listdir(anno_dir) if f.endswith('.txt')]
+        sequences_cur_set = [
+            (s, os.path.splitext(f)[0]) for f in os.listdir(anno_dir) if f.endswith(".txt")
+        ]
         sequence_list += sequences_cur_set
 
     return sequence_list
 
 
 class TrackingNet(BaseVideoDataset):
-    """ TrackingNet dataset.
+    """TrackingNet dataset.
 
     Publication:
         TrackingNet: A Large-Scale Dataset and Benchmark for Object Tracking in the Wild.
@@ -43,6 +47,7 @@ class TrackingNet(BaseVideoDataset):
 
     Download the dataset using the got10k_toolkit https://github.com/SilvioGiancola/TrackingNet-devkit.
     """
+
     def __init__(self, root=None, image_loader=jpeg4py_loader, set_ids=None, data_fraction=None):
         """
         args:
@@ -54,7 +59,7 @@ class TrackingNet(BaseVideoDataset):
             data_fraction - Fraction of dataset to be used. The complete dataset is used by default
         """
         root = env_settings().trackingnet_dir if root is None else root
-        super().__init__('TrackingNet', root, image_loader)
+        super().__init__("TrackingNet", root, image_loader)
 
         if set_ids is None:
             set_ids = [i for i in range(12)]
@@ -66,7 +71,9 @@ class TrackingNet(BaseVideoDataset):
         self.sequence_list = list_sequences(self.root, self.set_ids)
 
         if data_fraction is not None:
-            self.sequence_list = random.sample(self.sequence_list, int(len(self.sequence_list) * data_fraction))
+            self.sequence_list = random.sample(
+                self.sequence_list, int(len(self.sequence_list) * data_fraction)
+            )
 
         self.seq_to_class_map, self.seq_per_class = self._load_class_info()
 
@@ -75,15 +82,17 @@ class TrackingNet(BaseVideoDataset):
         self.class_list.sort()
 
     def _load_class_info(self):
-        ltr_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..')
-        class_map_path = os.path.join(ltr_path, 'data_specs', 'trackingnet_classmap.txt')
+        ltr_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
+        class_map_path = os.path.join(ltr_path, "data_specs", "trackingnet_classmap.txt")
 
-        with open(class_map_path, 'r') as f:
-            seq_to_class_map = {seq_class.split('\t')[0]: seq_class.rstrip().split('\t')[1] for seq_class in f}
+        with open(class_map_path) as f:
+            seq_to_class_map = {
+                seq_class.split("\t")[0]: seq_class.rstrip().split("\t")[1] for seq_class in f
+            }
 
         seq_per_class = {}
         for i, seq in enumerate(self.sequence_list):
-            class_name = seq_to_class_map.get(seq[1], 'Unknown')
+            class_name = seq_to_class_map.get(seq[1], "Unknown")
             if class_name not in seq_per_class:
                 seq_per_class[class_name] = [i]
             else:
@@ -92,7 +101,7 @@ class TrackingNet(BaseVideoDataset):
         return seq_to_class_map, seq_per_class
 
     def get_name(self):
-        return 'trackingnet'
+        return "trackingnet"
 
     def has_class_info(self):
         return True
@@ -104,8 +113,14 @@ class TrackingNet(BaseVideoDataset):
         set_id = self.sequence_list[seq_id][0]
         vid_name = self.sequence_list[seq_id][1]
         bb_anno_file = os.path.join(self.root, "TRAIN_" + str(set_id), "anno", vid_name + ".txt")
-        gt = pandas.read_csv(bb_anno_file, delimiter=',', header=None, dtype=np.float32, na_filter=False,
-                             low_memory=False).values
+        gt = pandas.read_csv(
+            bb_anno_file,
+            delimiter=",",
+            header=None,
+            dtype=np.float32,
+            na_filter=False,
+            low_memory=False,
+        ).values
         return jt.var(gt)
 
     def get_sequence_info(self, seq_id):
@@ -113,12 +128,14 @@ class TrackingNet(BaseVideoDataset):
 
         valid = (bbox[:, 2] > 0) & (bbox[:, 3] > 0)
         visible = valid.clone().byte()
-        return {'bbox': bbox, 'valid': valid, 'visible': visible}
+        return {"bbox": bbox, "valid": valid, "visible": visible}
 
     def _get_frame(self, seq_id, frame_id):
         set_id = self.sequence_list[seq_id][0]
         vid_name = self.sequence_list[seq_id][1]
-        frame_path = os.path.join(self.root, "TRAIN_" + str(set_id), "frames", vid_name, str(frame_id) + ".jpg")
+        frame_path = os.path.join(
+            self.root, "TRAIN_" + str(set_id), "frames", vid_name, str(frame_id) + ".jpg"
+        )
         return self.image_loader(frame_path)
 
     def _get_class(self, seq_id):
@@ -142,10 +159,14 @@ class TrackingNet(BaseVideoDataset):
 
         obj_class = self._get_class(seq_id)
 
-        object_meta = OrderedDict({'object_class_name': obj_class,
-                                   'motion_class': None,
-                                   'major_class': None,
-                                   'root_class': None,
-                                   'motion_adverb': None})
+        object_meta = OrderedDict(
+            {
+                "object_class_name": obj_class,
+                "motion_class": None,
+                "major_class": None,
+                "root_class": None,
+                "motion_adverb": None,
+            }
+        )
 
         return frame_list, anno_frames, object_meta

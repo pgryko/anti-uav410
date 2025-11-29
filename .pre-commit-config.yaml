@@ -1,0 +1,102 @@
+# Pre-commit hooks configuration
+# Runs locally on commit and in CI
+# Install: uv run pre-commit install
+# Run manually: uv run pre-commit run --all-files
+
+default_language_version:
+  python: python3.12
+
+repos:
+  # =============================================================================
+  # Tier 1: Essential hooks (fast, run on every commit)
+  # =============================================================================
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: ^(\.venv/|archive/|anti_uav_jittor/)
+      - id: end-of-file-fixer
+        exclude: ^(\.venv/|archive/|anti_uav_jittor/)
+      - id: check-yaml
+        args: [--unsafe]  # Allow custom YAML tags used in PyTorch configs
+        exclude: ^(\.venv/|archive/)
+      - id: check-added-large-files
+        args: ['--maxkb=1024']  # 1MB threshold (lenient for ML project)
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: check-symlinks
+      - id: destroyed-symlinks
+      - id: check-toml
+      - id: check-json
+        exclude: ^(\.venv/|archive/|anti_uav_jittor/)
+      - id: pretty-format-json
+        args: [--autofix, --no-sort-keys]
+        exclude: ^(\.venv/|archive/|anti_uav_jittor/|.*\.ipynb$)
+
+  # =============================================================================
+  # Tier 2: Code quality (ruff - fast linter/formatter)
+  # =============================================================================
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.7.4
+    hooks:
+      # Linter
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+        exclude: ^(\.venv/|archive/|anti_uav_jittor/|.*\.ipynb$)
+      # Formatter (replaces black)
+      - id: ruff-format
+        exclude: ^(\.venv/|archive/|anti_uav_jittor/|.*\.ipynb$)
+
+  # =============================================================================
+  # Tier 3: Security hooks
+  # =============================================================================
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        args: ['--baseline', '.secrets.baseline']
+        # Only scan src/, tests/, scripts/, and config files - skip large legacy dirs
+        files: ^(src/|tests/|scripts/|Codes/detect_wrapper/|\.github/|pyproject\.toml|\.env\.example)
+        exclude: ^(\.venv/|archive/|anti_uav_jittor/|.*\.ipynb$|uv\.lock$|.*\.pt$|.*\.pth$)
+
+  # =============================================================================
+  # Tier 4: Type checking (pyright)
+  # =============================================================================
+  - repo: local
+    hooks:
+      - id: pyright
+        name: pyright
+        entry: uv run pyright
+        language: system
+        files: ^(src/|tests/).*\.py$
+        types: [python]
+        pass_filenames: false
+        args: [src/, tests/]
+
+  # =============================================================================
+  # Tier 5: ML/Data Science specific
+  # =============================================================================
+  - repo: https://github.com/kynan/nbstripout
+    rev: 0.7.1
+    hooks:
+      - id: nbstripout
+        args: [--extra-keys, 'metadata.kernelspec metadata.language_info']
+
+  # =============================================================================
+  # Tier 6: Documentation and spelling
+  # =============================================================================
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.3.0
+    hooks:
+      - id: codespell
+        # Only check tests, scripts, README - skip src (has too much legacy code)
+        files: ^(tests/|scripts/|README\.md|pyproject\.toml)
+        args: [--skip, '*.ipynb,*.pt,*.pth,*.onnx,*.c,*.pyx,*.pxd', --ignore-words-list, 'dectect']
+        additional_dependencies:
+          - tomli
+
+# CI configuration hint:
+# Add to your CI workflow:
+#   - uses: actions/checkout@v4
+#   - uses: astral-sh/setup-uv@v4
+#   - run: uv run pre-commit run --all-files

@@ -1,10 +1,10 @@
-import jittor as jt
 from jittor.dataset import Dataset
+
 from ltr.data.image_loader import jpeg4py_loader
 
 
 class BaseVideoDataset(Dataset):
-    """ Base class for video datasets """
+    """Base class for video datasets"""
 
     def __init__(self, name, root, image_loader=jpeg4py_loader):
         """
@@ -17,23 +17,22 @@ class BaseVideoDataset(Dataset):
         self.root = root
         self.image_loader = image_loader
 
-        self.sequence_list = []     # Contains the list of sequences.
+        self.sequence_list = []  # Contains the list of sequences.
         self.class_list = []
 
     def __len__(self):
-        """ Returns size of the dataset
+        """Returns size of the dataset
         returns:
             int - number of samples in the dataset
         """
         return self.get_num_sequences()
 
     def __getitem__(self, index):
-        """ Not to be used! Check get_frames() instead.
-        """
+        """Not to be used! Check get_frames() instead."""
         return None
 
     def is_video_sequence(self):
-        """ Returns whether the dataset is a video dataset or an image dataset
+        """Returns whether the dataset is a video dataset or an image dataset
 
         returns:
             bool - True if a video dataset
@@ -41,7 +40,7 @@ class BaseVideoDataset(Dataset):
         return True
 
     def is_synthetic_video_dataset(self):
-        """ Returns whether the dataset contains real videos or synthetic
+        """Returns whether the dataset contains real videos or synthetic
 
         returns:
             bool - True if a video dataset
@@ -49,7 +48,7 @@ class BaseVideoDataset(Dataset):
         return False
 
     def get_name(self):
-        """ Name of the dataset
+        """Name of the dataset
 
         returns:
             string - Name of the dataset
@@ -57,7 +56,7 @@ class BaseVideoDataset(Dataset):
         raise NotImplementedError
 
     def get_num_sequences(self):
-        """ Number of sequences in a dataset
+        """Number of sequences in a dataset
 
         returns:
             int - number of sequences in the dataset."""
@@ -82,18 +81,18 @@ class BaseVideoDataset(Dataset):
         return False
 
     def get_sequence_info(self, seq_id):
-        """ Returns information about a particular sequences,
+        """Returns information about a particular sequences,
 
         args:
             seq_id - index of the sequence
 
         returns:
             Dict
-            """
+        """
         raise NotImplementedError
 
     def get_frames(self, seq_id, frame_ids, anno=None):
-        """ Get a set of frames from a particular sequence
+        """Get a set of frames from a particular sequence
 
         args:
             seq_id      - index of sequence
@@ -107,4 +106,3 @@ class BaseVideoDataset(Dataset):
 
         """
         raise NotImplementedError
-

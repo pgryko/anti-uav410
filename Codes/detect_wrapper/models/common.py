@@ -1,12 +1,12 @@
 # This file contains modules common to various models
 
 import math
+
 import numpy as np
 import torch
 import torch.nn as nn
-
 from utils.datasets import letterbox
-from utils.general import non_max_suppression, make_divisible, scale_coords
+from utils.general import make_divisible, non_max_suppression, scale_coords
 
 
 def autopad(k, p=None):  # kernel, padding
@@ -23,7 +23,9 @@ def DWConv(c1, c2, k=1, s=1, act=True):
 
 class Conv(nn.Module):
     # Standard convolution
-    def __init__(self, c1, c2, k=1, s=1, p=None, g=1, act=True):  # ch_in, ch_out, kernel, stride, padding, groups
+    def __init__(
+        self, c1, c2, k=1, s=1, p=None, g=1, act=True
+    ):  # ch_in, ch_out, kernel, stride, padding, groups
         super(Conv, self).__init__()
         self.conv = nn.Conv2d(c1, c2, k, s, autopad(k, p), groups=g, bias=False)
         self.bn = nn.BatchNorm2d(c2)
@@ -38,7 +40,9 @@ class Conv(nn.Module):
 
 class Bottleneck(nn.Module):
     # Standard bottleneck
-    def __init__(self, c1, c2, shortcut=True, g=1, e=0.5):  # ch_in, ch_out, shortcut, groups, expansion
+    def __init__(
+        self, c1, c2, shortcut=True, g=1, e=0.5
+    ):  # ch_in, ch_out, shortcut, groups, expansion
         super(Bottleneck, self).__init__()
         c_ = int(c2 * e)  # hidden channels
         self.cv1 = Conv(c1, c_, 1, 1)
@@ -51,7 +55,9 @@ class Bottleneck(nn.Module):
 
 class BottleneckCSP(nn.Module):
     # CSP Bottleneck https://github.com/WongKinYiu/CrossStagePartialNetworks
-    def __init__(self, c1, c2, n=1, shortcut=True, g=1, e=0.5):  # ch_in, ch_out, number, shortcut, groups, expansion
+    def __init__(
+        self, c1, c2, n=1, shortcut=True, g=1, e=0.5
+    ):  # ch_in, ch_out, number, shortcut, groups, expansion
         super(BottleneckCSP, self).__init__()
         c_ = int(c2 * e)  # hidden channels
         self.cv1 = Conv(c1, c_, 1, 1)
@@ -84,12 +90,18 @@ class SPP(nn.Module):
 
 class Focus(nn.Module):
     # Focus wh information into c-space
-    def __init__(self, c1, c2, k=1, s=1, p=None, g=1, act=True):  # ch_in, ch_out, kernel, stride, padding, groups
+    def __init__(
+        self, c1, c2, k=1, s=1, p=None, g=1, act=True
+    ):  # ch_in, ch_out, kernel, stride, padding, groups
         super(Focus, self).__init__()
         self.conv = Conv(c1 * 4, c2, k, s, p, g, act)
 
     def forward(self, x):  # x(b,c,w,h) -> y(b,4c,w/2,h/2)
-        return self.conv(torch.cat([x[..., ::2, ::2], x[..., 1::2, ::2], x[..., ::2, 1::2], x[..., 1::2, 1::2]], 1))
+        return self.conv(
+            torch.cat(
+                [x[..., ::2, ::2], x[..., 1::2, ::2], x[..., ::2, 1::2], x[..., 1::2, 1::2]], 1
+            )
+        )
 
 
 class Concat(nn.Module):
@@ -112,7 +124,9 @@ class NMS(nn.Module):
         super(NMS, self).__init__()
 
     def forward(self, x):
-        return non_max_suppression(x[0], conf_thres=self.conf, iou_thres=self.iou, classes=self.classes)
+        return non_max_suppression(
+            x[0], conf_thres=self.conf, iou_thres=self.iou, classes=self.classes
+        )
 
 
 class autoShape(nn.Module):
@@ -147,17 +161,21 @@ class autoShape(nn.Module):
             x[i] = np.array(x[i])[:, :, :3]  # up to 3 channels if png
             s = x[i].shape[:2]  # HWC
             shape0.append(s)  # image shape
-            g = (size / max(s))  # gain
+            g = size / max(s)  # gain
             shape1.append([y * g for y in s])
-        shape1 = [make_divisible(x, int(self.stride.max())) for x in np.stack(shape1, 0).max(0)]  # inference shape
+        shape1 = [
+            make_divisible(x, int(self.stride.max())) for x in np.stack(shape1, 0).max(0)
+        ]  # inference shape
         x = [letterbox(x[i], new_shape=shape1, auto=False)[0] for i in batch]  # pad
         x = np.stack(x, 0) if batch[-1] else x[0][None]  # stack
         x = np.ascontiguousarray(x.transpose((0, 3, 1, 2)))  # BHWC to BCHW
-        x = torch.from_numpy(x).to(p.device).type_as(p) / 255.  # uint8 to fp16/32
+        x = torch.from_numpy(x).to(p.device).type_as(p) / 255.0  # uint8 to fp16/32
 
         # Inference
         x = self.model(x, augment, profile)  # forward
-        x = non_max_suppression(x[0], conf_thres=self.conf, iou_thres=self.iou, classes=self.classes)  # NMS
+        x = non_max_suppression(
+            x[0], conf_thres=self.conf, iou_thres=self.iou, classes=self.classes
+        )  # NMS
 
         # Post-process
         for i in batch:
@@ -175,7 +193,9 @@ class Flatten(nn.Module):
 
 class Classify(nn.Module):
     # Classification head, i.e. x(b,c1,20,20) to x(b,c2)
-    def __init__(self, c1, c2, k=1, s=1, p=None, g=1):  # ch_in, ch_out, kernel, stride, padding, groups
+    def __init__(
+        self, c1, c2, k=1, s=1, p=None, g=1
+    ):  # ch_in, ch_out, kernel, stride, padding, groups
         super(Classify, self).__init__()
         self.aap = nn.AdaptiveAvgPool2d(1)  # to x(b,c1,1,1)
         self.conv = nn.Conv2d(c1, c2, k, s, autopad(k, p), groups=g, bias=False)  # to x(b,c2,1,1)

@@ -1,13 +1,14 @@
-from .vot import VOTDataset, VOTLTDataset
-from .otb import OTBDataset
-from .uav import UAVDataset
+from .Antidataset import AntiDataset
+from .got10k import GOT10kDataset
 from .lasot import LaSOTDataset
 from .nfs import NFSDataset
+from .otb import OTBDataset
 from .trackingnet import TrackingNetDataset
-from .got10k import GOT10kDataset
-from .vot import VOTLTVideo
-from .Antidataset import AntiDataset
-class DatasetFactory(object):
+from .uav import UAVDataset
+from .vot import VOTDataset, VOTLTDataset, VOTLTVideo
+
+
+class DatasetFactory:
     @staticmethod
     def create_dataset(**kwargs):
         """
@@ -19,25 +20,24 @@ class DatasetFactory(object):
         Return:
             dataset
         """
-        assert 'name' in kwargs, "should provide dataset name"
-        name = kwargs['name']
-        if 'OTB' in name:
+        assert "name" in kwargs, "should provide dataset name"
+        name = kwargs["name"]
+        if "OTB" in name:
             dataset = OTBDataset(**kwargs)
-        elif 'LaSOT' == name:
+        elif "LaSOT" == name:
             dataset = LaSOTDataset(**kwargs)
-        elif 'UAV' in name:
+        elif "UAV" in name:
             dataset = UAVDataset(**kwargs)
-        elif 'NFS' in name:
+        elif "NFS" in name:
             dataset = NFSDataset(**kwargs)
-        elif 'VOT2018' == name or 'VOT2016' == name or 'VOT2019' == name:
+        elif "VOT2018" == name or "VOT2016" == name or "VOT2019" == name:
             dataset = VOTDataset(**kwargs)
-        elif 'VOT2018-LT' == name:
+        elif "VOT2018-LT" == name:
             dataset = VOTLTDataset(**kwargs)
-        elif 'TrackingNet' == name:
+        elif "TrackingNet" == name:
             dataset = TrackingNetDataset(**kwargs)
-        elif 'GOT-10k' == name:
+        elif "GOT-10k" == name:
             dataset = GOT10kDataset(**kwargs)
         else:
-            raise Exception("unknow dataset {}".format(kwargs['name']))
+            raise Exception("unknow dataset {}".format(kwargs["name"]))
         return dataset
-

@@ -1,2 +1,1 @@
-from .basetracker import BaseTracker
-from .basetracker import SiameseTracker
+from .basetracker import BaseTracker, SiameseTracker

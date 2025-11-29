@@ -1,10 +1,13 @@
 import os
-from .base_image_dataset import BaseImageDataset
-from ltr.data.image_loader import jpeg4py_loader, imread_indexed
-import jittor as jt
 from collections import OrderedDict
+
+import jittor as jt
+
 from ltr.admin.environment import env_settings
 from ltr.data.bounding_box_utils import masks_to_bboxes
+from ltr.data.image_loader import imread_indexed, jpeg4py_loader
+
+from .base_image_dataset import BaseImageDataset
 
 
 class MSRA10k(BaseImageDataset):
@@ -30,7 +33,7 @@ class MSRA10k(BaseImageDataset):
             min_area - Objects with area less than min_area are filtered out. Default is 0.0
         """
         root = env_settings().msra10k_dir if root is None else root
-        super().__init__('MSRA10k', root, image_loader)
+        super().__init__("MSRA10k", root, image_loader)
 
         self.image_list = self._load_dataset(min_area=min_area)
 
@@ -38,13 +41,13 @@ class MSRA10k(BaseImageDataset):
             raise NotImplementedError
 
     def _load_dataset(self, min_area=None):
-        files_list = os.listdir(os.path.join(self.root, 'Imgs'))
-        image_list = [f[:-4] for f in files_list if f[-3:] == 'jpg']
+        files_list = os.listdir(os.path.join(self.root, "Imgs"))
+        image_list = [f[:-4] for f in files_list if f[-3:] == "jpg"]
 
         images = []
 
         for f in image_list:
-            a = imread_indexed(os.path.join(self.root, 'Imgs', '{}.png'.format(f)))
+            a = imread_indexed(os.path.join(self.root, "Imgs", f"{f}.png"))
 
             if min_area is None or (a > 0).sum() > min_area:
                 images.append(f)
@@ -52,32 +55,40 @@ class MSRA10k(BaseImageDataset):
         return images
 
     def get_name(self):
-        return 'msra10k'
+        return "msra10k"
 
     def has_segmentation_info(self):
         return True
 
     def get_image_info(self, im_id):
-        mask = imread_indexed(os.path.join(self.root, 'Imgs', '{}.png'.format(self.image_list[im_id])))
+        mask = imread_indexed(os.path.join(self.root, "Imgs", f"{self.image_list[im_id]}.png"))
         mask = jt.var(mask == 255)
-        bbox = masks_to_bboxes(mask, fmt='t').view(4,)
+        bbox = masks_to_bboxes(mask, fmt="t").view(
+            4,
+        )
 
         valid = (bbox[2] > 0) & (bbox[3] > 0)
         visible = valid.clone().byte()
 
-        return {'bbox': bbox, 'mask': mask, 'valid': valid, 'visible': visible}
+        return {"bbox": bbox, "mask": mask, "valid": valid, "visible": visible}
 
     def get_meta_info(self, im_id):
-        object_meta = OrderedDict({'object_class_name': None,
-                                   'motion_class': None,
-                                   'major_class': None,
-                                   'root_class': None,
-                                   'motion_adverb': None})
+        object_meta = OrderedDict(
+            {
+                "object_class_name": None,
+                "motion_class": None,
+                "major_class": None,
+                "root_class": None,
+                "motion_adverb": None,
+            }
+        )
 
         return object_meta
 
     def get_image(self, image_id, anno=None):
-        frame = self.image_loader(os.path.join(self.root, 'Imgs', '{}.jpg'.format(self.image_list[image_id])))
+        frame = self.image_loader(
+            os.path.join(self.root, "Imgs", f"{self.image_list[image_id]}.jpg")
+        )
 
         if anno is None:
             anno = self.get_image_info(image_id)

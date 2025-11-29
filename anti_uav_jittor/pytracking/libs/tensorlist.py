@@ -1,13 +1,13 @@
+import copy
 import functools
 
 import jittor as jt
-import copy
 
 
 class TensorList(list):
     """Container mainly used for lists of torch tensors. Extends lists with pytorch functionality."""
 
-    def __init__(self, list_of_tensors = None):
+    def __init__(self, list_of_tensors=None):
         if list_of_tensors is None:
             list_of_tensors = list()
         super(TensorList, self).__init__(list_of_tensors)
@@ -25,12 +25,12 @@ class TensorList(list):
 
     def __add__(self, other):
         if TensorList._iterable(other):
-            return TensorList([e1 + e2 for e1, e2 in zip(self, other)])
+            return TensorList([e1 + e2 for e1, e2 in zip(self, other, strict=False)])
         return TensorList([e + other for e in self])
 
     def __radd__(self, other):
         if TensorList._iterable(other):
-            return TensorList([e2 + e1 for e1, e2 in zip(self, other)])
+            return TensorList([e2 + e1 for e1, e2 in zip(self, other, strict=False)])
         return TensorList([other + e for e in self])
 
     def __iadd__(self, other):
@@ -44,12 +44,12 @@ class TensorList(list):
 
     def __sub__(self, other):
         if TensorList._iterable(other):
-            return TensorList([e1 - e2 for e1, e2 in zip(self, other)])
+            return TensorList([e1 - e2 for e1, e2 in zip(self, other, strict=False)])
         return TensorList([e - other for e in self])
 
     def __rsub__(self, other):
         if TensorList._iterable(other):
-            return TensorList([e2 - e1 for e1, e2 in zip(self, other)])
+            return TensorList([e2 - e1 for e1, e2 in zip(self, other, strict=False)])
         return TensorList([other - e for e in self])
 
     def __isub__(self, other):
@@ -63,12 +63,12 @@ class TensorList(list):
 
     def __mul__(self, other):
         if TensorList._iterable(other):
-            return TensorList([e1 * e2 for e1, e2 in zip(self, other)])
+            return TensorList([e1 * e2 for e1, e2 in zip(self, other, strict=False)])
         return TensorList([e * other for e in self])
 
     def __rmul__(self, other):
         if TensorList._iterable(other):
-            return TensorList([e2 * e1 for e1, e2 in zip(self, other)])
+            return TensorList([e2 * e1 for e1, e2 in zip(self, other, strict=False)])
         return TensorList([other * e for e in self])
 
     def __imul__(self, other):
@@ -82,12 +82,12 @@ class TensorList(list):
 
     def __truediv__(self, other):
         if TensorList._iterable(other):
-            return TensorList([e1 / e2 for e1, e2 in zip(self, other)])
+            return TensorList([e1 / e2 for e1, e2 in zip(self, other, strict=False)])
         return TensorList([e / other for e in self])
 
     def __rtruediv__(self, other):
         if TensorList._iterable(other):
-            return TensorList([e2 / e1 for e1, e2 in zip(self, other)])
+            return TensorList([e2 / e1 for e1, e2 in zip(self, other, strict=False)])
         return TensorList([other / e for e in self])
 
     def __itruediv__(self, other):
@@ -101,12 +101,12 @@ class TensorList(list):
 
     def __matmul__(self, other):
         if TensorList._iterable(other):
-            return TensorList([e1 @ e2 for e1, e2 in zip(self, other)])
+            return TensorList([e1 @ e2 for e1, e2 in zip(self, other, strict=False)])
         return TensorList([e @ other for e in self])
 
     def __rmatmul__(self, other):
         if TensorList._iterable(other):
-            return TensorList([e2 @ e1 for e1, e2 in zip(self, other)])
+            return TensorList([e2 @ e1 for e1, e2 in zip(self, other, strict=False)])
         return TensorList([other @ e for e in self])
 
     def __imatmul__(self, other):
@@ -120,12 +120,12 @@ class TensorList(list):
 
     def __mod__(self, other):
         if TensorList._iterable(other):
-            return TensorList([e1 % e2 for e1, e2 in zip(self, other)])
+            return TensorList([e1 % e2 for e1, e2 in zip(self, other, strict=False)])
         return TensorList([e % other for e in self])
 
     def __rmod__(self, other):
         if TensorList._iterable(other):
-            return TensorList([e2 % e1 for e1, e2 in zip(self, other)])
+            return TensorList([e2 % e1 for e1, e2 in zip(self, other, strict=False)])
         return TensorList([other % e for e in self])
 
     def __pos__(self):
@@ -136,12 +136,12 @@ class TensorList(list):
 
     def __le__(self, other):
         if TensorList._iterable(other):
-            return TensorList([e1 <= e2 for e1, e2 in zip(self, other)])
+            return TensorList([e1 <= e2 for e1, e2 in zip(self, other, strict=False)])
         return TensorList([e <= other for e in self])
 
     def __ge__(self, other):
         if TensorList._iterable(other):
-            return TensorList([e1 >= e2 for e1, e2 in zip(self, other)])
+            return TensorList([e1 >= e2 for e1, e2 in zip(self, other, strict=False)])
         return TensorList([e >= other for e in self])
 
     def concat(self, other):
@@ -173,7 +173,7 @@ class TensorList(list):
 
     def __getattr__(self, name):
         if not hasattr(jt.Var, name):
-            raise AttributeError('\'TensorList\' object has not attribute \'{}\''.format(name))
+            raise AttributeError(f"'TensorList' object has not attribute '{name}'")
 
         def apply_attr(*args, **kwargs):
             return TensorList([getattr(e, name)(*args, **kwargs) for e in self])
@@ -185,7 +185,6 @@ class TensorList(list):
         return isinstance(a, (TensorList, list))
 
 
-
 def tensor_operation(op):
     def islist(a):
         return isinstance(a, TensorList)
@@ -193,7 +192,7 @@ def tensor_operation(op):
     @functools.wraps(op)
     def oplist(*args, **kwargs):
         if len(args) == 0:
-            raise ValueError('Must be at least one argument without keyword (i.e. operand).')
+            raise ValueError("Must be at least one argument without keyword (i.e. operand).")
 
         if len(args) == 1:
             if islist(args[0]):
@@ -201,7 +200,9 @@ def tensor_operation(op):
         else:
             # Multiple operands, assume max two
             if islist(args[0]) and islist(args[1]):
-                return TensorList([op(a, b, *args[2:], **kwargs) for a, b in zip(*args[:2])])
+                return TensorList(
+                    [op(a, b, *args[2:], **kwargs) for a, b in zip(*args[:2], strict=False)]
+                )
             if islist(args[0]):
                 return TensorList([op(a, *args[1:], **kwargs) for a in args[0]])
             if islist(args[1]):

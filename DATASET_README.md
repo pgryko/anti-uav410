@@ -19,7 +19,7 @@ The Anti-UAV410 dataset is a comprehensive collection of 410 high-quality video 
 
 ## Dataset Components
 - **RGB Sequences**: Visible spectrum video sequences
-- **Thermal IR Sequences**: Thermal infrared video sequences  
+- **Thermal IR Sequences**: Thermal infrared video sequences
 - **Ground Truth**: Tracking annotations and bounding boxes
 - **Metadata**: Information about sequence characteristics and conditions
 
@@ -66,7 +66,7 @@ The Anti-UAV410 dataset is a comprehensive collection of 410 high-quality video 
 ## Evaluation Metrics
 Common evaluation metrics for this dataset include:
 - **Success Rate**: Overlap-based success plots
-- **Precision**: Distance-based precision plots  
+- **Precision**: Distance-based precision plots
 - **Robustness**: Tracking failure recovery
 - **Speed**: Real-time tracking performance
 

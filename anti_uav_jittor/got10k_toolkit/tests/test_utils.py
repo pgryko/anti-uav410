@@ -1,13 +1,10 @@
-from __future__ import absolute_import
-
 import unittest
-import numpy as np
 
-from got10k.utils.metrics import rect_iou, poly_iou
+import numpy as np
+from got10k.utils.metrics import poly_iou, rect_iou
 
 
 class TestUtils(unittest.TestCase):
-
     def setUp(self):
         pass
 
@@ -35,5 +32,5 @@ class TestUtils(unittest.TestCase):
         return corners
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -96,13 +96,13 @@ typedef struct region_container {
 
 typedef struct region_overlap {
 
-	float overlap;    
+	float overlap;
     float only1;
     float only2;
 
 } region_overlap;
 
-extern const region_bounds region_no_bounds; 
+extern const region_bounds region_no_bounds;
 
 __TRAX_EXPORT int region_set_flags(int mask);
 

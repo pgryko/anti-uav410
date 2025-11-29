@@ -1,8 +1,9 @@
-import os
-import glob
 import json
-import cv2
+import os
+
 import numpy as np
+
+
 def iou(bbox1, bbox2):
     """
     Calculates the intersection-over-union of two bounding boxes.
@@ -39,14 +40,18 @@ def iou(bbox1, bbox2):
 
     return size_intersection / size_union
 
+
 def not_exist(pred):
-    return (pred[0] == 0 and pred[2]==0) or len(pred) == 0
+    return (pred[0] == 0 and pred[2] == 0) or len(pred) == 0
+
 
 def eval(out_res, label_res):
     measure_per_frame = []
     penalty_measures = []
-    for _pred, _gt, _exist in zip(out_res, label_res['gt_rect'], label_res['exist']):
-        measure_per_frame.append(not_exist(_pred) if not _exist else iou(_pred, _gt) if len(_pred) > 1 else 0)
+    for _pred, _gt, _exist in zip(out_res, label_res["gt_rect"], label_res["exist"], strict=False):
+        measure_per_frame.append(
+            not_exist(_pred) if not _exist else iou(_pred, _gt) if len(_pred) > 1 else 0
+        )
         if _exist:
             if (len(_pred) > 1 and iou(_pred, _gt) < 1e-5) or not_exist(_pred):
                 penalty_measures.append(1)
@@ -57,11 +62,12 @@ def eval(out_res, label_res):
 
     return np.mean(measure_per_frame) - 0.2 * np.mean(penalty_measures) ** 0.3
 
-dataset_root = '/path/to/test set'
-list_file = os.path.join(dataset_root, 'list.txt')
-with open(list_file, 'r') as f:
-    video_files = [video.split('\n')[0] for video in f.readlines()]
-results_root = 'path/to/results'
+
+dataset_root = "/path/to/test set"
+list_file = os.path.join(dataset_root, "list.txt")
+with open(list_file) as f:
+    video_files = [video.split("\n")[0] for video in f.readlines()]
+results_root = "path/to/results"
 overall_performance = []
 video_id = 0
 video_num = len(video_files)
@@ -70,19 +76,19 @@ for video in video_files:
     video_id += 1
     # load groundtruth
     video_path = os.path.join(dataset_root, video)
-    label_file = os.path.join(video_path, 'IR_label.json')
-    with open(label_file, 'r') as f:
+    label_file = os.path.join(video_path, "IR_label.json")
+    with open(label_file) as f:
         label_res = json.load(f)
     print(video)
 
     # load predicted results
-    res_file = os.path.join(results_root, '%s.txt' % video)
-    with open(res_file, 'r') as f:
-        bboxes_list = [i.split('\n')[0].split('\t') for i in f.readlines()]
+    res_file = os.path.join(results_root, "%s.txt" % video)
+    with open(res_file) as f:
+        bboxes_list = [i.split("\n")[0].split("\t") for i in f.readlines()]
         bboxes = [(float(i[0]), float(i[1]), float(i[2]), float(i[3])) for i in bboxes_list]
     out_res = bboxes
     mixed_measure = eval(out_res, label_res)
     overall_performance.append(mixed_measure)
-    print('[%03d/%03d] %20s Fixed Measure: %.03f' % (video_id, video_num, video, mixed_measure))
+    print("[%03d/%03d] %20s Fixed Measure: %.03f" % (video_id, video_num, video, mixed_measure))
 
-print('[Overall] Mixed Measure: %.03f\n' % np.mean(overall_performance))
+print("[Overall] Mixed Measure: %.03f\n" % np.mean(overall_performance))

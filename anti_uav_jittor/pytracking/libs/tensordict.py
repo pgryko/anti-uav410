@@ -1,7 +1,7 @@
+import copy
 from collections import OrderedDict
 
 import jittor as jt
-import copy
 
 
 class TensorDict(OrderedDict):
@@ -14,18 +14,21 @@ class TensorDict(OrderedDict):
     def copy(self):
         return TensorDict(super(TensorDict, self).copy())
 
-
-
-
     def __deepcopy__(self, memodict={}):
         return TensorDict(copy.deepcopy(list(self), memodict))
 
     def __getattr__(self, name):
         if not hasattr(jt.Var, name):
-            raise AttributeError('\'TensorDict\' object has not attribute \'{}\''.format(name))
+            raise AttributeError(f"'TensorDict' object has not attribute '{name}'")
 
         def apply_attr(*args, **kwargs):
-            return TensorDict({n: getattr(e, name)(*args, **kwargs) if hasattr(e, name) else e for n, e in self.items()})
+            return TensorDict(
+                {
+                    n: getattr(e, name)(*args, **kwargs) if hasattr(e, name) else e
+                    for n, e in self.items()
+                }
+            )
+
         return apply_attr
 
     def attribute(self, attr: str, *args):
@@ -37,4 +40,3 @@ class TensorDict(OrderedDict):
     @staticmethod
     def _iterable(a):
         return isinstance(a, (TensorDict, list))
-

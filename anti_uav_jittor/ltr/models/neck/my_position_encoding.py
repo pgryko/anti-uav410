@@ -2,20 +2,19 @@
 """
 Various positional encodings for the transformer.
 """
+
 import math
 
-
-from util.misc import (NestedTensor, nested_tensor_from_tensor,
-                       nested_tensor_from_tensor_2,
-                       accuracy)
+import jittor as jt
 from util.misc import NestedTensor
-import jittor as jt 
+
 
 class PositionEmbeddingSine(jt.nn.Module):
     """
     This is a more standard version of the position embedding, very similar to the one
     used by the Attention is all you need paper, generalized to work on images.
     """
+
     def __init__(self, num_pos_feats=64, temperature=10000, normalize=False, scale=None):
         super().__init__()
         self.num_pos_feats = num_pos_feats
@@ -28,7 +27,7 @@ class PositionEmbeddingSine(jt.nn.Module):
         self.scale = scale
 
     def execute(self, mask):
-        '''
+        """
 
         Args:
             tensor_list: a nestedTensor torch.size([batch,channel,H,W])
@@ -36,7 +35,7 @@ class PositionEmbeddingSine(jt.nn.Module):
 
         Returns:
              positon_embeding: torch.size([batch,channel,H,W])
-        '''
+        """
 
         assert mask is not None
         not_mask = ~mask
@@ -55,10 +54,12 @@ class PositionEmbeddingSine(jt.nn.Module):
         pos = jt.concat((pos_y, pos_x), dim=3).permute(0, 3, 1, 2)
         return pos
 
+
 class PositionEmbeddingLearned(jt.nn.Module):
     """
     Absolute pos embedding, learned.
     """
+
     def __init__(self, num_pos_feats=256):
         super().__init__()
         self.row_embed = jt.nn.Embedding(50, num_pos_feats)
@@ -76,52 +77,53 @@ class PositionEmbeddingLearned(jt.nn.Module):
         j = jt.arange(h, device=x.device)
         x_emb = self.col_embed(i)
         y_emb = self.row_embed(j)
-        pos = jt.concat([
-            x_emb.unsqueeze(0).repeat(h, 1, 1),
-            y_emb.unsqueeze(1).repeat(1, w, 1),
-        ], dim=-1).permute(2, 0, 1).unsqueeze(0).repeat(x.shape[0], 1, 1, 1)
+        pos = (
+            jt.concat(
+                [
+                    x_emb.unsqueeze(0).repeat(h, 1, 1),
+                    y_emb.unsqueeze(1).repeat(1, w, 1),
+                ],
+                dim=-1,
+            )
+            .permute(2, 0, 1)
+            .unsqueeze(0)
+            .repeat(x.shape[0], 1, 1, 1)
+        )
         return pos
 
 
 class PositionEmbeddingModal(jt.nn.Module):
-    '''
-        position embedding for input torch.size([H*W,batch,hidden])
-        Returns:embedding for input torch.size([H*W,batch,hidden])
-    '''
+    """
+    position embedding for input torch.size([H*W,batch,hidden])
+    Returns:embedding for input torch.size([H*W,batch,hidden])
+    """
+
     def __init__(self, num_pos_feats=256):
         super().__init__()
         self.embedding = jt.nn.Embedding(2048, num_pos_feats)
         # self.reset_parameters()
 
-    def execute(self,fusion_feature):
+    def execute(self, fusion_feature):
         hw = fusion_feature.shape[0]
         orig = jt.arange(hw)
         embed = self.embedding(orig)
-        pos = embed.unsqueeze(0).repeat(fusion_feature.shape[1],1,1).permute(1, 0, 2)
+        pos = embed.unsqueeze(0).repeat(fusion_feature.shape[1], 1, 1).permute(1, 0, 2)
         return pos
-
 
 
 def build_position_encoding_modal(settings):
     N_steps = settings.hidden_dim // 2
-    if settings.position_embedding in ('v2', 'sine'):
+    if settings.position_embedding in ("v2", "sine"):
         # TODO find a better way of exposing other arguments
         position_embedding_single_modal = PositionEmbeddingModal(settings.hidden_dim)
-        position_embedding_modals = PositionEmbeddingModal(settings.hidden_dim*2)
-    elif settings.position_embedding in ('v3', 'learned'):
+        position_embedding_modals = PositionEmbeddingModal(settings.hidden_dim * 2)
+    elif settings.position_embedding in ("v3", "learned"):
         position_embedding_single_modal = PositionEmbeddingLearned(N_steps)
-        position_embedding_modals = PositionEmbeddingModal(settings.hidden_dim*2)
+        position_embedding_modals = PositionEmbeddingModal(settings.hidden_dim * 2)
     else:
         raise ValueError(f"not supported {settings.position_embedding}")
     positon_embedding = {
-        'single':position_embedding_single_modal,
-        'multiple':position_embedding_modals
+        "single": position_embedding_single_modal,
+        "multiple": position_embedding_modals,
     }
     return positon_embedding
-
-
-
-
-
-
-

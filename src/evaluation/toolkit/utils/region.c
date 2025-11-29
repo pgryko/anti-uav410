@@ -856,7 +856,7 @@ struct __pyx_obj___Pyx_EnumMeta;
 
 /* "toolkit/utils/region.pyx":13
  * cimport c_region
- * 
+ *
  * cpdef enum RegionType:             # <<<<<<<<<<<<<<
  *     EMTPY
  *     SPECIAL
@@ -871,10 +871,10 @@ enum __pyx_t_7toolkit_5utils_6region_RegionType {
 
 /* "toolkit/utils/region.pyx":20
  *     MASK
- * 
+ *
  * cdef class RegionBounds:             # <<<<<<<<<<<<<<
  *     cdef c_region.region_bounds* _c_region_bounds
- * 
+ *
  */
 struct __pyx_obj_7toolkit_5utils_6region_RegionBounds {
   PyObject_HEAD
@@ -884,10 +884,10 @@ struct __pyx_obj_7toolkit_5utils_6region_RegionBounds {
 
 /* "toolkit/utils/region.pyx":57
  *         self._c_region_bounds.right = right
- * 
+ *
  * cdef class Rectangle:             # <<<<<<<<<<<<<<
  *     cdef c_region.region_rectangle* _c_region_rectangle
- * 
+ *
  */
 struct __pyx_obj_7toolkit_5utils_6region_Rectangle {
   PyObject_HEAD
@@ -897,10 +897,10 @@ struct __pyx_obj_7toolkit_5utils_6region_Rectangle {
 
 /* "toolkit/utils/region.pyx":98
  *                 self._c_region_rectangle.height)
- * 
+ *
  * cdef class Polygon:             # <<<<<<<<<<<<<<
  *     cdef c_region.region_polygon* _c_region_polygon
- * 
+ *
  */
 struct __pyx_obj_7toolkit_5utils_6region_Polygon {
   PyObject_HEAD
@@ -909,7 +909,7 @@ struct __pyx_obj_7toolkit_5utils_6region_Polygon {
 
 
 /* "EnumBase":15
- * 
+ *
  * @cython.internal
  * cdef class __Pyx_EnumMeta(type):             # <<<<<<<<<<<<<<
  *     def __init__(cls, name, parents, dct):
@@ -1802,7 +1802,7 @@ static PyObject *__pyx_codeobj__22;
 
 /* "toolkit/utils/region.pyx":23
  *     cdef c_region.region_bounds* _c_region_bounds
- * 
+ *
  *     def __cinit__(self):             # <<<<<<<<<<<<<<
  *         self._c_region_bounds = <c_region.region_bounds*>malloc(
  *                 sizeof(c_region.region_bounds))
@@ -1834,7 +1834,7 @@ static int __pyx_pf_7toolkit_5utils_6region_12RegionBounds___cinit__(struct __py
   __Pyx_RefNannySetupContext("__cinit__", 0);
 
   /* "toolkit/utils/region.pyx":24
- * 
+ *
  *     def __cinit__(self):
  *         self._c_region_bounds = <c_region.region_bounds*>malloc(             # <<<<<<<<<<<<<<
  *                 sizeof(c_region.region_bounds))
@@ -1857,7 +1857,7 @@ static int __pyx_pf_7toolkit_5utils_6region_12RegionBounds___cinit__(struct __py
  *         if not self._c_region_bounds:
  *             self._c_region_bounds = NULL             # <<<<<<<<<<<<<<
  *             raise MemoryError()
- * 
+ *
  */
     __pyx_v_self->_c_region_bounds = NULL;
 
@@ -1865,7 +1865,7 @@ static int __pyx_pf_7toolkit_5utils_6region_12RegionBounds___cinit__(struct __py
  *         if not self._c_region_bounds:
  *             self._c_region_bounds = NULL
  *             raise MemoryError()             # <<<<<<<<<<<<<<
- * 
+ *
  *     def __init__(self, top, bottom, left, right):
  */
     PyErr_NoMemory(); __PYX_ERR(0, 28, __pyx_L1_error)
@@ -1881,7 +1881,7 @@ static int __pyx_pf_7toolkit_5utils_6region_12RegionBounds___cinit__(struct __py
 
   /* "toolkit/utils/region.pyx":23
  *     cdef c_region.region_bounds* _c_region_bounds
- * 
+ *
  *     def __cinit__(self):             # <<<<<<<<<<<<<<
  *         self._c_region_bounds = <c_region.region_bounds*>malloc(
  *                 sizeof(c_region.region_bounds))
@@ -1900,10 +1900,10 @@ static int __pyx_pf_7toolkit_5utils_6region_12RegionBounds___cinit__(struct __py
 
 /* "toolkit/utils/region.pyx":30
  *             raise MemoryError()
- * 
+ *
  *     def __init__(self, top, bottom, left, right):             # <<<<<<<<<<<<<<
  *         self.set(top, bottom, left, right)
- * 
+ *
  */
 
 /* Python wrapper */
@@ -2006,10 +2006,10 @@ static int __pyx_pf_7toolkit_5utils_6region_12RegionBounds_2__init__(struct __py
   __Pyx_RefNannySetupContext("__init__", 0);
 
   /* "toolkit/utils/region.pyx":31
- * 
+ *
  *     def __init__(self, top, bottom, left, right):
  *         self.set(top, bottom, left, right)             # <<<<<<<<<<<<<<
- * 
+ *
  *     def __dealloc__(self):
  */
   __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_set); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 31, __pyx_L1_error)
@@ -2069,10 +2069,10 @@ static int __pyx_pf_7toolkit_5utils_6region_12RegionBounds_2__init__(struct __py
 
   /* "toolkit/utils/region.pyx":30
  *             raise MemoryError()
- * 
+ *
  *     def __init__(self, top, bottom, left, right):             # <<<<<<<<<<<<<<
  *         self.set(top, bottom, left, right)
- * 
+ *
  */
 
   /* function exit code */
@@ -2092,7 +2092,7 @@ static int __pyx_pf_7toolkit_5utils_6region_12RegionBounds_2__init__(struct __py
 
 /* "toolkit/utils/region.pyx":33
  *         self.set(top, bottom, left, right)
- * 
+ *
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
  *         if self._c_region_bounds is not NULL:
  *             free(self._c_region_bounds)
@@ -2115,7 +2115,7 @@ static void __pyx_pf_7toolkit_5utils_6region_12RegionBounds_4__dealloc__(struct 
   __Pyx_RefNannySetupContext("__dealloc__", 0);
 
   /* "toolkit/utils/region.pyx":34
- * 
+ *
  *     def __dealloc__(self):
  *         if self._c_region_bounds is not NULL:             # <<<<<<<<<<<<<<
  *             free(self._c_region_bounds)
@@ -2129,7 +2129,7 @@ static void __pyx_pf_7toolkit_5utils_6region_12RegionBounds_4__dealloc__(struct 
  *         if self._c_region_bounds is not NULL:
  *             free(self._c_region_bounds)             # <<<<<<<<<<<<<<
  *             self._c_region_bounds = NULL
- * 
+ *
  */
     free(__pyx_v_self->_c_region_bounds);
 
@@ -2137,13 +2137,13 @@ static void __pyx_pf_7toolkit_5utils_6region_12RegionBounds_4__dealloc__(struct 
  *         if self._c_region_bounds is not NULL:
  *             free(self._c_region_bounds)
  *             self._c_region_bounds = NULL             # <<<<<<<<<<<<<<
- * 
+ *
  *     def __str__(self):
  */
     __pyx_v_self->_c_region_bounds = NULL;
 
     /* "toolkit/utils/region.pyx":34
- * 
+ *
  *     def __dealloc__(self):
  *         if self._c_region_bounds is not NULL:             # <<<<<<<<<<<<<<
  *             free(self._c_region_bounds)
@@ -2153,7 +2153,7 @@ static void __pyx_pf_7toolkit_5utils_6region_12RegionBounds_4__dealloc__(struct 
 
   /* "toolkit/utils/region.pyx":33
  *         self.set(top, bottom, left, right)
- * 
+ *
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
  *         if self._c_region_bounds is not NULL:
  *             free(self._c_region_bounds)
@@ -2165,7 +2165,7 @@ static void __pyx_pf_7toolkit_5utils_6region_12RegionBounds_4__dealloc__(struct 
 
 /* "toolkit/utils/region.pyx":38
  *             self._c_region_bounds = NULL
- * 
+ *
  *     def __str__(self):             # <<<<<<<<<<<<<<
  *         return "top: {:.3f} bottom: {:.3f} left: {:.3f} reight: {:.3f}".format(
  *                 self._c_region_bounds.top,
@@ -2202,7 +2202,7 @@ static PyObject *__pyx_pf_7toolkit_5utils_6region_12RegionBounds_6__str__(struct
   __Pyx_RefNannySetupContext("__str__", 0);
 
   /* "toolkit/utils/region.pyx":39
- * 
+ *
  *     def __str__(self):
  *         return "top: {:.3f} bottom: {:.3f} left: {:.3f} reight: {:.3f}".format(             # <<<<<<<<<<<<<<
  *                 self._c_region_bounds.top,
@@ -2237,7 +2237,7 @@ static PyObject *__pyx_pf_7toolkit_5utils_6region_12RegionBounds_6__str__(struct
  *                 self._c_region_bounds.bottom,
  *                 self._c_region_bounds.left,             # <<<<<<<<<<<<<<
  *                 self._c_region_bounds.right)
- * 
+ *
  */
   __pyx_t_5 = PyFloat_FromDouble(__pyx_v_self->_c_region_bounds->left); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 42, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
@@ -2246,7 +2246,7 @@ static PyObject *__pyx_pf_7toolkit_5utils_6region_12RegionBounds_6__str__(struct
  *                 self._c_region_bounds.bottom,
  *                 self._c_region_bounds.left,
  *                 self._c_region_bounds.right)             # <<<<<<<<<<<<<<
- * 
+ *
  *     def get(self):
  */
   __pyx_t_6 = PyFloat_FromDouble(__pyx_v_self->_c_region_bounds->right); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 43, __pyx_L1_error)
@@ -2316,7 +2316,7 @@ static PyObject *__pyx_pf_7toolkit_5utils_6region_12RegionBounds_6__str__(struct
 
   /* "toolkit/utils/region.pyx":38
  *             self._c_region_bounds = NULL
- * 
+ *
  *     def __str__(self):             # <<<<<<<<<<<<<<
  *         return "top: {:.3f} bottom: {:.3f} left: {:.3f} reight: {:.3f}".format(
  *                 self._c_region_bounds.top,
@@ -2342,7 +2342,7 @@ static PyObject *__pyx_pf_7toolkit_5utils_6region_12RegionBounds_6__str__(struct
 
 /* "toolkit/utils/region.pyx":45
  *                 self._c_region_bounds.right)
- * 
+ *
  *     def get(self):             # <<<<<<<<<<<<<<
  *         return (self._c_region_bounds.top,
  *                 self._c_region_bounds.bottom,
@@ -2375,7 +2375,7 @@ static PyObject *__pyx_pf_7toolkit_5utils_6region_12RegionBounds_8get(struct __p
   __Pyx_RefNannySetupContext("get", 0);
 
   /* "toolkit/utils/region.pyx":46
- * 
+ *
  *     def get(self):
  *         return (self._c_region_bounds.top,             # <<<<<<<<<<<<<<
  *                 self._c_region_bounds.bottom,
@@ -2400,7 +2400,7 @@ static PyObject *__pyx_pf_7toolkit_5utils_6region_12RegionBounds_8get(struct __p
  *                 self._c_region_bounds.bottom,
  *                 self._c_region_bounds.left,             # <<<<<<<<<<<<<<
  *                 self._c_region_bounds.right)
- * 
+ *
  */
   __pyx_t_3 = PyFloat_FromDouble(__pyx_v_self->_c_region_bounds->left); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 48, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
@@ -2409,14 +2409,14 @@ static PyObject *__pyx_pf_7toolkit_5utils_6region_12RegionBounds_8get(struct __p
  *                 self._c_region_bounds.bottom,
  *                 self._c_region_bounds.left,
  *                 self._c_region_bounds.right)             # <<<<<<<<<<<<<<
- * 
+ *
  *     def set(self, top, bottom, left, right):
  */
   __pyx_t_4 = PyFloat_FromDouble(__pyx_v_self->_c_region_bounds->right); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 49, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
 
   /* "toolkit/utils/region.pyx":46
- * 
+ *
  *     def get(self):
  *         return (self._c_region_bounds.top,             # <<<<<<<<<<<<<<
  *                 self._c_region_bounds.bottom,
@@ -2442,7 +2442,7 @@ static PyObject *__pyx_pf_7toolkit_5utils_6region_12RegionBounds_8get(struct __p
 
   /* "toolkit/utils/region.pyx":45
  *                 self._c_region_bounds.right)
- * 
+ *
  *     def get(self):             # <<<<<<<<<<<<<<
  *         return (self._c_region_bounds.top,
  *                 self._c_region_bounds.bottom,
@@ -2465,7 +2465,7 @@ static PyObject *__pyx_pf_7toolkit_5utils_6region_12RegionBounds_8get(struct __p
 
 /* "toolkit/utils/region.pyx":51
  *                 self._c_region_bounds.right)
- * 
+ *
  *     def set(self, top, bottom, left, right):             # <<<<<<<<<<<<<<
  *         self._c_region_bounds.top = top
  *         self._c_region_bounds.bottom = bottom
@@ -2567,7 +2567,7 @@ static PyObject *__pyx_pf_7toolkit_5utils_6region_12RegionBounds_10set(struct __
   __Pyx_RefNannySetupContext("set", 0);
 
   /* "toolkit/utils/region.pyx":52
- * 
+ *
  *     def set(self, top, bottom, left, right):
  *         self._c_region_bounds.top = top             # <<<<<<<<<<<<<<
  *         self._c_region_bounds.bottom = bottom
@@ -2591,7 +2591,7 @@ static PyObject *__pyx_pf_7toolkit_5utils_6region_12RegionBounds_10set(struct __
  *         self._c_region_bounds.bottom = bottom
  *         self._c_region_bounds.left = left             # <<<<<<<<<<<<<<
  *         self._c_region_bounds.right = right
- * 
+ *
  */
   __pyx_t_1 = __pyx_PyFloat_AsFloat(__pyx_v_left); if (unlikely((__pyx_t_1 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 54, __pyx_L1_error)
   __pyx_v_self->_c_region_bounds->left = __pyx_t_1;
@@ -2600,7 +2600,7 @@ static PyObject *__pyx_pf_7toolkit_5utils_6region_12RegionBounds_10set(struct __
  *         self._c_region_bounds.bottom = bottom
  *         self._c_region_bounds.left = left
  *         self._c_region_bounds.right = right             # <<<<<<<<<<<<<<
- * 
+ *
  * cdef class Rectangle:
  */
   __pyx_t_1 = __pyx_PyFloat_AsFloat(__pyx_v_right); if (unlikely((__pyx_t_1 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 55, __pyx_L1_error)
@@ -2608,7 +2608,7 @@ static PyObject *__pyx_pf_7toolkit_5utils_6region_12RegionBounds_10set(struct __
 
   /* "toolkit/utils/region.pyx":51
  *                 self._c_region_bounds.right)
- * 
+ *
  *     def set(self, top, bottom, left, right):             # <<<<<<<<<<<<<<
  *         self._c_region_bounds.top = top
  *         self._c_region_bounds.bottom = bottom
@@ -2741,7 +2741,7 @@ static PyObject *__pyx_pf_7toolkit_5utils_6region_12RegionBounds_14__setstate_cy
 
 /* "toolkit/utils/region.pyx":60
  *     cdef c_region.region_rectangle* _c_region_rectangle
- * 
+ *
  *     def __cinit__(self):             # <<<<<<<<<<<<<<
  *         self._c_region_rectangle = <c_region.region_rectangle*>malloc(
  *                 sizeof(c_region.region_rectangle))
@@ -2773,7 +2773,7 @@ static int __pyx_pf_7toolkit_5utils_6region_9Rectangle___cinit__(struct __pyx_ob
   __Pyx_RefNannySetupContext("__cinit__", 0);
 
   /* "toolkit/utils/region.pyx":61
- * 
+ *
  *     def __cinit__(self):
  *         self._c_region_rectangle = <c_region.region_rectangle*>malloc(             # <<<<<<<<<<<<<<
  *                 sizeof(c_region.region_rectangle))
@@ -2796,7 +2796,7 @@ static int __pyx_pf_7toolkit_5utils_6region_9Rectangle___cinit__(struct __pyx_ob
  *         if not self._c_region_rectangle:
  *             self._c_region_rectangle = NULL             # <<<<<<<<<<<<<<
  *             raise MemoryError()
- * 
+ *
  */
     __pyx_v_self->_c_region_rectangle = NULL;
 
@@ -2804,7 +2804,7 @@ static int __pyx_pf_7toolkit_5utils_6region_9Rectangle___cinit__(struct __pyx_ob
  *         if not self._c_region_rectangle:
  *             self._c_region_rectangle = NULL
  *             raise MemoryError()             # <<<<<<<<<<<<<<
- * 
+ *
  *     def __init__(self, x, y, width, height):
  */
     PyErr_NoMemory(); __PYX_ERR(0, 65, __pyx_L1_error)
@@ -2820,7 +2820,7 @@ static int __pyx_pf_7toolkit_5utils_6region_9Rectangle___cinit__(struct __pyx_ob
 
   /* "toolkit/utils/region.pyx":60
  *     cdef c_region.region_rectangle* _c_region_rectangle
- * 
+ *
  *     def __cinit__(self):             # <<<<<<<<<<<<<<
  *         self._c_region_rectangle = <c_region.region_rectangle*>malloc(
  *                 sizeof(c_region.region_rectangle))
@@ -2839,10 +2839,10 @@ static int __pyx_pf_7toolkit_5utils_6region_9Rectangle___cinit__(struct __pyx_ob
 
 /* "toolkit/utils/region.pyx":67
  *             raise MemoryError()
- * 
+ *
  *     def __init__(self, x, y, width, height):             # <<<<<<<<<<<<<<
  *         self.set(x, y, width, height)
- * 
+ *
  */
 
 /* Python wrapper */
@@ -2945,10 +2945,10 @@ static int __pyx_pf_7toolkit_5utils_6region_9Rectangle_2__init__(struct __pyx_ob
   __Pyx_RefNannySetupContext("__init__", 0);
 
   /* "toolkit/utils/region.pyx":68
- * 
+ *
  *     def __init__(self, x, y, width, height):
  *         self.set(x, y, width, height)             # <<<<<<<<<<<<<<
- * 
+ *
  *     def __dealloc__(self):
  */
   __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_set); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 68, __pyx_L1_error)
@@ -3008,10 +3008,10 @@ static int __pyx_pf_7toolkit_5utils_6region_9Rectangle_2__init__(struct __pyx_ob
 
   /* "toolkit/utils/region.pyx":67
  *             raise MemoryError()
- * 
+ *
  *     def __init__(self, x, y, width, height):             # <<<<<<<<<<<<<<
  *         self.set(x, y, width, height)
- * 
+ *
  */
 
   /* function exit code */
@@ -3031,7 +3031,7 @@ static int __pyx_pf_7toolkit_5utils_6region_9Rectangle_2__init__(struct __pyx_ob
 
 /* "toolkit/utils/region.pyx":70
  *         self.set(x, y, width, height)
- * 
+ *
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
  *         if self._c_region_rectangle is not NULL:
  *             free(self._c_region_rectangle)
@@ -3054,7 +3054,7 @@ static void __pyx_pf_7toolkit_5utils_6region_9Rectangle_4__dealloc__(struct __py
   __Pyx_RefNannySetupContext("__dealloc__", 0);
 
   /* "toolkit/utils/region.pyx":71
- * 
+ *
  *     def __dealloc__(self):
  *         if self._c_region_rectangle is not NULL:             # <<<<<<<<<<<<<<
  *             free(self._c_region_rectangle)
@@ -3068,7 +3068,7 @@ static void __pyx_pf_7toolkit_5utils_6region_9Rectangle_4__dealloc__(struct __py
  *         if self._c_region_rectangle is not NULL:
  *             free(self._c_region_rectangle)             # <<<<<<<<<<<<<<
  *             self._c_region_rectangle = NULL
- * 
+ *
  */
     free(__pyx_v_self->_c_region_rectangle);
 
@@ -3076,13 +3076,13 @@ static void __pyx_pf_7toolkit_5utils_6region_9Rectangle_4__dealloc__(struct __py
  *         if self._c_region_rectangle is not NULL:
  *             free(self._c_region_rectangle)
  *             self._c_region_rectangle = NULL             # <<<<<<<<<<<<<<
- * 
+ *
  *     def __str__(self):
  */
     __pyx_v_self->_c_region_rectangle = NULL;
 
     /* "toolkit/utils/region.pyx":71
- * 
+ *
  *     def __dealloc__(self):
  *         if self._c_region_rectangle is not NULL:             # <<<<<<<<<<<<<<
  *             free(self._c_region_rectangle)
@@ -3092,7 +3092,7 @@ static void __pyx_pf_7toolkit_5utils_6region_9Rectangle_4__dealloc__(struct __py
 
   /* "toolkit/utils/region.pyx":70
  *         self.set(x, y, width, height)
- * 
+ *
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
  *         if self._c_region_rectangle is not NULL:
  *             free(self._c_region_rectangle)
@@ -3104,7 +3104,7 @@ static void __pyx_pf_7toolkit_5utils_6region_9Rectangle_4__dealloc__(struct __py
 
 /* "toolkit/utils/region.pyx":75
  *             self._c_region_rectangle = NULL
- * 
+ *
  *     def __str__(self):             # <<<<<<<<<<<<<<
  *         return "x: {:.3f} y: {:.3f} width: {:.3f} height: {:.3f}".format(
  *                 self._c_region_rectangle.x,
@@ -3141,7 +3141,7 @@ static PyObject *__pyx_pf_7toolkit_5utils_6region_9Rectangle_6__str__(struct __p
   __Pyx_RefNannySetupContext("__str__", 0);
 
   /* "toolkit/utils/region.pyx":76
- * 
+ *
  *     def __str__(self):
  *         return "x: {:.3f} y: {:.3f} width: {:.3f} height: {:.3f}".format(             # <<<<<<<<<<<<<<
  *                 self._c_region_rectangle.x,
@@ -3176,7 +3176,7 @@ static PyObject *__pyx_pf_7toolkit_5utils_6region_9Rectangle_6__str__(struct __p
  *                 self._c_region_rectangle.y,
  *                 self._c_region_rectangle.width,             # <<<<<<<<<<<<<<
  *                 self._c_region_rectangle.height)
- * 
+ *
  */
   __pyx_t_5 = PyFloat_FromDouble(__pyx_v_self->_c_region_rectangle->width); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 79, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
@@ -3185,7 +3185,7 @@ static PyObject *__pyx_pf_7toolkit_5utils_6region_9Rectangle_6__str__(struct __p
  *                 self._c_region_rectangle.y,
  *                 self._c_region_rectangle.width,
  *                 self._c_region_rectangle.height)             # <<<<<<<<<<<<<<
- * 
+ *
  *     def set(self, x, y, width, height):
  */
   __pyx_t_6 = PyFloat_FromDouble(__pyx_v_self->_c_region_rectangle->height); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 80, __pyx_L1_error)
@@ -3255,7 +3255,7 @@ static PyObject *__pyx_pf_7toolkit_5utils_6region_9Rectangle_6__str__(struct __p
 
   /* "toolkit/utils/region.pyx":75
  *             self._c_region_rectangle = NULL
- * 
+ *
  *     def __str__(self):             # <<<<<<<<<<<<<<
  *         return "x: {:.3f} y: {:.3f} width: {:.3f} height: {:.3f}".format(
  *                 self._c_region_rectangle.x,
@@ -3281,7 +3281,7 @@ static PyObject *__pyx_pf_7toolkit_5utils_6region_9Rectangle_6__str__(struct __p
 
 /* "toolkit/utils/region.pyx":82
  *                 self._c_region_rectangle.height)
- * 
+ *
  *     def set(self, x, y, width, height):             # <<<<<<<<<<<<<<
  *         self._c_region_rectangle.x = x
  *         self._c_region_rectangle.y = y
@@ -3383,7 +3383,7 @@ static PyObject *__pyx_pf_7toolkit_5utils_6region_9Rectangle_8set(struct __pyx_o
   __Pyx_RefNannySetupContext("set", 0);
 
   /* "toolkit/utils/region.pyx":83
- * 
+ *
  *     def set(self, x, y, width, height):
  *         self._c_region_rectangle.x = x             # <<<<<<<<<<<<<<
  *         self._c_region_rectangle.y = y
@@ -3407,7 +3407,7 @@ static PyObject *__pyx_pf_7toolkit_5utils_6region_9Rectangle_8set(struct __pyx_o
  *         self._c_region_rectangle.y = y
  *         self._c_region_rectangle.width = width             # <<<<<<<<<<<<<<
  *         self._c_region_rectangle.height = height
- * 
+ *
  */
   __pyx_t_1 = __pyx_PyFloat_AsFloat(__pyx_v_width); if (unlikely((__pyx_t_1 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 85, __pyx_L1_error)
   __pyx_v_self->_c_region_rectangle->width = __pyx_t_1;
@@ -3416,7 +3416,7 @@ static PyObject *__pyx_pf_7toolkit_5utils_6region_9Rectangle_8set(struct __pyx_o
  *         self._c_region_rectangle.y = y
  *         self._c_region_rectangle.width = width
  *         self._c_region_rectangle.height = height             # <<<<<<<<<<<<<<
- * 
+ *
  *     def get(self):
  */
   __pyx_t_1 = __pyx_PyFloat_AsFloat(__pyx_v_height); if (unlikely((__pyx_t_1 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 86, __pyx_L1_error)
@@ -3424,7 +3424,7 @@ static PyObject *__pyx_pf_7toolkit_5utils_6region_9Rectangle_8set(struct __pyx_o
 
   /* "toolkit/utils/region.pyx":82
  *                 self._c_region_rectangle.height)
- * 
+ *
  *     def set(self, x, y, width, height):             # <<<<<<<<<<<<<<
  *         self._c_region_rectangle.x = x
  *         self._c_region_rectangle.y = y
@@ -3444,7 +3444,7 @@ static PyObject *__pyx_pf_7toolkit_5utils_6region_9Rectangle_8set(struct __pyx_o
 
 /* "toolkit/utils/region.pyx":88
  *         self._c_region_rectangle.height = height
- * 
+ *
  *     def get(self):             # <<<<<<<<<<<<<<
  *         """
  *         return:
@@ -3503,7 +3503,7 @@ static PyObject *__pyx_pf_7toolkit_5utils_6region_9Rectangle_10get(struct __pyx_
  *                 self._c_region_rectangle.y,
  *                 self._c_region_rectangle.width,             # <<<<<<<<<<<<<<
  *                 self._c_region_rectangle.height)
- * 
+ *
  */
   __pyx_t_3 = PyFloat_FromDouble(__pyx_v_self->_c_region_rectangle->width); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 95, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
@@ -3512,7 +3512,7 @@ static PyObject *__pyx_pf_7toolkit_5utils_6region_9Rectangle_10get(struct __pyx_
  *                 self._c_region_rectangle.y,
  *                 self._c_region_rectangle.width,
  *                 self._c_region_rectangle.height)             # <<<<<<<<<<<<<<
- * 
+ *
  * cdef class Polygon:
  */
   __pyx_t_4 = PyFloat_FromDouble(__pyx_v_self->_c_region_rectangle->height); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 96, __pyx_L1_error)
@@ -3545,7 +3545,7 @@ static PyObject *__pyx_pf_7toolkit_5utils_6region_9Rectangle_10get(struct __pyx_
 
   /* "toolkit/utils/region.pyx":88
  *         self._c_region_rectangle.height = height
- * 
+ *
  *     def get(self):             # <<<<<<<<<<<<<<
  *         """
  *         return:
@@ -3681,7 +3681,7 @@ static PyObject *__pyx_pf_7toolkit_5utils_6region_9Rectangle_14__setstate_cython
 
 /* "toolkit/utils/region.pyx":101
  *     cdef c_region.region_polygon* _c_region_polygon
- * 
+ *
  *     def __cinit__(self, points):             # <<<<<<<<<<<<<<
  *         """
  *         args:
@@ -3894,7 +3894,7 @@ static int __pyx_pf_7toolkit_5utils_6region_7Polygon___cinit__(struct __pyx_obj_
  *         self._c_region_polygon.y = <float*>malloc(sizeof(float) * num)
  *         if not self._c_region_polygon.y:             # <<<<<<<<<<<<<<
  *             raise MemoryError()
- * 
+ *
  */
   __pyx_t_3 = ((!(__pyx_v_self->_c_region_polygon->y != 0)) != 0);
   if (unlikely(__pyx_t_3)) {
@@ -3903,7 +3903,7 @@ static int __pyx_pf_7toolkit_5utils_6region_7Polygon___cinit__(struct __pyx_obj_
  *         self._c_region_polygon.y = <float*>malloc(sizeof(float) * num)
  *         if not self._c_region_polygon.y:
  *             raise MemoryError()             # <<<<<<<<<<<<<<
- * 
+ *
  *         for i in range(num):
  */
     PyErr_NoMemory(); __PYX_ERR(0, 119, __pyx_L1_error)
@@ -3913,13 +3913,13 @@ static int __pyx_pf_7toolkit_5utils_6region_7Polygon___cinit__(struct __pyx_obj_
  *         self._c_region_polygon.y = <float*>malloc(sizeof(float) * num)
  *         if not self._c_region_polygon.y:             # <<<<<<<<<<<<<<
  *             raise MemoryError()
- * 
+ *
  */
   }
 
   /* "toolkit/utils/region.pyx":121
  *             raise MemoryError()
- * 
+ *
  *         for i in range(num):             # <<<<<<<<<<<<<<
  *             self._c_region_polygon.x[i] = points[i*2]
  *             self._c_region_polygon.y[i] = points[i*2+1]
@@ -3970,11 +3970,11 @@ static int __pyx_pf_7toolkit_5utils_6region_7Polygon___cinit__(struct __pyx_obj_
     __pyx_t_2 = 0;
 
     /* "toolkit/utils/region.pyx":122
- * 
+ *
  *         for i in range(num):
  *             self._c_region_polygon.x[i] = points[i*2]             # <<<<<<<<<<<<<<
  *             self._c_region_polygon.y[i] = points[i*2+1]
- * 
+ *
  */
     __pyx_t_2 = PyNumber_Multiply(__pyx_v_i, __pyx_int_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 122, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
@@ -3990,7 +3990,7 @@ static int __pyx_pf_7toolkit_5utils_6region_7Polygon___cinit__(struct __pyx_obj_
  *         for i in range(num):
  *             self._c_region_polygon.x[i] = points[i*2]
  *             self._c_region_polygon.y[i] = points[i*2+1]             # <<<<<<<<<<<<<<
- * 
+ *
  *     def __dealloc__(self):
  */
     __pyx_t_8 = PyNumber_Multiply(__pyx_v_i, __pyx_int_2); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 123, __pyx_L1_error)
@@ -4008,7 +4008,7 @@ static int __pyx_pf_7toolkit_5utils_6region_7Polygon___cinit__(struct __pyx_obj_
 
     /* "toolkit/utils/region.pyx":121
  *             raise MemoryError()
- * 
+ *
  *         for i in range(num):             # <<<<<<<<<<<<<<
  *             self._c_region_polygon.x[i] = points[i*2]
  *             self._c_region_polygon.y[i] = points[i*2+1]
@@ -4018,7 +4018,7 @@ static int __pyx_pf_7toolkit_5utils_6region_7Polygon___cinit__(struct __pyx_obj_
 
   /* "toolkit/utils/region.pyx":101
  *     cdef c_region.region_polygon* _c_region_polygon
- * 
+ *
  *     def __cinit__(self, points):             # <<<<<<<<<<<<<<
  *         """
  *         args:
@@ -4042,7 +4042,7 @@ static int __pyx_pf_7toolkit_5utils_6region_7Polygon___cinit__(struct __pyx_obj_
 
 /* "toolkit/utils/region.pyx":125
  *             self._c_region_polygon.y[i] = points[i*2+1]
- * 
+ *
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
  *         if self._c_region_polygon is not NULL:
  *             if self._c_region_polygon.x is not NULL:
@@ -4065,7 +4065,7 @@ static void __pyx_pf_7toolkit_5utils_6region_7Polygon_2__dealloc__(struct __pyx_
   __Pyx_RefNannySetupContext("__dealloc__", 0);
 
   /* "toolkit/utils/region.pyx":126
- * 
+ *
  *     def __dealloc__(self):
  *         if self._c_region_polygon is not NULL:             # <<<<<<<<<<<<<<
  *             if self._c_region_polygon.x is not NULL:
@@ -4153,7 +4153,7 @@ static void __pyx_pf_7toolkit_5utils_6region_7Polygon_2__dealloc__(struct __pyx_
  *                 self._c_region_polygon.y = NULL
  *             free(self._c_region_polygon)             # <<<<<<<<<<<<<<
  *             self._c_region_polygon = NULL
- * 
+ *
  */
     free(__pyx_v_self->_c_region_polygon);
 
@@ -4161,13 +4161,13 @@ static void __pyx_pf_7toolkit_5utils_6region_7Polygon_2__dealloc__(struct __pyx_
  *                 self._c_region_polygon.y = NULL
  *             free(self._c_region_polygon)
  *             self._c_region_polygon = NULL             # <<<<<<<<<<<<<<
- * 
+ *
  *     def __str__(self):
  */
     __pyx_v_self->_c_region_polygon = NULL;
 
     /* "toolkit/utils/region.pyx":126
- * 
+ *
  *     def __dealloc__(self):
  *         if self._c_region_polygon is not NULL:             # <<<<<<<<<<<<<<
  *             if self._c_region_polygon.x is not NULL:
@@ -4177,7 +4177,7 @@ static void __pyx_pf_7toolkit_5utils_6region_7Polygon_2__dealloc__(struct __pyx_
 
   /* "toolkit/utils/region.pyx":125
  *             self._c_region_polygon.y[i] = points[i*2+1]
- * 
+ *
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
  *         if self._c_region_polygon is not NULL:
  *             if self._c_region_polygon.x is not NULL:
@@ -4189,7 +4189,7 @@ static void __pyx_pf_7toolkit_5utils_6region_7Polygon_2__dealloc__(struct __pyx_
 
 /* "toolkit/utils/region.pyx":136
  *             self._c_region_polygon = NULL
- * 
+ *
  *     def __str__(self):             # <<<<<<<<<<<<<<
  *         ret = ""
  *         for i in range(self._c_region_polygon.count-1):
@@ -4229,7 +4229,7 @@ static PyObject *__pyx_pf_7toolkit_5utils_6region_7Polygon_4__str__(struct __pyx
   __Pyx_RefNannySetupContext("__str__", 0);
 
   /* "toolkit/utils/region.pyx":137
- * 
+ *
  *     def __str__(self):
  *         ret = ""             # <<<<<<<<<<<<<<
  *         for i in range(self._c_region_polygon.count-1):
@@ -4352,7 +4352,7 @@ static PyObject *__pyx_pf_7toolkit_5utils_6region_7Polygon_4__str__(struct __pyx
  *         ret += "({:.3f} {:.3f})".format(self._c_region_polygon.x[i],
  *                 self._c_region_polygon.y[i])             # <<<<<<<<<<<<<<
  *         return ret
- * 
+ *
  */
   __pyx_t_7 = PyFloat_FromDouble((__pyx_v_self->_c_region_polygon->y[__pyx_v_i])); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 142, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
@@ -4423,7 +4423,7 @@ static PyObject *__pyx_pf_7toolkit_5utils_6region_7Polygon_4__str__(struct __pyx
  *         ret += "({:.3f} {:.3f})".format(self._c_region_polygon.x[i],
  *                 self._c_region_polygon.y[i])
  *         return ret             # <<<<<<<<<<<<<<
- * 
+ *
  * def vot_overlap(polygon1, polygon2, bounds=None):
  */
   __Pyx_XDECREF(__pyx_r);
@@ -4433,7 +4433,7 @@ static PyObject *__pyx_pf_7toolkit_5utils_6region_7Polygon_4__str__(struct __pyx
 
   /* "toolkit/utils/region.pyx":136
  *             self._c_region_polygon = NULL
- * 
+ *
  *     def __str__(self):             # <<<<<<<<<<<<<<
  *         ret = ""
  *         for i in range(self._c_region_polygon.count-1):
@@ -4571,7 +4571,7 @@ static PyObject *__pyx_pf_7toolkit_5utils_6region_7Polygon_8__setstate_cython__(
 
 /* "toolkit/utils/region.pyx":145
  *         return ret
- * 
+ *
  * def vot_overlap(polygon1, polygon2, bounds=None):             # <<<<<<<<<<<<<<
  *     """ computing overlap between two polygon
  *     Args:
@@ -4695,7 +4695,7 @@ static PyObject *__pyx_pf_7toolkit_5utils_6region_vot_overlap(CYTHON_UNUSED PyOb
  *     """
  *     if len(polygon1) == 1 or len(polygon2) == 1:             # <<<<<<<<<<<<<<
  *         return float("nan")
- * 
+ *
  */
   __pyx_t_2 = PyObject_Length(__pyx_v_polygon1); if (unlikely(__pyx_t_2 == ((Py_ssize_t)-1))) __PYX_ERR(0, 154, __pyx_L1_error)
   __pyx_t_3 = ((__pyx_t_2 == 1) != 0);
@@ -4714,7 +4714,7 @@ static PyObject *__pyx_pf_7toolkit_5utils_6region_vot_overlap(CYTHON_UNUSED PyOb
  *     """
  *     if len(polygon1) == 1 or len(polygon2) == 1:
  *         return float("nan")             # <<<<<<<<<<<<<<
- * 
+ *
  *     if len(polygon1) == 4:
  */
     __Pyx_XDECREF(__pyx_r);
@@ -4729,13 +4729,13 @@ static PyObject *__pyx_pf_7toolkit_5utils_6region_vot_overlap(CYTHON_UNUSED PyOb
  *     """
  *     if len(polygon1) == 1 or len(polygon2) == 1:             # <<<<<<<<<<<<<<
  *         return float("nan")
- * 
+ *
  */
   }
 
   /* "toolkit/utils/region.pyx":157
  *         return float("nan")
- * 
+ *
  *     if len(polygon1) == 4:             # <<<<<<<<<<<<<<
  *         polygon1_ = Polygon([polygon1[0], polygon1[1],
  *                              polygon1[0]+polygon1[2], polygon1[1],
@@ -4745,7 +4745,7 @@ static PyObject *__pyx_pf_7toolkit_5utils_6region_vot_overlap(CYTHON_UNUSED PyOb
   if (__pyx_t_1) {
 
     /* "toolkit/utils/region.pyx":158
- * 
+ *
  *     if len(polygon1) == 4:
  *         polygon1_ = Polygon([polygon1[0], polygon1[1],             # <<<<<<<<<<<<<<
  *                              polygon1[0]+polygon1[2], polygon1[1],
@@ -4817,7 +4817,7 @@ static PyObject *__pyx_pf_7toolkit_5utils_6region_vot_overlap(CYTHON_UNUSED PyOb
     __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
 
     /* "toolkit/utils/region.pyx":158
- * 
+ *
  *     if len(polygon1) == 4:
  *         polygon1_ = Polygon([polygon1[0], polygon1[1],             # <<<<<<<<<<<<<<
  *                              polygon1[0]+polygon1[2], polygon1[1],
@@ -4857,7 +4857,7 @@ static PyObject *__pyx_pf_7toolkit_5utils_6region_vot_overlap(CYTHON_UNUSED PyOb
 
     /* "toolkit/utils/region.pyx":157
  *         return float("nan")
- * 
+ *
  *     if len(polygon1) == 4:             # <<<<<<<<<<<<<<
  *         polygon1_ = Polygon([polygon1[0], polygon1[1],
  *                              polygon1[0]+polygon1[2], polygon1[1],
@@ -4869,7 +4869,7 @@ static PyObject *__pyx_pf_7toolkit_5utils_6region_vot_overlap(CYTHON_UNUSED PyOb
  *                              polygon1[0], polygon1[1]+polygon1[3]])
  *     else:
  *         polygon1_ = Polygon(polygon1)             # <<<<<<<<<<<<<<
- * 
+ *
  *     if len(polygon2) == 4:
  */
   /*else*/ {
@@ -4882,7 +4882,7 @@ static PyObject *__pyx_pf_7toolkit_5utils_6region_vot_overlap(CYTHON_UNUSED PyOb
 
   /* "toolkit/utils/region.pyx":165
  *         polygon1_ = Polygon(polygon1)
- * 
+ *
  *     if len(polygon2) == 4:             # <<<<<<<<<<<<<<
  *         polygon2_ = Polygon([polygon2[0], polygon2[1],
  *                              polygon2[0]+polygon2[2], polygon2[1],
@@ -4892,7 +4892,7 @@ static PyObject *__pyx_pf_7toolkit_5utils_6region_vot_overlap(CYTHON_UNUSED PyOb
   if (__pyx_t_1) {
 
     /* "toolkit/utils/region.pyx":166
- * 
+ *
  *     if len(polygon2) == 4:
  *         polygon2_ = Polygon([polygon2[0], polygon2[1],             # <<<<<<<<<<<<<<
  *                              polygon2[0]+polygon2[2], polygon2[1],
@@ -4964,7 +4964,7 @@ static PyObject *__pyx_pf_7toolkit_5utils_6region_vot_overlap(CYTHON_UNUSED PyOb
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
     /* "toolkit/utils/region.pyx":166
- * 
+ *
  *     if len(polygon2) == 4:
  *         polygon2_ = Polygon([polygon2[0], polygon2[1],             # <<<<<<<<<<<<<<
  *                              polygon2[0]+polygon2[2], polygon2[1],
@@ -5004,7 +5004,7 @@ static PyObject *__pyx_pf_7toolkit_5utils_6region_vot_overlap(CYTHON_UNUSED PyOb
 
     /* "toolkit/utils/region.pyx":165
  *         polygon1_ = Polygon(polygon1)
- * 
+ *
  *     if len(polygon2) == 4:             # <<<<<<<<<<<<<<
  *         polygon2_ = Polygon([polygon2[0], polygon2[1],
  *                              polygon2[0]+polygon2[2], polygon2[1],
@@ -5016,7 +5016,7 @@ static PyObject *__pyx_pf_7toolkit_5utils_6region_vot_overlap(CYTHON_UNUSED PyOb
  *                              polygon2[0], polygon2[1]+polygon2[3]])
  *     else:
  *         polygon2_ = Polygon(polygon2)             # <<<<<<<<<<<<<<
- * 
+ *
  *     if bounds is not None and len(bounds) == 4:
  */
   /*else*/ {
@@ -5029,7 +5029,7 @@ static PyObject *__pyx_pf_7toolkit_5utils_6region_vot_overlap(CYTHON_UNUSED PyOb
 
   /* "toolkit/utils/region.pyx":173
  *         polygon2_ = Polygon(polygon2)
- * 
+ *
  *     if bounds is not None and len(bounds) == 4:             # <<<<<<<<<<<<<<
  *         pno_bounds = RegionBounds(bounds[0], bounds[1], bounds[2], bounds[3])
  *     elif bounds is not None and len(bounds) == 2:
@@ -5048,7 +5048,7 @@ static PyObject *__pyx_pf_7toolkit_5utils_6region_vot_overlap(CYTHON_UNUSED PyOb
   if (__pyx_t_1) {
 
     /* "toolkit/utils/region.pyx":174
- * 
+ *
  *     if bounds is not None and len(bounds) == 4:
  *         pno_bounds = RegionBounds(bounds[0], bounds[1], bounds[2], bounds[3])             # <<<<<<<<<<<<<<
  *     elif bounds is not None and len(bounds) == 2:
@@ -5084,7 +5084,7 @@ static PyObject *__pyx_pf_7toolkit_5utils_6region_vot_overlap(CYTHON_UNUSED PyOb
 
     /* "toolkit/utils/region.pyx":173
  *         polygon2_ = Polygon(polygon2)
- * 
+ *
  *     if bounds is not None and len(bounds) == 4:             # <<<<<<<<<<<<<<
  *         pno_bounds = RegionBounds(bounds[0], bounds[1], bounds[2], bounds[3])
  *     elif bounds is not None and len(bounds) == 2:
@@ -5269,7 +5269,7 @@ static PyObject *__pyx_pf_7toolkit_5utils_6region_vot_overlap(CYTHON_UNUSED PyOb
  *                                             &only1,
  *                                             &only2,
  *                                             no_bounds)             # <<<<<<<<<<<<<<
- * 
+ *
  * def vot_overlap_traj(polygons1, polygons2, bounds=None):
  */
   __pyx_t_4 = PyFloat_FromDouble(compute_polygon_overlap(__pyx_v_c_polygon1, __pyx_v_c_polygon2, (&__pyx_v_only1), (&__pyx_v_only2), __pyx_v_no_bounds)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 185, __pyx_L1_error)
@@ -5280,7 +5280,7 @@ static PyObject *__pyx_pf_7toolkit_5utils_6region_vot_overlap(CYTHON_UNUSED PyOb
 
   /* "toolkit/utils/region.pyx":145
  *         return ret
- * 
+ *
  * def vot_overlap(polygon1, polygon2, bounds=None):             # <<<<<<<<<<<<<<
  *     """ computing overlap between two polygon
  *     Args:
@@ -5311,7 +5311,7 @@ static PyObject *__pyx_pf_7toolkit_5utils_6region_vot_overlap(CYTHON_UNUSED PyOb
 
 /* "toolkit/utils/region.pyx":191
  *                                             no_bounds)
- * 
+ *
  * def vot_overlap_traj(polygons1, polygons2, bounds=None):             # <<<<<<<<<<<<<<
  *     """ computing overlap between two trajectory
  *     Args:
@@ -5496,7 +5496,7 @@ static PyObject *__pyx_pf_7toolkit_5utils_6region_2vot_overlap_traj(CYTHON_UNUSE
  *         overlap = vot_overlap(polygons1[i], polygons2[i], bounds=bounds)
  *         overlaps.append(overlap)             # <<<<<<<<<<<<<<
  *     return overlaps
- * 
+ *
  */
     __pyx_t_8 = __Pyx_PyList_Append(__pyx_v_overlaps, __pyx_v_overlap); if (unlikely(__pyx_t_8 == ((int)-1))) __PYX_ERR(0, 204, __pyx_L1_error)
   }
@@ -5505,8 +5505,8 @@ static PyObject *__pyx_pf_7toolkit_5utils_6region_2vot_overlap_traj(CYTHON_UNUSE
  *         overlap = vot_overlap(polygons1[i], polygons2[i], bounds=bounds)
  *         overlaps.append(overlap)
  *     return overlaps             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
  */
   __Pyx_XDECREF(__pyx_r);
   __Pyx_INCREF(__pyx_v_overlaps);
@@ -5515,7 +5515,7 @@ static PyObject *__pyx_pf_7toolkit_5utils_6region_2vot_overlap_traj(CYTHON_UNUSE
 
   /* "toolkit/utils/region.pyx":191
  *                                             no_bounds)
- * 
+ *
  * def vot_overlap_traj(polygons1, polygons2, bounds=None):             # <<<<<<<<<<<<<<
  *     """ computing overlap between two trajectory
  *     Args:
@@ -5538,8 +5538,8 @@ static PyObject *__pyx_pf_7toolkit_5utils_6region_2vot_overlap_traj(CYTHON_UNUSE
 }
 
 /* "toolkit/utils/region.pyx":208
- * 
- * 
+ *
+ *
  * def vot_float2str(template, float value):             # <<<<<<<<<<<<<<
  *     """
  *     Args:
@@ -5806,8 +5806,8 @@ static PyObject *__pyx_pf_7toolkit_5utils_6region_4vot_float2str(CYTHON_UNUSED P
   goto __pyx_L0;
 
   /* "toolkit/utils/region.pyx":208
- * 
- * 
+ *
+ *
  * def vot_float2str(template, float value):             # <<<<<<<<<<<<<<
  *     """
  *     Args:
@@ -6128,7 +6128,7 @@ static PyObject *__pyx_pf_8EnumBase_14__Pyx_EnumMeta_2__iter__(struct __pyx_obj_
  *         return iter(cls.__members__.values())
  *     def __getitem__(cls, name):             # <<<<<<<<<<<<<<
  *         return cls.__members__[name]
- * 
+ *
  */
 
 /* Python wrapper */
@@ -6158,8 +6158,8 @@ static PyObject *__pyx_pf_8EnumBase_14__Pyx_EnumMeta_4__getitem__(struct __pyx_o
  *         return iter(cls.__members__.values())
  *     def __getitem__(cls, name):
  *         return cls.__members__[name]             # <<<<<<<<<<<<<<
- * 
- * 
+ *
+ *
  */
   __Pyx_XDECREF(__pyx_r);
   __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_cls), __pyx_n_s_members); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 22, __pyx_L1_error)
@@ -6176,7 +6176,7 @@ static PyObject *__pyx_pf_8EnumBase_14__Pyx_EnumMeta_4__getitem__(struct __pyx_o
  *         return iter(cls.__members__.values())
  *     def __getitem__(cls, name):             # <<<<<<<<<<<<<<
  *         return cls.__members__[name]
- * 
+ *
  */
 
   /* function exit code */
@@ -6930,7 +6930,7 @@ static PyObject *__pyx_pf_8EnumBase_14__Pyx_EnumBase_2__repr__(CYTHON_UNUSED PyO
  *         return "<%s.%s: %d>" % (self.__class__.__name__, self.name, self)
  *     def __str__(self):             # <<<<<<<<<<<<<<
  *         return "%s.%s" % (self.__class__.__name__, self.name)
- * 
+ *
  */
 
 /* Python wrapper */
@@ -6962,7 +6962,7 @@ static PyObject *__pyx_pf_8EnumBase_14__Pyx_EnumBase_4__str__(CYTHON_UNUSED PyOb
  *         return "<%s.%s: %d>" % (self.__class__.__name__, self.name, self)
  *     def __str__(self):
  *         return "%s.%s" % (self.__class__.__name__, self.name)             # <<<<<<<<<<<<<<
- * 
+ *
  * if PY_VERSION_HEX >= 0x03040000:
  */
   __Pyx_XDECREF(__pyx_r);
@@ -6993,7 +6993,7 @@ static PyObject *__pyx_pf_8EnumBase_14__Pyx_EnumBase_4__str__(CYTHON_UNUSED PyOb
  *         return "<%s.%s: %d>" % (self.__class__.__name__, self.name, self)
  *     def __str__(self):             # <<<<<<<<<<<<<<
  *         return "%s.%s" % (self.__class__.__name__, self.name)
- * 
+ *
  */
 
   /* function exit code */
@@ -8077,7 +8077,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
 
   /* "toolkit/utils/region.pyx":145
  *         return ret
- * 
+ *
  * def vot_overlap(polygon1, polygon2, bounds=None):             # <<<<<<<<<<<<<<
  *     """ computing overlap between two polygon
  *     Args:
@@ -8089,7 +8089,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
 
   /* "toolkit/utils/region.pyx":191
  *                                             no_bounds)
- * 
+ *
  * def vot_overlap_traj(polygons1, polygons2, bounds=None):             # <<<<<<<<<<<<<<
  *     """ computing overlap between two trajectory
  *     Args:
@@ -8100,8 +8100,8 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __pyx_codeobj__11 = (PyObject*)__Pyx_PyCode_New(3, 0, 6, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__10, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_toolkit_utils_region_pyx, __pyx_n_s_vot_overlap_traj, 191, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__11)) __PYX_ERR(0, 191, __pyx_L1_error)
 
   /* "toolkit/utils/region.pyx":208
- * 
- * 
+ *
+ *
  * def vot_float2str(template, float value):             # <<<<<<<<<<<<<<
  *     """
  *     Args:
@@ -8143,7 +8143,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  *         return "<%s.%s: %d>" % (self.__class__.__name__, self.name, self)
  *     def __str__(self):             # <<<<<<<<<<<<<<
  *         return "%s.%s" % (self.__class__.__name__, self.name)
- * 
+ *
  */
   __pyx_tuple__19 = PyTuple_Pack(1, __pyx_n_s_self); if (unlikely(!__pyx_tuple__19)) __PYX_ERR(1, 41, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__19);
@@ -8498,7 +8498,7 @@ if (!__Pyx_RefNanny) {
 
   /* "toolkit/utils/region.pyx":145
  *         return ret
- * 
+ *
  * def vot_overlap(polygon1, polygon2, bounds=None):             # <<<<<<<<<<<<<<
  *     """ computing overlap between two polygon
  *     Args:
@@ -8510,7 +8510,7 @@ if (!__Pyx_RefNanny) {
 
   /* "toolkit/utils/region.pyx":191
  *                                             no_bounds)
- * 
+ *
  * def vot_overlap_traj(polygons1, polygons2, bounds=None):             # <<<<<<<<<<<<<<
  *     """ computing overlap between two trajectory
  *     Args:
@@ -8521,8 +8521,8 @@ if (!__Pyx_RefNanny) {
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "toolkit/utils/region.pyx":208
- * 
- * 
+ *
+ *
  * def vot_float2str(template, float value):             # <<<<<<<<<<<<<<
  *     """
  *     Args:
@@ -8543,7 +8543,7 @@ if (!__Pyx_RefNanny) {
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "EnumBase":9
- * 
+ *
  * cdef object __Pyx_OrderedDict
  * if PY_VERSION_HEX >= 0x02070000:             # <<<<<<<<<<<<<<
  *     from collections import OrderedDict as __Pyx_OrderedDict
@@ -8577,7 +8577,7 @@ if (!__Pyx_RefNanny) {
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
     /* "EnumBase":9
- * 
+ *
  * cdef object __Pyx_OrderedDict
  * if PY_VERSION_HEX >= 0x02070000:             # <<<<<<<<<<<<<<
  *     from collections import OrderedDict as __Pyx_OrderedDict
@@ -8590,7 +8590,7 @@ if (!__Pyx_RefNanny) {
  *     from collections import OrderedDict as __Pyx_OrderedDict
  * else:
  *     __Pyx_OrderedDict = dict             # <<<<<<<<<<<<<<
- * 
+ *
  * @cython.internal
  */
   /*else*/ {
@@ -8602,7 +8602,7 @@ if (!__Pyx_RefNanny) {
   __pyx_L2:;
 
   /* "EnumBase":26
- * 
+ *
  * cdef object __Pyx_EnumBase
  * class __Pyx_EnumBase(int):             # <<<<<<<<<<<<<<
  *     __metaclass__ = __Pyx_EnumMeta
@@ -8657,7 +8657,7 @@ if (!__Pyx_RefNanny) {
  *         return "<%s.%s: %d>" % (self.__class__.__name__, self.name, self)
  *     def __str__(self):             # <<<<<<<<<<<<<<
  *         return "%s.%s" % (self.__class__.__name__, self.name)
- * 
+ *
  */
   __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_8EnumBase_14__Pyx_EnumBase_5__str__, 0, __pyx_n_s_Pyx_EnumBase___str, NULL, __pyx_n_s_EnumBase, __pyx_d, ((PyObject *)__pyx_codeobj__20)); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 41, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
@@ -8665,7 +8665,7 @@ if (!__Pyx_RefNanny) {
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
   /* "EnumBase":26
- * 
+ *
  * cdef object __Pyx_EnumBase
  * class __Pyx_EnumBase(int):             # <<<<<<<<<<<<<<
  *     __metaclass__ = __Pyx_EnumMeta
@@ -8683,19 +8683,19 @@ if (!__Pyx_RefNanny) {
 
   /* "EnumBase":44
  *         return "%s.%s" % (self.__class__.__name__, self.name)
- * 
+ *
  * if PY_VERSION_HEX >= 0x03040000:             # <<<<<<<<<<<<<<
  *     from enum import IntEnum as __Pyx_EnumBase
- * 
+ *
  */
   __pyx_t_2 = ((PY_VERSION_HEX >= 0x03040000) != 0);
   if (__pyx_t_2) {
 
     /* "EnumBase":45
- * 
+ *
  * if PY_VERSION_HEX >= 0x03040000:
  *     from enum import IntEnum as __Pyx_EnumBase             # <<<<<<<<<<<<<<
- * 
+ *
  */
     __pyx_t_3 = PyList_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 45, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
@@ -8716,10 +8716,10 @@ if (!__Pyx_RefNanny) {
 
     /* "EnumBase":44
  *         return "%s.%s" % (self.__class__.__name__, self.name)
- * 
+ *
  * if PY_VERSION_HEX >= 0x03040000:             # <<<<<<<<<<<<<<
  *     from enum import IntEnum as __Pyx_EnumBase
- * 
+ *
  */
   }
 
@@ -8734,11 +8734,11 @@ if (!__Pyx_RefNanny) {
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "EnumType":50
- * 
- * 
+ *
+ *
  * cdef dict __Pyx_globals = globals()             # <<<<<<<<<<<<<<
  * if PY_VERSION_HEX >= 0x03040000:
- * 
+ *
  */
   __pyx_t_1 = __Pyx_Globals(); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 50, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
@@ -8749,17 +8749,17 @@ if (!__Pyx_RefNanny) {
   __pyx_t_1 = 0;
 
   /* "EnumType":51
- * 
+ *
  * cdef dict __Pyx_globals = globals()
  * if PY_VERSION_HEX >= 0x03040000:             # <<<<<<<<<<<<<<
- * 
+ *
  *     RegionType = __Pyx_EnumBase('RegionType', __Pyx_OrderedDict([
  */
   __pyx_t_2 = ((PY_VERSION_HEX >= 0x03040000) != 0);
   if (__pyx_t_2) {
 
     /* "EnumType":54
- * 
+ *
  *     RegionType = __Pyx_EnumBase('RegionType', __Pyx_OrderedDict([
  *         ('EMTPY', EMTPY),             # <<<<<<<<<<<<<<
  *         ('SPECIAL', SPECIAL),
@@ -8850,7 +8850,7 @@ if (!__Pyx_RefNanny) {
 
     /* "EnumType":53
  * if PY_VERSION_HEX >= 0x03040000:
- * 
+ *
  *     RegionType = __Pyx_EnumBase('RegionType', __Pyx_OrderedDict([             # <<<<<<<<<<<<<<
  *         ('EMTPY', EMTPY),
  *         ('SPECIAL', SPECIAL),
@@ -8985,10 +8985,10 @@ if (!__Pyx_RefNanny) {
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
     /* "EnumType":51
- * 
+ *
  * cdef dict __Pyx_globals = globals()
  * if PY_VERSION_HEX >= 0x03040000:             # <<<<<<<<<<<<<<
- * 
+ *
  *     RegionType = __Pyx_EnumBase('RegionType', __Pyx_OrderedDict([
  */
     goto __pyx_L4;
@@ -9114,7 +9114,7 @@ if (!__Pyx_RefNanny) {
  *     __Pyx_globals['RECTANGEL'] = RegionType(RECTANGEL, 'RECTANGEL')
  *     __Pyx_globals['POLYGON'] = RegionType(POLYGON, 'POLYGON')             # <<<<<<<<<<<<<<
  *     __Pyx_globals['MASK'] = RegionType(MASK, 'MASK')
- * 
+ *
  */
     __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_RegionType); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 71, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
@@ -9143,7 +9143,7 @@ if (!__Pyx_RefNanny) {
  *     __Pyx_globals['RECTANGEL'] = RegionType(RECTANGEL, 'RECTANGEL')
  *     __Pyx_globals['POLYGON'] = RegionType(POLYGON, 'POLYGON')
  *     __Pyx_globals['MASK'] = RegionType(MASK, 'MASK')             # <<<<<<<<<<<<<<
- * 
+ *
  */
     __Pyx_GetModuleGlobalName(__pyx_t_7, __pyx_n_s_RegionType); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 72, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
@@ -10063,8 +10063,8 @@ static PyObject* __Pyx_PyInt_AddObjC(PyObject *op1, PyObject *op2, CYTHON_UNUSED
                 llx = lla + llb;
             return PyLong_FromLongLong(llx);
 #endif
-        
-        
+
+
     }
     #endif
     if (PyFloat_CheckExact(op1)) {

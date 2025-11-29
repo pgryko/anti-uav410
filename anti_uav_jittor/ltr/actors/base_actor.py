@@ -2,8 +2,9 @@ from pytracking import TensorDict
 
 
 class BaseActor:
-    """ Base class for actor. The actor class handles the passing of the data through the network
+    """Base class for actor. The actor class handles the passing of the data through the network
     and calculation the loss"""
+
     def __init__(self, net, objective):
         """
         args:
@@ -14,7 +15,7 @@ class BaseActor:
         self.objective = objective
 
     def __call__(self, data: TensorDict):
-        """ Called in each training iteration. Should pass in input data through the network, calculate the loss, and
+        """Called in each training iteration. Should pass in input data through the network, calculate the loss, and
         return the training stats for the input data
         args:
             data - A TensorDict containing all the necessary data blocks.
@@ -33,7 +34,7 @@ class BaseActor:
     #     self.net.to(device)
 
     def train(self, mode=True):
-        """ Set whether the network is in train mode.
+        """Set whether the network is in train mode.
         args:
             mode (True) - Bool specifying whether in training mode.
         """
@@ -41,5 +42,5 @@ class BaseActor:
         self.objective.train()
 
     def eval(self):
-        """ Set network to eval mode"""
+        """Set network to eval mode"""
         self.train(False)

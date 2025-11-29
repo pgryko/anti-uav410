@@ -1,20 +1,19 @@
-
-
 import jittor as jt
-from pytracking import complex, TensorList
+
+from pytracking import TensorList, complex
 from pytracking.libs.tensorlist import tensor_operation
 
 
 @tensor_operation
 def rfftshift2(a: jt.Var):
     h = a.shape[2] + 2
-    return jt.concat((a[:,:,(h-1)//2:,...], a[:,:,:h//2,...]), 2)
+    return jt.concat((a[:, :, (h - 1) // 2 :, ...], a[:, :, : h // 2, ...]), 2)
 
 
 @tensor_operation
 def irfftshift2(a: jt.Var):
-    mid = int((a.shape[2]-1)/2)
-    return jt.concat((a[:,:,mid:,...], a[:,:,:mid,...]), 2)
+    mid = int((a.shape[2] - 1) / 2)
+    return jt.concat((a[:, :, mid:, ...], a[:, :, :mid, ...]), 2)
 
 
 @tensor_operation
@@ -33,11 +32,11 @@ def cifft2(a, signal_sizes=None):
 
 
 @tensor_operation
-def sample_fs(a: jt.Var, grid_sz: jt.Var = None, rescale = True):
+def sample_fs(a: jt.Var, grid_sz: jt.Var = None, rescale=True):
     """Samples the Fourier series."""
 
     # Size of the fourier series
-    sz = jt.Var([a.shape[2], 2*a.shape[3]-1]).float()
+    sz = jt.Var([a.shape[2], 2 * a.shape[3] - 1]).float()
 
     # Default grid
     if grid_sz is None or sz[0] == grid_sz[0] and sz[1] == grid_sz[1]:
@@ -46,27 +45,37 @@ def sample_fs(a: jt.Var, grid_sz: jt.Var = None, rescale = True):
         return cifft2(a)
 
     if sz[0] > grid_sz[0] or sz[1] > grid_sz[1]:
-        raise ValueError("Only grid sizes that are smaller than the Fourier series size are supported.")
+        raise ValueError(
+            "Only grid sizes that are smaller than the Fourier series size are supported."
+        )
 
     tot_pad = (grid_sz - sz).tolist()
     is_even = [s.item() % 2 == 0 for s in sz]
 
     # Compute paddings
-    pad_top = int((tot_pad[0]+1)/2) if is_even[0] else int(tot_pad[0]/2)
+    pad_top = int((tot_pad[0] + 1) / 2) if is_even[0] else int(tot_pad[0] / 2)
     pad_bottom = int(tot_pad[0] - pad_top)
-    pad_right = int((tot_pad[1]+1)/2)
+    pad_right = int((tot_pad[1] + 1) / 2)
 
     if rescale:
-        return grid_sz.prod().item() * cifft2(jt.nn.pad(a, (0, 0, 0, pad_right, pad_top, pad_bottom)), signal_sizes=grid_sz.long().tolist())
+        return grid_sz.prod().item() * cifft2(
+            jt.nn.pad(a, (0, 0, 0, pad_right, pad_top, pad_bottom)),
+            signal_sizes=grid_sz.long().tolist(),
+        )
     else:
-        return cifft2(jt.nn.pad(a, (0, 0, 0, pad_right, pad_top, pad_bottom)), signal_sizes=grid_sz.long().tolist())
+        return cifft2(
+            jt.nn.pad(a, (0, 0, 0, pad_right, pad_top, pad_bottom)),
+            signal_sizes=grid_sz.long().tolist(),
+        )
 
 
-def get_frequency_coord(sz, add_complex_dim = False, device='cpu'):
+def get_frequency_coord(sz, add_complex_dim=False, device="cpu"):
     """Frequency coordinates."""
 
-    ky = jt.arange(-int((sz[0]-1)/2), int(sz[0]/2+1), dtype=jt.float32, device=device).view(1,1,-1,1)
-    kx = jt.arange(0, int(sz[1]/2+1), dtype=jt.float32, device=device).view(1,1,1,-1)
+    ky = jt.arange(-int((sz[0] - 1) / 2), int(sz[0] / 2 + 1), dtype=jt.float32, device=device).view(
+        1, 1, -1, 1
+    )
+    kx = jt.arange(0, int(sz[1] / 2 + 1), dtype=jt.float32, device=device).view(1, 1, 1, -1)
 
     if add_complex_dim:
         ky = ky.unsqueeze(-1)
@@ -83,14 +92,17 @@ def shift_fs(a: jt.Var, shift: jt.Var):
         shift : The shift to be performed normalized to the range [-pi, pi]."""
 
     if a.dim() != 5:
-        raise ValueError('a must be the Fourier coefficients, a 5-dimensional tensor.')
+        raise ValueError("a must be the Fourier coefficients, a 5-dimensional tensor.")
 
     if shift[0] == 0 and shift[1] == 0:
         return a
 
-    ky, kx = get_frequency_coord((a.shape[2], 2*a.shape[3]-1), device=a.device)
+    ky, kx = get_frequency_coord((a.shape[2], 2 * a.shape[3] - 1), device=a.device)
 
-    return complex.mult(complex.mult(a, complex.exp_imag(shift[0].item()*ky)), complex.exp_imag(shift[1].item()*kx))
+    return complex.mult(
+        complex.mult(a, complex.exp_imag(shift[0].item() * ky)),
+        complex.exp_imag(shift[1].item() * kx),
+    )
 
 
 def sum_fs(a: TensorList) -> jt.Var:
@@ -140,8 +152,12 @@ def sum_fs12(a: TensorList) -> jt.Var:
 @tensor_operation
 def inner_prod_fs(a: jt.Var, b: jt.Var):
     if complex.is_complex(a) and complex.is_complex(b):
-        return 2 * (a.reshape(-1) @ b.reshape(-1)) - a[:, :, :, 0, :].reshape(-1) @ b[:, :, :, 0, :].reshape(-1)
+        return 2 * (a.reshape(-1) @ b.reshape(-1)) - a[:, :, :, 0, :].reshape(-1) @ b[
+            :, :, :, 0, :
+        ].reshape(-1)
     elif complex.is_real(a) and complex.is_real(b):
-        return 2 * (a.reshape(-1) @ b.reshape(-1)) - a[:, :, :, 0].reshape(-1) @ b[:, :, :, 0].reshape(-1)
+        return 2 * (a.reshape(-1) @ b.reshape(-1)) - a[:, :, :, 0].reshape(-1) @ b[
+            :, :, :, 0
+        ].reshape(-1)
     else:
-        raise NotImplementedError('Not implemented for mixed real and complex.')
+        raise NotImplementedError("Not implemented for mixed real and complex.")

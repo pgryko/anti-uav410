@@ -1,13 +1,15 @@
-import torch
 import jittor as jt
-from pytracking.features.preprocessing import sample_patch
+
 from pytracking import TensorList
+from pytracking.features.preprocessing import sample_patch
+
 
 class ExtractorBase:
     """Base feature extractor class.
     args:
         features: List of features.
     """
+
     def __init__(self, features):
         self.features = features
 
@@ -21,6 +23,7 @@ class SingleResolutionExtractor(ExtractorBase):
     args:
         features: List of features.
     """
+
     def __init__(self, features):
         super().__init__(features)
 
@@ -39,10 +42,12 @@ class SingleResolutionExtractor(ExtractorBase):
             scales = [scales]
 
         # Get image patches
-        im_patches = jt.concat([sample_patch(im, pos, s*image_sz, image_sz) for s in scales])
+        im_patches = jt.concat([sample_patch(im, pos, s * image_sz, image_sz) for s in scales])
 
         # Compute features
-        feature_map = jt.concat(TensorList([f.get_feature(im_patches) for f in self.features]).unroll(), dim=1)
+        feature_map = jt.concat(
+            TensorList([f.get_feature(im_patches) for f in self.features]).unroll(), dim=1
+        )
 
         return feature_map
 
@@ -52,17 +57,24 @@ class MultiResolutionExtractor(ExtractorBase):
     args:
         features: List of features.
     """
-    def __init__(self, features, patch_mode='replicate', max_scale_change=None):
+
+    def __init__(self, features, patch_mode="replicate", max_scale_change=None):
         super().__init__(features)
         self.patch_mode = patch_mode
         self.max_scale_change = max_scale_change
         self.is_color = None
 
     def stride(self):
-        return jt.Var(TensorList([f.stride() for f in self.features if self._return_feature(f)]).unroll().list())
+        return jt.Var(
+            TensorList([f.stride() for f in self.features if self._return_feature(f)])
+            .unroll()
+            .list()
+        )
 
     def size(self, input_sz):
-        return TensorList([f.size(input_sz) for f in self.features if self._return_feature(f)]).unroll()
+        return TensorList(
+            [f.size(input_sz) for f in self.features if self._return_feature(f)]
+        ).unroll()
 
     def dim(self):
         return TensorList([f.dim() for f in self.features if self._return_feature(f)]).unroll()
@@ -70,27 +82,43 @@ class MultiResolutionExtractor(ExtractorBase):
     def get_fparams(self, name: str = None):
         if name is None:
             return [f.fparams for f in self.features if self._return_feature(f)]
-        return TensorList([getattr(f.fparams, name) for f in self.features if self._return_feature(f)]).unroll()
+        return TensorList(
+            [getattr(f.fparams, name) for f in self.features if self._return_feature(f)]
+        ).unroll()
 
     def get_attribute(self, name: str, ignore_missing: bool = False):
         if ignore_missing:
-            return TensorList([getattr(f, name) for f in self.features if self._return_feature(f) and hasattr(f, name)])
+            return TensorList(
+                [
+                    getattr(f, name)
+                    for f in self.features
+                    if self._return_feature(f) and hasattr(f, name)
+                ]
+            )
         else:
-            return TensorList([getattr(f, name, None) for f in self.features if self._return_feature(f)])
+            return TensorList(
+                [getattr(f, name, None) for f in self.features if self._return_feature(f)]
+            )
 
     def get_unique_attribute(self, name: str):
         feat = None
         for f in self.features:
             if self._return_feature(f) and hasattr(f, name):
                 if feat is not None:
-                    raise RuntimeError('The attribute was not unique.')
+                    raise RuntimeError("The attribute was not unique.")
                 feat = f
         if feat is None:
-            raise RuntimeError('The attribute did not exist')
+            raise RuntimeError("The attribute did not exist")
         return getattr(feat, name)
 
     def _return_feature(self, f):
-        return self.is_color is None or self.is_color and f.use_for_color or not self.is_color and f.use_for_gray
+        return (
+            self.is_color is None
+            or self.is_color
+            and f.use_for_color
+            or not self.is_color
+            and f.use_for_gray
+        )
 
     def set_is_color(self, is_color: bool):
         self.is_color = is_color
@@ -107,8 +135,20 @@ class MultiResolutionExtractor(ExtractorBase):
             scales = [scales]
 
         # Get image patches
-        patch_iter, coord_iter = zip(*(sample_patch(im, pos, s*image_sz, image_sz, mode=self.patch_mode,
-                                                    max_scale_change=self.max_scale_change) for s in scales))
+        patch_iter, coord_iter = zip(
+            *(
+                sample_patch(
+                    im,
+                    pos,
+                    s * image_sz,
+                    image_sz,
+                    mode=self.patch_mode,
+                    max_scale_change=self.max_scale_change,
+                )
+                for s in scales
+            ),
+            strict=False,
+        )
         im_patches = jt.concat(list(patch_iter))
         patch_coords = jt.concat(list(coord_iter))
 
@@ -133,7 +173,7 @@ class MultiResolutionExtractor(ExtractorBase):
         """
 
         # Get image patche
-        im_patch, _ = sample_patch(im, pos, scale*image_sz, image_sz)
+        im_patch, _ = sample_patch(im, pos, scale * image_sz, image_sz)
 
         # Apply transforms
         im_patches = jt.concat([T(im_patch) for T in transforms])
@@ -141,4 +181,4 @@ class MultiResolutionExtractor(ExtractorBase):
         # Compute features
         feature_map = TensorList([f.get_feature(im_patches) for f in self.features]).unroll()
 
-        return feature_map 
+        return feature_map

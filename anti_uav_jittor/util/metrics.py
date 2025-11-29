@@ -1,7 +1,7 @@
-from __future__ import absolute_import
-import os
 import glob
 import json
+import os
+
 import cv2
 import numpy as np
 
@@ -49,21 +49,23 @@ def not_exist(pred):
 
 def eval(out_res, label_res):
     measure_per_frame = []
-    for _pred, _gt, _exist in zip(out_res, label_res['gt_rect'], label_res['exist']):
-        measure_per_frame.append(not_exist(_pred) if not _exist else iou(_pred, _gt) if len(_pred) > 1 else 0)
+    for _pred, _gt, _exist in zip(out_res, label_res["gt_rect"], label_res["exist"], strict=False):
+        measure_per_frame.append(
+            not_exist(_pred) if not _exist else iou(_pred, _gt) if len(_pred) > 1 else 0
+        )
     return np.mean(measure_per_frame)
 
 
-def main(mode='IR', visulization=False):
-    assert mode in ['IR', 'RGB'], 'Only Support IR or RGB to evalute'
+def main(mode="IR", visulization=False):
+    assert mode in ["IR", "RGB"], "Only Support IR or RGB to evalute"
     # setup tracker
-    net_path = 'model.pth'
+    net_path = "model.pth"
     tracker = TrackerSiamFC(net_path=net_path)
 
     # setup experiments
-    video_paths = glob.glob(os.path.join('dataset', 'test-challenge', '*'))
+    video_paths = glob.glob(os.path.join("dataset", "test-challenge", "*"))
     video_num = len(video_paths)
-    output_dir = os.path.join('results', tracker.name)
+    output_dir = os.path.join("results", tracker.name)
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
     overall_performance = []
@@ -71,12 +73,12 @@ def main(mode='IR', visulization=False):
     # run tracking experiments and report performance
     for video_id, video_path in enumerate(video_paths, start=1):
         video_name = os.path.basename(video_path)
-        video_file = os.path.join(video_path, '%s.mp4'%mode)
-        res_file = os.path.join(video_path, '%s_label.json'%mode)
-        with open(res_file, 'r') as f:
+        video_file = os.path.join(video_path, "%s.mp4" % mode)
+        res_file = os.path.join(video_path, "%s_label.json" % mode)
+        with open(res_file) as f:
             label_res = json.load(f)
 
-        init_rect = label_res['gt_rect'][0]
+        init_rect = label_res["gt_rect"][0]
         capture = cv2.VideoCapture(video_file)
 
         frame_id = 0
@@ -94,28 +96,46 @@ def main(mode='IR', visulization=False):
                 out = tracker.update(frame)  # tracking
                 out_res.append(out.tolist())
             if visulization:
-                _gt = label_res['gt_rect'][frame_id]
-                _exist = label_res['exist'][frame_id]
+                _gt = label_res["gt_rect"][frame_id]
+                _exist = label_res["exist"][frame_id]
                 if _exist:
-                    cv2.rectangle(frame, (int(_gt[0]), int(_gt[1])), (int(_gt[0] + _gt[2]), int(_gt[1] + _gt[3])),
-                                  (0, 255, 0))
-                cv2.putText(frame, 'exist' if _exist else 'not exist',
-                            (frame.shape[1] // 2 - 20, 30), 1, 2, (0, 255, 0) if _exist else (0, 0, 255), 2)
+                    cv2.rectangle(
+                        frame,
+                        (int(_gt[0]), int(_gt[1])),
+                        (int(_gt[0] + _gt[2]), int(_gt[1] + _gt[3])),
+                        (0, 255, 0),
+                    )
+                cv2.putText(
+                    frame,
+                    "exist" if _exist else "not exist",
+                    (frame.shape[1] // 2 - 20, 30),
+                    1,
+                    2,
+                    (0, 255, 0) if _exist else (0, 0, 255),
+                    2,
+                )
 
-                cv2.rectangle(frame, (int(out[0]), int(out[1])), (int(out[0] + out[2]), int(out[1] + out[3])),
-                              (0, 255, 255))
+                cv2.rectangle(
+                    frame,
+                    (int(out[0]), int(out[1])),
+                    (int(out[0] + out[2]), int(out[1] + out[3])),
+                    (0, 255, 255),
+                )
                 cv2.imshow(video_name, frame)
                 cv2.waitKey(1)
             frame_id += 1
         if visulization:
             cv2.destroyAllWindows()
         # save result
-        output_file = os.path.join(output_dir, '%s_%s.txt' % (video_name, mode))
-        with open(output_file, 'w') as f:
-            json.dump({'res': out_res}, f)
+        output_file = os.path.join(output_dir, "%s_%s.txt" % (video_name, mode))
+        with open(output_file, "w") as f:
+            json.dump({"res": out_res}, f)
 
         mixed_measure = eval(out_res, label_res)
         overall_performance.append(mixed_measure)
-        print('[%03d/%03d] %20s %5s Fixed Measure: %.03f' % (video_id, video_num, video_name, mode, mixed_measure))
+        print(
+            "[%03d/%03d] %20s %5s Fixed Measure: %.03f"
+            % (video_id, video_num, video_name, mode, mixed_measure)
+        )
 
-    print('[Overall] %5s Mixed Measure: %.03f\n' % (mode, np.mean(overall_performance)))
+    print("[Overall] %5s Mixed Measure: %.03f\n" % (mode, np.mean(overall_performance)))

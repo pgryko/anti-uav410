@@ -1,5 +1,3 @@
-
-
 class StatValue:
     def __init__(self):
         self.clear()
@@ -16,8 +14,9 @@ class StatValue:
         self.history.append(self.val)
 
 
-class AverageMeter(object):
+class AverageMeter:
     """Computes and stores the average and current value"""
+
     def __init__(self):
         self.clear()
         self.has_new_data = False

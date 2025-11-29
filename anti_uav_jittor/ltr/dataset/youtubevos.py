@@ -1,14 +1,16 @@
-from pathlib import Path
-import os
-from ltr.dataset.vos_base import VOSDatasetBase, VOSMeta
-from pytracking.evaluation import Sequence
 import json
+import os
+from pathlib import Path
+
+from pytracking.evaluation import Sequence
+
 from ltr.admin.environment import env_settings
 from ltr.data.image_loader import jpeg4py_loader
+from ltr.dataset.vos_base import VOSDatasetBase, VOSMeta
 
 
 class YouTubeVOSMeta:
-    """ Thin wrapper for YouTubeVOS meta data
+    """Thin wrapper for YouTubeVOS meta data
     meta.json
     {
         "videos": {
@@ -30,28 +32,28 @@ class YouTubeVOSMeta:
     """
 
     def __init__(self, dset_split_path):
-        self._data = json.load(open(dset_split_path / 'meta.json'))['videos']
+        self._data = json.load(open(dset_split_path / "meta.json"))["videos"]
 
     def sequences(self):
         return list(self._data.keys())
 
     def seq_frames(self, seq_name):
-        """ All filename stems of the frames in the sequence """
+        """All filename stems of the frames in the sequence"""
         frames = set()
         for obj_id in self.object_ids(seq_name):
             for f in self.object_frames(seq_name, obj_id):
                 frames.add(f)
-        return list(sorted(frames))
+        return sorted(frames)
 
     def object_ids(self, seq_name):
-        """ All objects in the sequence """
-        return list(self._data[seq_name]['objects'].keys())
+        """All objects in the sequence"""
+        return list(self._data[seq_name]["objects"].keys())
 
     def object_category(self, seq_name, obj_id):
-        return self._data[seq_name]['objects'][str(obj_id)]['category']
+        return self._data[seq_name]["objects"][str(obj_id)]["category"]
 
     def object_frames(self, seq_name, obj_id):
-        return self._data[seq_name]['objects'][str(obj_id)]['frames']
+        return self._data[seq_name]["objects"][str(obj_id)]["frames"]
 
     def object_first_frame(self, seq_name, obj_id):
         return self.object_frames(seq_name, obj_id)[0]
@@ -69,8 +71,19 @@ class YouTubeVOS(VOSDatasetBase):
 
     Download dataset from: https://youtube-vos.org/dataset/
     """
-    def __init__(self, root=None, version='2019', split='train', cleanup=None, all_frames=False, sequences=None,
-                 multiobj=True, vis_threshold=10, image_loader=jpeg4py_loader):
+
+    def __init__(
+        self,
+        root=None,
+        version="2019",
+        split="train",
+        cleanup=None,
+        all_frames=False,
+        sequences=None,
+        multiobj=True,
+        vis_threshold=10,
+        image_loader=jpeg4py_loader,
+    ):
         """
         args:
             root - Dataset root path. If unset, it uses the path in your local.py config.
@@ -89,8 +102,15 @@ class YouTubeVOS(VOSDatasetBase):
             image_loader - Image loader.
         """
         root = env_settings().youtubevos_dir if root is None else root
-        super().__init__(name="YouTubeVOS", root=Path(root), version=version, split=split, multiobj=multiobj,
-                         vis_threshold=vis_threshold, image_loader=image_loader)
+        super().__init__(
+            name="YouTubeVOS",
+            root=Path(root),
+            version=version,
+            split=split,
+            multiobj=multiobj,
+            vis_threshold=vis_threshold,
+            image_loader=image_loader,
+        )
 
         split_folder = self.split
         if self.split.startswith("jj"):
@@ -98,26 +118,28 @@ class YouTubeVOS(VOSDatasetBase):
 
         dset_path = self.root / self.version / split_folder
 
-        self._anno_path = dset_path / 'Annotations'
+        self._anno_path = dset_path / "Annotations"
 
         if all_frames:
-            self._jpeg_path = self.root / self.version / (split_folder + "_all_frames") / 'JPEGImages'
+            self._jpeg_path = (
+                self.root / self.version / (split_folder + "_all_frames") / "JPEGImages"
+            )
         else:
-            self._jpeg_path = dset_path / 'JPEGImages'
+            self._jpeg_path = dset_path / "JPEGImages"
 
         self.meta = YouTubeVOSMeta(dset_path)
         meta_path = dset_path / "generated_meta.json"
         if meta_path.exists():
             self.gmeta = VOSMeta(filename=meta_path)
         else:
-            self.gmeta = VOSMeta.generate('YouTubeVOS', self._jpeg_path, self._anno_path)
+            self.gmeta = VOSMeta.generate("YouTubeVOS", self._jpeg_path, self._anno_path)
             self.gmeta.save(meta_path)
 
         if all_frames:
             self.gmeta.enable_all_frames(self._jpeg_path)
 
-        if self.split not in ['train', 'valid', 'test']:
-            self.gmeta.select_split('youtubevos', self.split)
+        if self.split not in ["train", "valid", "test"]:
+            self.gmeta.select_split("youtubevos", self.split)
 
         if sequences is None:
             sequences = self.gmeta.get_sequence_names()
@@ -125,21 +147,23 @@ class YouTubeVOS(VOSDatasetBase):
         to_remove = set()
         cleanup = {} if cleanup is None else set(cleanup)
 
-        if 'aspect' in cleanup:
+        if "aspect" in cleanup:
             # Remove sequences with unusual aspect ratios
             for seq_name in sequences:
                 a = self.gmeta.get_aspect_ratio(seq_name)
                 if a < 1.45 or a > 1.9:
                     to_remove.add(seq_name)
 
-        if 'starts' in cleanup:
+        if "starts" in cleanup:
             # Fix incorrect start frames for some objects found with ytvos_start_frames_test()
-            bad_start_frames = [("0e27472bea", '2', ['00055', '00060'], '00065'),
-                                ("5937b08d69", '4', ['00000'], '00005'),
-                                ("5e1ce354fd", '5', ['00010', '00015'], '00020'),
-                                ("7053e4f41e", '2', ['00000', '00005', '00010', '00015'], '00020'),
-                                ("720e3fa04c", '2', ['00050'], '00055'),
-                                ("c73c8e747f", '2', ['00035'], '00040')]
+            bad_start_frames = [
+                ("0e27472bea", "2", ["00055", "00060"], "00065"),
+                ("5937b08d69", "4", ["00000"], "00005"),
+                ("5e1ce354fd", "5", ["00010", "00015"], "00020"),
+                ("7053e4f41e", "2", ["00000", "00005", "00010", "00015"], "00020"),
+                ("720e3fa04c", "2", ["00050"], "00055"),
+                ("c73c8e747f", "2", ["00035"], "00040"),
+            ]
             for seq_name, obj_id, bad_frames, good_frame in bad_start_frames:
                 # bad_frames is from meta.json included with the dataset
                 # good_frame is from the generated meta - and the first actual frame where the object was seen.
@@ -163,30 +187,40 @@ class YouTubeVOS(VOSDatasetBase):
 
         print("%s loaded." % self.get_name())
         if len(to_remove) > 0:
-            print("   %d sequences were removed, (%d remaining)." % (len(to_remove), len(sequences)))
+            print(
+                "   %d sequences were removed, (%d remaining)." % (len(to_remove), len(sequences))
+            )
 
     def _construct_sequence(self, sequence_info):
-
-        seq_name = sequence_info['sequence']
-        frame_names = sequence_info['frame_names']
+        seq_name = sequence_info["sequence"]
+        frame_names = sequence_info["frame_names"]
         fname_to_fid = {f: i for i, f in enumerate(frame_names)}
         images, gt_segs, gt_bboxes = self.get_paths_and_bboxes(sequence_info)
 
         init_data = dict()
-        for obj_id in sequence_info['object_ids']:
-            if obj_id == '0':
+        for obj_id in sequence_info["object_ids"]:
+            if obj_id == "0":
                 print("!")
             f_name = self.meta.object_first_frame(seq_name, obj_id)
             f_id = fname_to_fid[f_name]
             if f_id not in init_data:
-                init_data[f_id] = {'object_ids': [obj_id],
-                                   'bbox': {obj_id: gt_bboxes[obj_id][f_id,:]},
-                                   'mask': os.path.join(os.path.dirname(gt_segs[f_id]), (f_name + ".png"))}
-                assert init_data[f_id]['mask'] in gt_segs  # If this fails, some file is missing
+                init_data[f_id] = {
+                    "object_ids": [obj_id],
+                    "bbox": {obj_id: gt_bboxes[obj_id][f_id, :]},
+                    "mask": os.path.join(os.path.dirname(gt_segs[f_id]), (f_name + ".png")),
+                }
+                assert init_data[f_id]["mask"] in gt_segs  # If this fails, some file is missing
             else:
-                init_data[f_id]['object_ids'].append(obj_id)
-                init_data[f_id]['bbox'][obj_id] = gt_bboxes[obj_id][f_id,:]
+                init_data[f_id]["object_ids"].append(obj_id)
+                init_data[f_id]["bbox"][obj_id] = gt_bboxes[obj_id][f_id, :]
 
-        return Sequence(name=seq_name, frames=images, dataset='YouTubeVOS', ground_truth_rect=gt_bboxes,
-                        init_data=init_data, ground_truth_seg=gt_segs, object_ids=sequence_info['object_ids'],
-                        multiobj_mode=self.multiobj)
+        return Sequence(
+            name=seq_name,
+            frames=images,
+            dataset="YouTubeVOS",
+            ground_truth_rect=gt_bboxes,
+            init_data=init_data,
+            ground_truth_seg=gt_segs,
+            object_ids=sequence_info["object_ids"],
+            multiobj_mode=self.multiobj,
+        )

@@ -6,16 +6,14 @@ if sys.version_info >= (3, 7):
     from mmdet.utils.contextmanagers import completed
 
 
-class RPNTestMixin(object):
+class RPNTestMixin:
     """Test methods of RPN."""
 
     if sys.version_info >= (3, 7):
 
         async def async_simple_test_rpn(self, x, img_metas):
-            sleep_interval = self.test_cfg.pop('async_sleep_interval', 0.025)
-            async with completed(
-                    __name__, 'rpn_head_forward',
-                    sleep_interval=sleep_interval):
+            sleep_interval = self.test_cfg.pop("async_sleep_interval", 0.025)
+            async with completed(__name__, "rpn_head_forward", sleep_interval=sleep_interval):
                 rpn_outs = self(x)
 
             proposal_list = self.get_bboxes(*rpn_outs, img_metas)
@@ -39,7 +37,7 @@ class RPNTestMixin(object):
     def aug_test_rpn(self, feats, img_metas):
         samples_per_gpu = len(img_metas[0])
         aug_proposals = [[] for _ in range(samples_per_gpu)]
-        for x, img_meta in zip(feats, img_metas):
+        for x, img_meta in zip(feats, img_metas, strict=False):
             proposal_list = self.simple_test_rpn(x, img_meta)
             for i, proposals in enumerate(proposal_list):
                 aug_proposals[i].append(proposals)
@@ -54,6 +52,6 @@ class RPNTestMixin(object):
         # after merging, proposals will be rescaled to the original image size
         merged_proposals = [
             merge_aug_proposals(proposals, aug_img_meta, self.test_cfg)
-            for proposals, aug_img_meta in zip(aug_proposals, aug_img_metas)
+            for proposals, aug_img_meta in zip(aug_proposals, aug_img_metas, strict=False)
         ]
         return merged_proposals

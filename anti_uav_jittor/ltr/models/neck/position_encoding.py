@@ -2,16 +2,19 @@
 """
 Various positional encodings for the transformer.
 """
+
 import math
 
-from util.misc import NestedTensor
 import jittor as jt
+from util.misc import NestedTensor
+
 
 class PositionEmbeddingSine(jt.nn.Module):
     """
     This is a more standard version of the position embedding, very similar to the one
     used by the Attention is all you need paper, generalized to work on images.
     """
+
     def __init__(self, num_pos_feats=64, temperature=10000, normalize=False, scale=None):
         super().__init__()
         self.num_pos_feats = num_pos_feats
@@ -34,7 +37,10 @@ class PositionEmbeddingSine(jt.nn.Module):
             eps = 1e-6
             y_embed = y_embed / (y_embed[:, -1:, :] + eps) * self.scale
             x_embed = x_embed / (x_embed[:, :, -1:] + eps) * self.scale
-        dim_t = jt.arange(self.num_pos_feats, dtype=jt.float32, )
+        dim_t = jt.arange(
+            self.num_pos_feats,
+            dtype=jt.float32,
+        )
         dim_t = self.temperature ** (2 * (dim_t // 2) / self.num_pos_feats)
         pos_x = x_embed[:, :, :, None] / dim_t
         pos_y = y_embed[:, :, :, None] / dim_t
@@ -48,6 +54,7 @@ class PositionEmbeddingLearned(jt.nn.Module):
     """
     Absolute pos embedding, learned.
     """
+
     def __init__(self, num_pos_feats=256):
         super().__init__()
         self.row_embed = jt.nn.Embedding(50, num_pos_feats)
@@ -65,19 +72,27 @@ class PositionEmbeddingLearned(jt.nn.Module):
         j = jt.arange(h, device=x.device)
         x_emb = self.col_embed(i)
         y_emb = self.row_embed(j)
-        pos = jt.concat([
-            x_emb.unsqueeze(0).repeat(h, 1, 1),
-            y_emb.unsqueeze(1).repeat(1, w, 1),
-        ], dim=-1).permute(2, 0, 1).unsqueeze(0).repeat(x.shape[0], 1, 1, 1)
+        pos = (
+            jt.concat(
+                [
+                    x_emb.unsqueeze(0).repeat(h, 1, 1),
+                    y_emb.unsqueeze(1).repeat(1, w, 1),
+                ],
+                dim=-1,
+            )
+            .permute(2, 0, 1)
+            .unsqueeze(0)
+            .repeat(x.shape[0], 1, 1, 1)
+        )
         return pos
 
 
 def build_position_encoding(settings):
     N_steps = settings.hidden_dim // 2
-    if settings.position_embedding in ('v2', 'sine'):
+    if settings.position_embedding in ("v2", "sine"):
         # TODO find a better way of exposing other arguments
         position_embedding = PositionEmbeddingSine(N_steps, normalize=True)
-    elif settings.position_embedding in ('v3', 'learned'):
+    elif settings.position_embedding in ("v3", "learned"):
         position_embedding = PositionEmbeddingSine(N_steps, normalize=True)
         # position_embedding = PositionEmbeddingLearned(N_steps)
     else:

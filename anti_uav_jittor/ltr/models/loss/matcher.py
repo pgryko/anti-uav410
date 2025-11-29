@@ -2,8 +2,11 @@
 """
 Modules to compute the matching cost and solve the corresponding LSAP.
 """
-import numpy as np
+
 import jittor as jt
+import numpy as np
+
+
 class TrackingMatcher(jt.nn.Module):
     """This class computes an assignment between the ground-truth and the predictions of the network.
     The corresponding feature vectors within the ground-truth box are matched as positive samples.
@@ -12,9 +15,8 @@ class TrackingMatcher(jt.nn.Module):
     def __init__(self):
         super().__init__()
 
-
     def forward(self, outputs, targets):
-        """ Performs the matching
+        """Performs the matching
 
         Params:
             outputs: This is a dict that contains these entries:
@@ -37,19 +39,25 @@ class TrackingMatcher(jt.nn.Module):
         indices = []
         bs, num_queries = outputs["pred_logits"].shape[:2]
         for i in range(bs):
-            cx, cy, w, h = targets[i]['boxes'][0]
-            cx = cx.item(); cy = cy.item(); w = w.item(); h = h.item()
-            xmin = cx-w/2; ymin = cy-h/2; xmax = cx+w/2; ymax = cy+h/2
-            area = w*h
+            cx, cy, w, h = targets[i]["boxes"][0]
+            cx = cx.item()
+            cy = cy.item()
+            w = w.item()
+            h = h.item()
+            xmin = cx - w / 2
+            ymin = cy - h / 2
+            xmax = cx + w / 2
+            ymax = cy + h / 2
+            area = w * h
             len_feature = int(np.sqrt(num_queries))
-            Xmin = int(np.ceil(xmin*len_feature))
-            Ymin = int(np.ceil(ymin*len_feature))
-            Xmax = int(np.ceil(xmax*len_feature))
-            Ymax = int(np.ceil(ymax*len_feature))
+            Xmin = int(np.ceil(xmin * len_feature))
+            Ymin = int(np.ceil(ymin * len_feature))
+            Xmax = int(np.ceil(xmax * len_feature))
+            Ymax = int(np.ceil(ymax * len_feature))
             if Xmin == Xmax:
-                Xmax = Xmax+1
+                Xmax = Xmax + 1
             if Ymin == Ymax:
-                Ymax = Ymax+1
+                Ymax = Ymax + 1
             a = np.arange(0, num_queries, 1)
             b = a.reshape([len_feature, len_feature])
             c = b[Ymin:Ymax, Xmin:Xmax].flatten()
@@ -57,6 +65,7 @@ class TrackingMatcher(jt.nn.Module):
             indice = (c, d)
             indices.append(indice)
         return [(jt.Var(i, dtype=jt.int64), jt.Var(j, dtype=jt.int64)) for i, j in indices]
+
 
 def build_matcher():
     return TrackingMatcher()

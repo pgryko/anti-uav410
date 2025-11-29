@@ -1,20 +1,18 @@
-from __future__ import absolute_import
-
-import numpy as np
 import time
-from PIL import Image
+
 import cv2
+import numpy as np
+from PIL import Image
 
 from ..utils.viz import show_frame
 
 
-class Tracker(object):
-
+class Tracker:
     def __init__(self, name, net, is_deterministic=False):
         self.name = name
         self.is_deterministic = is_deterministic
         self.net = net
-    
+
     def init(self, image, box):
         raise NotImplementedError()
 
@@ -29,8 +27,8 @@ class Tracker(object):
 
         for f, img_file in enumerate(img_files):
             image = Image.open(img_file)
-            if not image.mode == 'RGB':
-                image = image.convert('RGB')
+            if not image.mode == "RGB":
+                image = image.convert("RGB")
             im = np.array(image)
             start_time = time.time()
             if f == 0:

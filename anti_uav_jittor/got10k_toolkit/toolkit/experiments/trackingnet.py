@@ -1,11 +1,5 @@
-from __future__ import absolute_import
-
-import os
-import numpy as np
-
-from .otb import ExperimentOTB
 from ..datasets import TrackingNet
-from ..utils.metrics import rect_iou, center_error
+from .otb import ExperimentOTB
 
 
 class ExperimentTrackingNet(ExperimentOTB):
@@ -23,9 +17,11 @@ class ExperimentTrackingNet(ExperimentOTB):
         report_dir (string, optional): Directory for storing performance
             evaluation results. Default is ``./reports``.
     """
-    def __init__(self, root_dir, subset='test', return_meta=False,
-                 result_dir='results', report_dir='reports'):
-        assert subset.upper() in ['TRAIN', 'TEST']
+
+    def __init__(
+        self, root_dir, subset="test", return_meta=False, result_dir="results", report_dir="reports"
+    ):
+        assert subset.upper() in ["TRAIN", "TEST"]
         self.dataset = TrackingNet(root_dir, subset, return_meta=return_meta)
         self.result_dir = result_dir
         self.report_dir = report_dir

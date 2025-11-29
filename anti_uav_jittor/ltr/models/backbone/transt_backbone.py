@@ -3,17 +3,14 @@
 Backbone modules.
 """
 
-from typing import Dict, List
-import ltr.models.backbone as backbones
-
-from util.misc import NestedTensor
-
-from ltr.models.neck.position_encoding import build_position_encoding
-
 import jittor as jt
 from jittor import nn
+from util.misc import NestedTensor
+
+import ltr.models.backbone as backbones
 from ltr.models.backbone import backbones
 from ltr.models.neck import build_position_encoding
+from ltr.models.neck.position_encoding import build_position_encoding
 
 
 class FrozenBatchNorm2d(nn.Module):
@@ -32,15 +29,16 @@ class FrozenBatchNorm2d(nn.Module):
         self.register_buffer("running_mean", jt.zeros(n))
         self.register_buffer("running_var", jt.ones(n))
 
-    def _load_from_state_dict(self, state_dict, prefix, local_metadata, strict,
-                              missing_keys, unexpected_keys, error_msgs):
-        num_batches_tracked_key = prefix + 'num_batches_tracked'
+    def _load_from_state_dict(
+        self, state_dict, prefix, local_metadata, strict, missing_keys, unexpected_keys, error_msgs
+    ):
+        num_batches_tracked_key = prefix + "num_batches_tracked"
         if num_batches_tracked_key in state_dict:
             del state_dict[num_batches_tracked_key]
 
         super(FrozenBatchNorm2d, self)._load_from_state_dict(
-            state_dict, prefix, local_metadata, strict,
-            missing_keys, unexpected_keys, error_msgs)
+            state_dict, prefix, local_metadata, strict, missing_keys, unexpected_keys, error_msgs
+        )
 
     def forward(self, x):
         # move reshapes to the beginning
@@ -56,7 +54,6 @@ class FrozenBatchNorm2d(nn.Module):
 
 
 class BackboneBase(nn.Module):
-
     def __init__(self, backbone: nn.Module, num_channels: int):
         super().__init__()
         self.body = backbone
@@ -70,18 +67,18 @@ class BackboneBase(nn.Module):
             m = tensor_list.mask
             assert m is not None
             # 在Jittor中，我们可以直接使用jt.nn.functional.interpolate，而不需要像PyTorch那样手动创建NestedTensor。
-            mask = jt.nn.functional.interpolate(m[None].float(), size=x.shape[-2:], mode='bilinear')
+            mask = jt.nn.functional.interpolate(m[None].float(), size=x.shape[-2:], mode="bilinear")
             out[name] = mask
         return out
 
+
 class Backbone(BackboneBase):
     """ResNet backbone with frozen BatchNorm."""
-    def __init__(self,
-                 output_layers,
-                 pretrained,
-                 frozen_layers):
-        backbone = backbones.resnet50(output_layers=output_layers, pretrained=pretrained,
-                                      frozen_layers=frozen_layers)
+
+    def __init__(self, output_layers, pretrained, frozen_layers):
+        backbone = backbones.resnet50(
+            output_layers=output_layers, pretrained=pretrained, frozen_layers=frozen_layers
+        )
         num_channels = 1024
         super().__init__(backbone, num_channels)
 
@@ -92,7 +89,7 @@ class Joiner(nn.Sequential):
 
     def forward(self, tensor_list: NestedTensor):
         xs = self[0](tensor_list)
-        out: List[NestedTensor] = []
+        out: list[NestedTensor] = []
         pos = []
         for name, x in xs.items():
             out.append(x)
@@ -104,7 +101,11 @@ class Joiner(nn.Sequential):
 
 def build_backbone(settings, backbone_pretrained=True, frozen_backbone_layers=()):
     position_embedding = build_position_encoding(settings)
-    backbone = Backbone(output_layers=['layer3'], pretrained=backbone_pretrained, frozen_layers=frozen_backbone_layers)
+    backbone = Backbone(
+        output_layers=["layer3"],
+        pretrained=backbone_pretrained,
+        frozen_layers=frozen_backbone_layers,
+    )
     model = Joiner(backbone, position_embedding)
     model.num_channels = backbone.num_channels
     return model

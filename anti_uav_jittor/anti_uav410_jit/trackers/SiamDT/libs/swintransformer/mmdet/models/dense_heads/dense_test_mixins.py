@@ -5,7 +5,7 @@ import torch
 from mmdet.core import bbox2result, bbox_mapping_back, multiclass_nms
 
 
-class BBoxTestMixin(object):
+class BBoxTestMixin:
     """Mixin class for test time augmentation of bboxes."""
 
     def merge_aug_bboxes(self, aug_bboxes, aug_scores, img_metas):
@@ -20,13 +20,12 @@ class BBoxTestMixin(object):
             tuple: (bboxes, scores)
         """
         recovered_bboxes = []
-        for bboxes, img_info in zip(aug_bboxes, img_metas):
-            img_shape = img_info[0]['img_shape']
-            scale_factor = img_info[0]['scale_factor']
-            flip = img_info[0]['flip']
-            flip_direction = img_info[0]['flip_direction']
-            bboxes = bbox_mapping_back(bboxes, img_shape, scale_factor, flip,
-                                       flip_direction)
+        for bboxes, img_info in zip(aug_bboxes, img_metas, strict=False):
+            img_shape = img_info[0]["img_shape"]
+            scale_factor = img_info[0]["scale_factor"]
+            flip = img_info[0]["flip"]
+            flip_direction = img_info[0]["flip_direction"]
+            bboxes = bbox_mapping_back(bboxes, img_shape, scale_factor, flip, flip_direction)
             recovered_bboxes.append(bboxes)
         bboxes = torch.cat(recovered_bboxes, dim=0)
         if aug_scores is None:
@@ -54,19 +53,19 @@ class BBoxTestMixin(object):
         # check with_nms argument
         gb_sig = signature(self.get_bboxes)
         gb_args = [p.name for p in gb_sig.parameters.values()]
-        if hasattr(self, '_get_bboxes'):
+        if hasattr(self, "_get_bboxes"):
             gbs_sig = signature(self._get_bboxes)
         else:
             gbs_sig = signature(self._get_bboxes_single)
         gbs_args = [p.name for p in gbs_sig.parameters.values()]
-        assert ('with_nms' in gb_args) and ('with_nms' in gbs_args), \
-            f'{self.__class__.__name__}' \
-            ' does not support test-time augmentation'
+        assert ("with_nms" in gb_args) and ("with_nms" in gbs_args), (
+            f"{self.__class__.__name__}" " does not support test-time augmentation"
+        )
 
         aug_bboxes = []
         aug_scores = []
         aug_factors = []  # score_factors for NMS
-        for x, img_meta in zip(feats, img_metas):
+        for x, img_meta in zip(feats, img_metas, strict=False):
             # only one image in the batch
             outs = self.forward(x)
             bbox_inputs = outs + (img_meta, self.test_cfg, False, False)
@@ -79,8 +78,7 @@ class BBoxTestMixin(object):
                 aug_factors.append(bbox_outputs[2])
 
         # after merging, bboxes will be rescaled to the original image size
-        merged_bboxes, merged_scores = self.merge_aug_bboxes(
-            aug_bboxes, aug_scores, img_metas)
+        merged_bboxes, merged_scores = self.merge_aug_bboxes(aug_bboxes, aug_scores, img_metas)
         merged_factors = torch.cat(aug_factors, dim=0) if aug_factors else None
         det_bboxes, det_labels = multiclass_nms(
             merged_bboxes,
@@ -88,13 +86,13 @@ class BBoxTestMixin(object):
             self.test_cfg.score_thr,
             self.test_cfg.nms,
             self.test_cfg.max_per_img,
-            score_factors=merged_factors)
+            score_factors=merged_factors,
+        )
 
         if rescale:
             _det_bboxes = det_bboxes
         else:
             _det_bboxes = det_bboxes.clone()
-            _det_bboxes[:, :4] *= det_bboxes.new_tensor(
-                img_metas[0][0]['scale_factor'])
+            _det_bboxes[:, :4] *= det_bboxes.new_tensor(img_metas[0][0]["scale_factor"])
         bbox_results = bbox2result(_det_bboxes, det_labels, self.num_classes)
         return bbox_results

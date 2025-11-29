@@ -1,8 +1,8 @@
-import os
 import glob
-import jittor as jt
+import os
 import traceback
-from ltr.admin import loading
+
+import jittor as jt
 
 
 class BaseTrainer:
@@ -42,12 +42,11 @@ class BaseTrainer:
 
         if self.settings.env.workspace_dir is not None:
             self.settings.env.workspace_dir = os.path.expanduser(self.settings.env.workspace_dir)
-            self._checkpoint_dir = os.path.join(self.settings.env.workspace_dir, 'checkpoints')
+            self._checkpoint_dir = os.path.join(self.settings.env.workspace_dir, "checkpoints")
             if not os.path.exists(self._checkpoint_dir):
                 os.makedirs(self._checkpoint_dir)
         else:
             self._checkpoint_dir = None
-
 
     def train(self, max_epochs, load_latest=False, fail_safe=True):
         """Do training for the given number of epochs.
@@ -64,7 +63,7 @@ class BaseTrainer:
                 if load_latest:
                     self.load_checkpoint()
 
-                for epoch in range(self.epoch+1, max_epochs+1):
+                for epoch in range(self.epoch + 1, max_epochs + 1):
                     self.epoch = epoch
 
                     self.train_epoch()
@@ -75,22 +74,20 @@ class BaseTrainer:
                     if self._checkpoint_dir:
                         self.save_checkpoint()
             except:
-                print('Training crashed at epoch {}'.format(epoch))
+                print(f"Training crashed at epoch {epoch}")
                 if fail_safe:
                     self.epoch -= 1
                     load_latest = True
-                    print('Traceback for the error!')
+                    print("Traceback for the error!")
                     print(traceback.format_exc())
-                    print('Restarting training from last epoch ...')
+                    print("Restarting training from last epoch ...")
                 else:
                     raise
 
-        print('Finished training!')
-
+        print("Finished training!")
 
     def train_epoch(self):
         raise NotImplementedError
-
 
     def save_checkpoint(self):
         """Saves a checkpoint of the network and other variables."""
@@ -100,33 +97,33 @@ class BaseTrainer:
         actor_type = type(self.actor).__name__
         net_type = type(net).__name__
         state = {
-            'epoch': self.epoch,
-            'actor_type': actor_type,
-            'net_type': net_type,
-            'net': net.state_dict(),
-            'net_info': getattr(net, 'info', None),
-            'constructor': getattr(net, 'constructor', None),
-            'optimizer': self.optimizer.state_dict(),
-            'stats': self.stats,
-            'settings': self.settings
+            "epoch": self.epoch,
+            "actor_type": actor_type,
+            "net_type": net_type,
+            "net": net.state_dict(),
+            "net_info": getattr(net, "info", None),
+            "constructor": getattr(net, "constructor", None),
+            "optimizer": self.optimizer.state_dict(),
+            "stats": self.stats,
+            "settings": self.settings,
         }
 
-
-        directory = '{}/{}'.format(self._checkpoint_dir, self.settings.project_path)
+        directory = f"{self._checkpoint_dir}/{self.settings.project_path}"
         if not os.path.exists(directory):
             os.makedirs(directory)
 
         # First save as a tmp file
-        tmp_file_path = '{}/{}_ep{:04d}.tmp'.format(directory, net_type, self.epoch)
+        tmp_file_path = f"{directory}/{net_type}_ep{self.epoch:04d}.tmp"
         jt.save(state, tmp_file_path)
 
-        file_path = '{}/{}_ep{:04d}.pth.tar'.format(directory, net_type, self.epoch)
+        file_path = f"{directory}/{net_type}_ep{self.epoch:04d}.pth.tar"
 
         # Now rename to actual checkpoint. os.rename seems to be atomic if files are on same filesystem. Not 100% sure
         os.rename(tmp_file_path, file_path)
 
-
-    def load_checkpoint(self, checkpoint = None, fields = None, ignore_fields = None, load_constructor = False):
+    def load_checkpoint(
+        self, checkpoint=None, fields=None, ignore_fields=None, load_constructor=False
+    ):
         """Loads a network checkpoint file.
 
         Can be called in three different ways:
@@ -145,25 +142,27 @@ class BaseTrainer:
 
         if checkpoint is None:
             # Load most recent checkpoint
-            checkpoint_list = sorted(glob.glob('{}/{}/{}_ep*.pth.tar'.format(self._checkpoint_dir,
-                                                                             self.settings.project_path, net_type)))
+            checkpoint_list = sorted(
+                glob.glob(
+                    f"{self._checkpoint_dir}/{self.settings.project_path}/{net_type}_ep*.pth.tar"
+                )
+            )
             if checkpoint_list:
                 checkpoint_path = checkpoint_list[-1]
             else:
-                print('No matching checkpoint file found')
+                print("No matching checkpoint file found")
                 return
         elif isinstance(checkpoint, int):
             # Checkpoint is the epoch number
-            checkpoint_path = '{}/{}/{}_ep{:04d}.pth.tar'.format(self._checkpoint_dir, self.settings.project_path,
-                                                                 net_type, checkpoint)
+            checkpoint_path = f"{self._checkpoint_dir}/{self.settings.project_path}/{net_type}_ep{checkpoint:04d}.pth.tar"
         elif isinstance(checkpoint, str):
             # checkpoint is the path
             if os.path.isdir(checkpoint):
-                checkpoint_list = sorted(glob.glob('{}/*_ep*.pth.tar'.format(checkpoint)))
+                checkpoint_list = sorted(glob.glob(f"{checkpoint}/*_ep*.pth.tar"))
                 if checkpoint_list:
                     checkpoint_path = checkpoint_list[-1]
                 else:
-                    raise Exception('No checkpoint found')
+                    raise Exception("No checkpoint found")
             else:
                 checkpoint_path = os.path.expanduser(checkpoint)
         else:
@@ -179,8 +178,8 @@ class BaseTrainer:
         # if ignore_fields is None:
         #     ignore_fields = ['settings']
 
-            # Never load the scheduler. It exists in older checkpoints.
-#        ignore_fields.extend(['lr_scheduler', 'constructor', 'net_type', 'actor_type', 'net_info'])
+        # Never load the scheduler. It exists in older checkpoints.
+        #        ignore_fields.extend(['lr_scheduler', 'constructor', 'net_type', 'actor_type', 'net_info'])
 
         # Load all fields
         # for key in fields:

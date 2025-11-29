@@ -1,1 +1,1 @@
-from .params import TrackerParams, FeatureParams, Choice
+from .params import Choice, FeatureParams, TrackerParams

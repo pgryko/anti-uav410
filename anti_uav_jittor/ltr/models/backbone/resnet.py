@@ -1,18 +1,23 @@
 import math
-import jittor.nn as nn
 from collections import OrderedDict
-from .base import Backbone
 
 import jittor as jt
+import jittor.nn as nn
 from jittor import Module
-from jittor import init
-import math
+
 
 # Jittor中的Conv2d和BatchNorm2d等函数
 def conv3x3(in_planes, out_planes, stride=1, dilation=1):
     """3x3 convolution with padding"""
-    return jt.nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride,
-                         padding=dilation, bias=False, dilation=dilation)
+    return jt.nn.Conv2d(
+        in_planes,
+        out_planes,
+        kernel_size=3,
+        stride=stride,
+        padding=dilation,
+        bias=False,
+        dilation=dilation,
+    )
 
 
 class BasicBlock(Module):
@@ -93,35 +98,64 @@ class Bottleneck(Module):
 
         return out
 
+
 class ResNet(nn.Module):
-    """ ResNet network module. Allows extracting specific feature blocks."""
-    def __init__(self, block, layers, output_layers, num_classes=1000, inplanes=64, dilation_factor=1, frozen_layers=()):
+    """ResNet network module. Allows extracting specific feature blocks."""
+
+    def __init__(
+        self,
+        block,
+        layers,
+        output_layers,
+        num_classes=1000,
+        inplanes=64,
+        dilation_factor=1,
+        frozen_layers=(),
+    ):
         self.inplanes = inplanes
         super().__init__()
         self.output_layers = output_layers
-        self.conv1 = nn.Conv2d(3, inplanes, kernel_size=7, stride=2, padding=3,
-                               bias=False)
+        self.conv1 = nn.Conv2d(3, inplanes, kernel_size=7, stride=2, padding=3, bias=False)
         self.bn1 = nn.BatchNorm2d(inplanes)
         self.relu = nn.ReLU()
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
         stride = [1 + (dilation_factor < l) for l in (8, 4, 2)]
-        self.layer1 = self._make_layer(block, inplanes, layers[0], dilation=max(dilation_factor//8, 1))
-        self.layer2 = self._make_layer(block, inplanes*2, layers[1], stride=stride[0], dilation=max(dilation_factor//4, 1))
-        self.layer3 = self._make_layer(block, inplanes*4, layers[2], stride=1, dilation=2)
+        self.layer1 = self._make_layer(
+            block, inplanes, layers[0], dilation=max(dilation_factor // 8, 1)
+        )
+        self.layer2 = self._make_layer(
+            block, inplanes * 2, layers[1], stride=stride[0], dilation=max(dilation_factor // 4, 1)
+        )
+        self.layer3 = self._make_layer(block, inplanes * 4, layers[2], stride=1, dilation=2)
         # self.layer4 = self._make_layer(block, inplanes*8, layers[3], stride=stride[2], dilation=dilation_factor)
-        out_feature_strides = {'conv1': 4, 'layer1': 4, 'layer2': 4*stride[0], 'layer3': 4*stride[0]*stride[1],
-                               'layer4': 4*stride[0]*stride[1]*stride[2]}
+        out_feature_strides = {
+            "conv1": 4,
+            "layer1": 4,
+            "layer2": 4 * stride[0],
+            "layer3": 4 * stride[0] * stride[1],
+            "layer4": 4 * stride[0] * stride[1] * stride[2],
+        }
 
         # TODO better way?
         if isinstance(self.layer1[0], BasicBlock):
-            out_feature_channels = {'conv1': inplanes, 'layer1': inplanes, 'layer2': inplanes*2, 'layer3': inplanes*4,
-                               'layer4': inplanes*8}
+            out_feature_channels = {
+                "conv1": inplanes,
+                "layer1": inplanes,
+                "layer2": inplanes * 2,
+                "layer3": inplanes * 4,
+                "layer4": inplanes * 8,
+            }
         elif isinstance(self.layer1[0], Bottleneck):
             base_num_channels = 4 * inplanes
-            out_feature_channels = {'conv1': inplanes, 'layer1': base_num_channels, 'layer2': base_num_channels * 2,
-                                    'layer3': base_num_channels * 4, 'layer4': base_num_channels * 8}
+            out_feature_channels = {
+                "conv1": inplanes,
+                "layer1": base_num_channels,
+                "layer2": base_num_channels * 2,
+                "layer3": base_num_channels * 4,
+                "layer4": base_num_channels * 8,
+            }
         else:
-            raise Exception('block not supported')
+            raise Exception("block not supported")
 
         self._out_feature_strides = out_feature_strides
         self._out_feature_channels = out_feature_channels
@@ -132,7 +166,7 @@ class ResNet(nn.Module):
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
                 n = m.kernel_size[0] * m.kernel_size[1] * m.out_channels
-                m.weight.data.normal_(0, math.sqrt(2. / n))
+                m.weight.data.normal_(0, math.sqrt(2.0 / n))
             elif isinstance(m, nn.BatchNorm2d):
                 m.weight.data.fill_(1)
                 m.bias.data.zero_()
@@ -153,8 +187,13 @@ class ResNet(nn.Module):
         downsample = None
         if stride != 1 or self.inplanes != planes * block.expansion:
             downsample = nn.Sequential(
-                nn.Conv2d(self.inplanes, planes * block.expansion,
-                          kernel_size=1, stride=stride, bias=False),
+                nn.Conv2d(
+                    self.inplanes,
+                    planes * block.expansion,
+                    kernel_size=1,
+                    stride=stride,
+                    bias=False,
+                ),
                 nn.BatchNorm2d(planes * block.expansion),
             )
 
@@ -172,7 +211,7 @@ class ResNet(nn.Module):
         return len(output_layers) == len(outputs)
 
     def execute(self, x, output_layers=None):
-        """ Forward pass with input x. The output_layers specify the feature blocks which must be returned """
+        """Forward pass with input x. The output_layers specify the feature blocks which must be returned"""
         outputs = OrderedDict()
 
         if output_layers is None:
@@ -182,43 +221,41 @@ class ResNet(nn.Module):
         x = self.bn1(x)
         x = self.relu(x)
 
-        if self._add_output_and_check('conv1', x, outputs, output_layers):
+        if self._add_output_and_check("conv1", x, outputs, output_layers):
             return outputs
 
         x = self.maxpool(x)
 
         x = self.layer1(x)
 
-        if self._add_output_and_check('layer1', x, outputs, output_layers):
+        if self._add_output_and_check("layer1", x, outputs, output_layers):
             return outputs
 
         x = self.layer2(x)
 
-        if self._add_output_and_check('layer2', x, outputs, output_layers):
+        if self._add_output_and_check("layer2", x, outputs, output_layers):
             return outputs
 
         x = self.layer3(x)
 
-        if self._add_output_and_check('layer3', x, outputs, output_layers):
+        if self._add_output_and_check("layer3", x, outputs, output_layers):
             return outputs
 
-
-
-        raise ValueError('output_layer is wrong.')
-
+        raise ValueError("output_layer is wrong.")
 
 
 import os
+
+
 def resnet_baby(output_layers=None, pretrained=False, inplanes=16, **kwargs):
-    """Constructs a simplified ResNet model.
-    """
+    """Constructs a simplified ResNet model."""
 
     if output_layers is None:
-        output_layers = ['default']
+        output_layers = ["default"]
     else:
         for l in output_layers:
-            if l not in ['conv1', 'layer1', 'layer2', 'layer3', 'layer4', 'fc']:
-                raise ValueError('Unknown layer: {}'.format(l))
+            if l not in ["conv1", "layer1", "layer2", "layer3", "layer4", "fc"]:
+                raise ValueError(f"Unknown layer: {l}")
 
     model = ResNet(BasicBlock, [2, 2, 2, 2], output_layers, inplanes=inplanes, **kwargs)
 
@@ -228,16 +265,14 @@ def resnet_baby(output_layers=None, pretrained=False, inplanes=16, **kwargs):
     return model
 
 
-
-def resnet18(output_layers=None, pretrained=False,pretrained_weights_path='none', **kwargs):
-    """Constructs a ResNet-18 model.
-    """
+def resnet18(output_layers=None, pretrained=False, pretrained_weights_path="none", **kwargs):
+    """Constructs a ResNet-18 model."""
     if output_layers is None:
-        output_layers = ['default']
+        output_layers = ["default"]
     else:
         for l in output_layers:
-            if l not in ['conv1', 'layer1', 'layer2', 'layer3', 'layer4', 'fc']:
-                raise ValueError('Unknown layer: {}'.format(l))
+            if l not in ["conv1", "layer1", "layer2", "layer3", "layer4", "fc"]:
+                raise ValueError(f"Unknown layer: {l}")
 
     model = ResNet(BasicBlock, [2, 2, 2, 2], output_layers, **kwargs)
 
@@ -252,15 +287,14 @@ def resnet18(output_layers=None, pretrained=False,pretrained_weights_path='none'
     return model
 
 
-def resnet50(output_layers=None, pretrained=False,pretrained_weights_path='none', **kwargs):
-    """Constructs a ResNet-50 model.
-    """
+def resnet50(output_layers=None, pretrained=False, pretrained_weights_path="none", **kwargs):
+    """Constructs a ResNet-50 model."""
     if output_layers is None:
-        output_layers = ['default']
+        output_layers = ["default"]
     else:
         for l in output_layers:
-            if l not in ['conv1', 'layer1', 'layer2', 'layer3', 'layer4', 'fc']:
-                raise ValueError('Unknown layer: {}'.format(l))
+            if l not in ["conv1", "layer1", "layer2", "layer3", "layer4", "fc"]:
+                raise ValueError(f"Unknown layer: {l}")
 
     model = ResNet(Bottleneck, [3, 4, 6, 3], output_layers, **kwargs)
 

@@ -1,8 +1,7 @@
+import jittor as jt
 import torch
 import torch.autograd
 
-import jittor as jt
-import math
 from pytracking.libs import TensorList
 from pytracking.utils.plotting import plot_graph
 
@@ -30,8 +29,10 @@ class L2Problem:
         """M2 preconditioner."""
         return x
 
+
 class MinimizationProblem:
     """General minimization problem."""
+
     def __call__(self, x: TensorList) -> TensorList:
         """Shall compute the loss."""
         raise NotImplementedError
@@ -50,7 +51,9 @@ class MinimizationProblem:
 class ConjugateGradientBase:
     """Conjugate Gradient optimizer base class. Implements the CG loop."""
 
-    def __init__(self, fletcher_reeves = True, standard_alpha = True, direction_forget_factor = 0, debug = False):
+    def __init__(
+        self, fletcher_reeves=True, standard_alpha=True, direction_forget_factor=0, debug=False
+    ):
         self.fletcher_reeves = fletcher_reeves
         self.standard_alpha = standard_alpha
         self.direction_forget_factor = direction_forget_factor
@@ -68,7 +71,6 @@ class ConjugateGradientBase:
         self.p = None
         self.rho = jt.ones(1)
         self.r_prev = None
-
 
     def run_CG(self, num_iter, x=None, eps=0.0):
         """Main conjugate gradient method.
@@ -94,7 +96,7 @@ class ConjugateGradientBase:
         resvec = None
         if self.debug:
             normr = self.residual_norm(r)
-            resvec = jt.zeros(num_iter+1)
+            resvec = jt.zeros(num_iter + 1)
             resvec[0] = normr
 
         # Loop over iterations
@@ -108,9 +110,9 @@ class ConjugateGradientBase:
 
             if self.check_zero(self.rho):
                 if self.debug:
-                    print('Stopped CG since rho = 0')
+                    print("Stopped CG since rho = 0")
                     if resvec is not None:
-                        resvec = resvec[:ii+1]
+                        resvec = resvec[: ii + 1]
                 return x, resvec
 
             if self.p is None:
@@ -151,18 +153,17 @@ class ConjugateGradientBase:
 
             if self.debug:
                 self.evaluate_CG_iteration(x)
-                resvec[ii+1] = normr
+                resvec[ii + 1] = normr
 
             if eps > 0 and normr <= eps:
                 if self.debug:
-                    print('Stopped CG since norm smaller than eps')
+                    print("Stopped CG since norm smaller than eps")
                 break
 
         if resvec is not None:
-            resvec = resvec[:ii+2]
+            resvec = resvec[: ii + 2]
 
         return x, resvec
-
 
     def A(self, x):
         # Implements the left hand operation
@@ -178,7 +179,7 @@ class ConjugateGradientBase:
             res = sum(res)
         return res.sqrt()
 
-    def check_zero(self, s, eps = 0.0):
+    def check_zero(self, s, eps=0.0):
         ss = s.abs() <= eps
         if isinstance(ss, (TensorList, list, tuple)):
             ss = sum(ss)
@@ -196,19 +197,30 @@ class ConjugateGradientBase:
         pass
 
 
-
 class ConjugateGradient(ConjugateGradientBase):
     """Conjugate Gradient optimizer, performing single linearization of the residuals in the start."""
 
-    def __init__(self, problem: L2Problem, variable: TensorList, cg_eps = 0.0, fletcher_reeves = True,
-                 standard_alpha = True, direction_forget_factor = 0, debug = False, plotting = False, visdom=None):
-        super().__init__(fletcher_reeves, standard_alpha, direction_forget_factor, debug or plotting)
+    def __init__(
+        self,
+        problem: L2Problem,
+        variable: TensorList,
+        cg_eps=0.0,
+        fletcher_reeves=True,
+        standard_alpha=True,
+        direction_forget_factor=0,
+        debug=False,
+        plotting=False,
+        visdom=None,
+    ):
+        super().__init__(
+            fletcher_reeves, standard_alpha, direction_forget_factor, debug or plotting
+        )
 
         self.problem = problem
         self.x = variable
 
         self.plotting = plotting
-        self.fig_num = (10,11)
+        self.fig_num = (10, 11)
         self.visdom = visdom
 
         self.cg_eps = cg_eps
@@ -223,7 +235,6 @@ class ConjugateGradient(ConjugateGradientBase):
         self.f0 = None
         self.g = None
         self.dfdxt_g = None
-
 
     def run(self, num_cg_iter):
         """Run the oprimizer with the provided number of iterations."""
@@ -252,7 +263,7 @@ class ConjugateGradient(ConjugateGradientBase):
         self.dfdxt_g = TensorList(torch.autograd.grad(self.f0, self.x, self.g, create_graph=True))
 
         # Get the right hand side
-        self.b = - self.dfdxt_g.detach()
+        self.b = -self.dfdxt_g.detach()
 
         # Run CG
         delta_x, res = self.run_CG(num_cg_iter, eps=self.cg_eps)
@@ -266,15 +277,14 @@ class ConjugateGradient(ConjugateGradientBase):
             self.residuals = jt.concat((self.residuals, res))
             self.losses = jt.concat((self.losses, lossvec))
             if self.visdom is not None:
-                self.visdom.register(self.losses, 'lineplot', 3, 'Loss')
-                self.visdom.register(self.residuals, 'lineplot', 3, 'CG residuals')
+                self.visdom.register(self.losses, "lineplot", 3, "Loss")
+                self.visdom.register(self.residuals, "lineplot", 3, "CG residuals")
             elif self.plotting:
-                plot_graph(self.losses, self.fig_num[0], title='Loss')
-                plot_graph(self.residuals, self.fig_num[1], title='CG residuals')
+                plot_graph(self.losses, self.fig_num[0], title="Loss")
+                plot_graph(self.residuals, self.fig_num[1], title="CG residuals")
 
         self.x.detach_()
         self.clear_temp()
-
 
     def A(self, x):
         dfdx_x = torch.autograd.grad(self.dfdxt_g, self.g, x, retain_graph=True)
@@ -290,21 +300,32 @@ class ConjugateGradient(ConjugateGradientBase):
         return self.problem.M2(x)
 
 
-
 class GaussNewtonCG(ConjugateGradientBase):
     """Gauss-Newton with Conjugate Gradient optimizer."""
 
-    def __init__(self, problem: L2Problem, variable: TensorList, cg_eps = 0.0, fletcher_reeves = True,
-                 standard_alpha = True, direction_forget_factor = 0, debug = False, analyze = False, plotting = False,
-                 visdom=None):
-        super().__init__(fletcher_reeves, standard_alpha, direction_forget_factor, debug or analyze or plotting)
+    def __init__(
+        self,
+        problem: L2Problem,
+        variable: TensorList,
+        cg_eps=0.0,
+        fletcher_reeves=True,
+        standard_alpha=True,
+        direction_forget_factor=0,
+        debug=False,
+        analyze=False,
+        plotting=False,
+        visdom=None,
+    ):
+        super().__init__(
+            fletcher_reeves, standard_alpha, direction_forget_factor, debug or analyze or plotting
+        )
 
         self.problem = problem
         self.x = variable
 
         self.analyze_convergence = analyze
         self.plotting = plotting
-        self.fig_num = (10,11,12)
+        self.fig_num = (10, 11, 12)
         self.visdom = visdom
 
         self.cg_eps = cg_eps
@@ -321,10 +342,8 @@ class GaussNewtonCG(ConjugateGradientBase):
         self.g = None
         self.dfdxt_g = None
 
-
     def run_GN(self, *args, **kwargs):
         return self.run(*args, **kwargs)
-
 
     def run(self, num_cg_iter, num_gn_iter=None):
         """Run the optimizer.
@@ -336,8 +355,8 @@ class GaussNewtonCG(ConjugateGradientBase):
 
         if isinstance(num_cg_iter, int):
             if num_gn_iter is None:
-                raise ValueError('Must specify number of GN iter if CG iter is constant')
-            num_cg_iter = [num_cg_iter]*num_gn_iter
+                raise ValueError("Must specify number of GN iter if CG iter is constant")
+            num_cg_iter = [num_cg_iter] * num_gn_iter
 
         num_gn_iter = len(num_cg_iter)
         if num_gn_iter == 0:
@@ -357,23 +376,21 @@ class GaussNewtonCG(ConjugateGradientBase):
                 self.losses = jt.concat((self.losses, loss.detach().cpu().view(-1)))
 
             if self.visdom is not None:
-                self.visdom.register(self.losses, 'lineplot', 3, 'Loss')
-                self.visdom.register(self.residuals, 'lineplot', 3, 'CG residuals')
+                self.visdom.register(self.losses, "lineplot", 3, "Loss")
+                self.visdom.register(self.residuals, "lineplot", 3, "CG residuals")
 
                 if self.analyze_convergence:
-                    self.visdom.register(self.gradient_mags, 'lineplot', 4, 'Gradient magnitude')
+                    self.visdom.register(self.gradient_mags, "lineplot", 4, "Gradient magnitude")
             elif self.plotting:
-                plot_graph(self.losses, self.fig_num[0], title='Loss')
-                plot_graph(self.residuals, self.fig_num[1], title='CG residuals')
+                plot_graph(self.losses, self.fig_num[0], title="Loss")
+                plot_graph(self.residuals, self.fig_num[1], title="CG residuals")
                 if self.analyze_convergence:
-                    plot_graph(self.gradient_mags, self.fig_num[2], 'Gradient magnitude')
-
+                    plot_graph(self.gradient_mags, self.fig_num[2], "Gradient magnitude")
 
         self.x.detach_()
         self.clear_temp()
 
         return self.losses, self.residuals
-
 
     def run_GN_iter(self, num_cg_iter):
         """Runs a single GN iteration."""
@@ -396,7 +413,7 @@ class GaussNewtonCG(ConjugateGradientBase):
         self.dfdxt_g = TensorList(torch.autograd.grad(self.f0, self.x, self.g, create_graph=True))
 
         # Get the right hand side
-        self.b = - self.dfdxt_g.detach()
+        self.b = -self.dfdxt_g.detach()
 
         # Run CG
         delta_x, res = self.run_CG(num_cg_iter, eps=self.cg_eps)
@@ -406,7 +423,6 @@ class GaussNewtonCG(ConjugateGradientBase):
 
         if self.debug:
             self.residuals = jt.concat((self.residuals, res))
-
 
     def A(self, x):
         dfdx_x = torch.autograd.grad(self.dfdxt_g, self.g, x, retain_graph=True)
@@ -433,14 +449,27 @@ class GaussNewtonCG(ConjugateGradientBase):
 
             # store in the vectors
             self.losses = jt.concat((self.losses, loss.detach().cpu().view(-1)))
-            self.gradient_mags = jt.concat((self.gradient_mags, sum(grad.view(-1) @ grad.view(-1)).cpu().sqrt().detach().view(-1)))
+            self.gradient_mags = jt.concat(
+                (
+                    self.gradient_mags,
+                    sum(grad.view(-1) @ grad.view(-1)).cpu().sqrt().detach().view(-1),
+                )
+            )
 
 
 class GradientDescentL2:
     """Gradient descent with momentum for L2 problems."""
 
-    def __init__(self, problem: L2Problem, variable: TensorList, step_length: float, momentum: float = 0.0, debug = False, plotting = False, visdom=None):
-
+    def __init__(
+        self,
+        problem: L2Problem,
+        variable: TensorList,
+        step_length: float,
+        momentum: float = 0.0,
+        debug=False,
+        plotting=False,
+        visdom=None,
+    ):
         self.problem = problem
         self.x = variable
 
@@ -449,7 +478,7 @@ class GradientDescentL2:
 
         self.debug = debug or plotting
         self.plotting = plotting
-        self.fig_num = (10,11)
+        self.fig_num = (10, 11)
         self.visdom = visdom
         self.losses = jt.zeros(0)
         self.gradient_mags = jt.zeros(0)
@@ -457,21 +486,18 @@ class GradientDescentL2:
 
         self.clear_temp()
 
-
     def clear_temp(self):
         self.f0 = None
         self.dir = None
 
-
-    def run(self, num_iter, dummy = None):
-
+    def run(self, num_iter, dummy=None):
         if num_iter == 0:
             return
 
         lossvec = None
         if self.debug:
-            lossvec = jt.zeros(num_iter+1)
-            grad_mags = jt.zeros(num_iter+1)
+            lossvec = jt.zeros(num_iter + 1)
+            grad_mags = jt.zeros(num_iter + 1)
 
         for i in range(num_iter):
             self.x.requires_grad_(True)
@@ -509,24 +535,37 @@ class GradientDescentL2:
             self.gradient_mags = jt.concat((self.gradient_mags, grad_mags))
 
             if self.visdom is not None:
-                self.visdom.register(self.losses, 'lineplot', 3, 'Loss')
-                self.visdom.register(self.gradient_mags, 'lineplot', 4, 'Gradient magnitude')
+                self.visdom.register(self.losses, "lineplot", 3, "Loss")
+                self.visdom.register(self.gradient_mags, "lineplot", 4, "Gradient magnitude")
             elif self.plotting:
-                plot_graph(self.losses, self.fig_num[0], title='Loss')
-                plot_graph(self.gradient_mags, self.fig_num[1], title='Gradient magnitude')
+                plot_graph(self.losses, self.fig_num[0], title="Loss")
+                plot_graph(self.gradient_mags, self.fig_num[1], title="Gradient magnitude")
 
         self.x.detach_()
         self.clear_temp()
 
 
-
 class NewtonCG(ConjugateGradientBase):
     """Newton with Conjugate Gradient. Handels general minimization problems."""
 
-    def __init__(self, problem: MinimizationProblem, variable: TensorList, init_hessian_reg = 0.0, hessian_reg_factor = 1.0,
-                 cg_eps = 0.0, fletcher_reeves = True, standard_alpha = True, direction_forget_factor = 0,
-                 debug = False, analyze = False, plotting = False, fig_num=(10, 11, 12)):
-        super().__init__(fletcher_reeves, standard_alpha, direction_forget_factor, debug or analyze or plotting)
+    def __init__(
+        self,
+        problem: MinimizationProblem,
+        variable: TensorList,
+        init_hessian_reg=0.0,
+        hessian_reg_factor=1.0,
+        cg_eps=0.0,
+        fletcher_reeves=True,
+        standard_alpha=True,
+        direction_forget_factor=0,
+        debug=False,
+        analyze=False,
+        plotting=False,
+        fig_num=(10, 11, 12),
+    ):
+        super().__init__(
+            fletcher_reeves, standard_alpha, direction_forget_factor, debug or analyze or plotting
+        )
 
         self.problem = problem
         self.x = variable
@@ -549,9 +588,7 @@ class NewtonCG(ConjugateGradientBase):
         self.f0 = None
         self.g = None
 
-
     def run(self, num_cg_iter, num_newton_iter=None):
-
         if isinstance(num_cg_iter, int):
             if num_cg_iter == 0:
                 return
@@ -576,19 +613,17 @@ class NewtonCG(ConjugateGradientBase):
                 self.losses = jt.concat((self.losses, loss.detach().cpu().view(-1)))
 
             if self.plotting:
-                plot_graph(self.losses, self.fig_num[0], title='Loss')
-                plot_graph(self.residuals, self.fig_num[1], title='CG residuals')
+                plot_graph(self.losses, self.fig_num[0], title="Loss")
+                plot_graph(self.residuals, self.fig_num[1], title="CG residuals")
                 if self.analyze_convergence:
-                    plot_graph(self.gradient_mags, self.fig_num[2], 'Gradient magnitude')
+                    plot_graph(self.gradient_mags, self.fig_num[2], "Gradient magnitude")
 
         self.x.detach_()
         self.clear_temp()
 
         return self.losses, self.residuals
 
-
     def run_newton_iter(self, num_cg_iter):
-
         self.x.requires_grad_(True)
 
         # Evaluate function at current estimate
@@ -601,7 +636,7 @@ class NewtonCG(ConjugateGradientBase):
         self.g = TensorList(torch.autograd.grad(self.f0, self.x, create_graph=True))
 
         # Get the right hand side
-        self.b = - self.g.detach()
+        self.b = -self.g.detach()
 
         # Run CG
         delta_x, res = self.run_CG(num_cg_iter, eps=self.cg_eps)
@@ -612,9 +647,11 @@ class NewtonCG(ConjugateGradientBase):
         if self.debug:
             self.residuals = jt.concat((self.residuals, res))
 
-
     def A(self, x):
-        return TensorList(torch.autograd.grad(self.g, self.x, x, retain_graph=True)) + self.hessian_reg * x
+        return (
+            TensorList(torch.autograd.grad(self.g, self.x, x, retain_graph=True))
+            + self.hessian_reg * x
+        )
 
     def ip(self, a, b):
         # Implements the inner product
@@ -637,15 +674,27 @@ class NewtonCG(ConjugateGradientBase):
 
             # store in the vectors
             self.losses = jt.concat((self.losses, loss.detach().cpu().view(-1)))
-            self.gradient_mags = jt.concat((self.gradient_mags, sum(grad.view(-1) @ grad.view(-1)).cpu().sqrt().detach().view(-1)))
+            self.gradient_mags = jt.concat(
+                (
+                    self.gradient_mags,
+                    sum(grad.view(-1) @ grad.view(-1)).cpu().sqrt().detach().view(-1),
+                )
+            )
 
 
 class GradientDescent:
     """Gradient descent for general minimization problems."""
 
-    def __init__(self, problem: MinimizationProblem, variable: TensorList, step_length: float, momentum: float = 0.0,
-                 debug = False, plotting = False, fig_num=(10,11)):
-
+    def __init__(
+        self,
+        problem: MinimizationProblem,
+        variable: TensorList,
+        step_length: float,
+        momentum: float = 0.0,
+        debug=False,
+        plotting=False,
+        fig_num=(10, 11),
+    ):
         self.problem = problem
         self.x = variable
 
@@ -662,20 +711,17 @@ class GradientDescent:
 
         self.clear_temp()
 
-
     def clear_temp(self):
         self.dir = None
 
-
-    def run(self, num_iter, dummy = None):
-
+    def run(self, num_iter, dummy=None):
         if num_iter == 0:
             return
 
         lossvec = None
         if self.debug:
-            lossvec = jt.zeros(num_iter+1)
-            grad_mags = jt.zeros(num_iter+1)
+            lossvec = jt.zeros(num_iter + 1)
+            grad_mags = jt.zeros(num_iter + 1)
 
         for i in range(num_iter):
             self.x.requires_grad_(True)
@@ -708,8 +754,8 @@ class GradientDescent:
             self.losses = jt.concat((self.losses, lossvec))
             self.gradient_mags = jt.concat((self.gradient_mags, grad_mags))
             if self.plotting:
-                plot_graph(self.losses, self.fig_num[0], title='Loss')
-                plot_graph(self.gradient_mags, self.fig_num[1], title='Gradient magnitude')
+                plot_graph(self.losses, self.fig_num[0], title="Loss")
+                plot_graph(self.gradient_mags, self.fig_num[1], title="Gradient magnitude")
 
         self.x.detach_()
         self.clear_temp()

@@ -983,7 +983,7 @@ region_overlap region_compute_overlap(const region_container* ra, const region_c
 }
 
 int region_contains_point(region_container* r, float x, float y) {
-	
+
 	if (r->type == RECTANGLE) {
 		if (x >= (r->data.rectangle).x && x <= ((r->data.rectangle).width + (r->data.rectangle).x) &&
 			y >= (r->data.rectangle).y && y <= ((r->data.rectangle).height + (r->data.rectangle).y))
@@ -1030,4 +1030,3 @@ void region_get_mask_offset(region_container* r, char* mask, int x, int y, int w
 		region_release(&t);
 
 }
-

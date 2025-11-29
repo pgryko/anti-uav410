@@ -1,30 +1,39 @@
 import argparse
-import jittor as jt
+import importlib
 import os
 import time
-import importlib
-import _init_paths
+
+import jittor as jt
 from jittor import nn
 from lib.models.mixformer.mixformer_online import Attention
 from thop import profile
 from thop.utils import clever_format
 
+
 def parse_args():
     """
     args for training.
     """
-    parser = argparse.ArgumentParser(description='Parse args for training')
+    parser = argparse.ArgumentParser(description="Parse args for training")
     # for train
-    parser.add_argument('--script', type=str, default='mixformer_online', choices=['mixformer', 'mixformer_online'],
-                        help='training script name')
-    parser.add_argument('--config', type=str, default='baseline', help='yaml configure file name')
-    parser.add_argument('--display_name', type=str, default='MixFormer')
-    parser.add_argument('--online_skip', type=int, default=200, help='the skip interval of mixformer-online')
+    parser.add_argument(
+        "--script",
+        type=str,
+        default="mixformer_online",
+        choices=["mixformer", "mixformer_online"],
+        help="training script name",
+    )
+    parser.add_argument("--config", type=str, default="baseline", help="yaml configure file name")
+    parser.add_argument("--display_name", type=str, default="MixFormer")
+    parser.add_argument(
+        "--online_skip", type=int, default=200, help="the skip interval of mixformer-online"
+    )
     args = parser.parse_args()
 
     return args
 
-def get_complexity_MHA(m:nn.MultiheadAttention, x, y):
+
+def get_complexity_MHA(m: nn.MultiheadAttention, x, y):
     """(L, B, D): sequence length, batch size, dimension"""
     d_mid = m.embed_dim
     query, key, value = x[0], x[1], x[2]
@@ -38,6 +47,7 @@ def get_complexity_MHA(m:nn.MultiheadAttention, x, y):
     # compute attention
     total_ops += Lq * Lk * d_mid * 2
     m.total_ops += jt.Var([int(total_ops)])
+
 
 def get_complexity_Attention(module: Attention, input, y):
     # T: num_token
@@ -82,42 +92,18 @@ def get_complexity_Attention(module: Attention, input, y):
     flops += T_Q_t * T_KV_t * module.dim * 2  # including template and online template
     flops += T_Q_t * module.dim * T_KV_t * 2
 
-    if (
-            hasattr(module, 'conv_proj_q')
-            and hasattr(module.conv_proj_q, 'conv')
-    ):
-        params = sum(
-            [
-                p.numel()
-                for p in module.conv_proj_q.conv.parameters()
-            ]
-        )
+    if hasattr(module, "conv_proj_q") and hasattr(module.conv_proj_q, "conv"):
+        params = sum([p.numel() for p in module.conv_proj_q.conv.parameters()])
         flops += params * H_Q_t * W_Q_t * 2
         flops += params * H_Q_s * W_Q_s
 
-    if (
-            hasattr(module, 'conv_proj_k')
-            and hasattr(module.conv_proj_k, 'conv')
-    ):
-        params = sum(
-            [
-                p.numel()
-                for p in module.conv_proj_k.conv.parameters()
-            ]
-        )
+    if hasattr(module, "conv_proj_k") and hasattr(module.conv_proj_k, "conv"):
+        params = sum([p.numel() for p in module.conv_proj_k.conv.parameters()])
         flops += params * H_KV_t * W_KV_t * 2
         flops += params * H_KV_s * W_KV_s
 
-    if (
-            hasattr(module, 'conv_proj_v')
-            and hasattr(module.conv_proj_v, 'conv')
-    ):
-        params = sum(
-            [
-                p.numel()
-                for p in module.conv_proj_v.conv.parameters()
-            ]
-        )
+    if hasattr(module, "conv_proj_v") and hasattr(module.conv_proj_v, "conv"):
+        params = sum([p.numel() for p in module.conv_proj_v.conv.parameters()])
         flops += params * H_KV_t * W_KV_t * 2
         flops += params * H_KV_s * W_KV_s
 
@@ -133,15 +119,16 @@ def get_complexity_Attention(module: Attention, input, y):
     module.total_ops += jt.Var([int(flops)])
 
 
-def evaluate(model, template, search, skip=200, display_info='MixFormer'):
+def evaluate(model, template, search, skip=200, display_info="MixFormer"):
     """Compute FLOPs, Params, and Speed"""
     # compute flops and params except for score prediction
     custom_ops = {Attention: get_complexity_Attention}
-    macs, params = profile(model, inputs=(template, template, search, False),
-                           custom_ops=custom_ops, verbose=False)
+    macs, params = profile(
+        model, inputs=(template, template, search, False), custom_ops=custom_ops, verbose=False
+    )
     macs, params = clever_format([macs, params], "%.3f")
-    print('==>Macs is ', macs)
-    print('==>Params is ', params)
+    print("==>Macs is ", macs)
+    print("==>Params is ", params)
 
     # test speed
     T_w = 10
@@ -158,7 +145,7 @@ def evaluate(model, template, search, skip=200, display_info='MixFormer'):
             _ = model.forward_test(search)
         end = time.time()
         avg_lat = (end - start) / T_t
-        print("\033[0;32;40m The average overall FPS of {} is {}.\033[0m" .format(display_info, 1.0/avg_lat))
+        print(f"\033[0;32;40m The average overall FPS of {display_info} is {1.0/avg_lat}.\033[0m")
 
 
 def get_data(bs, sz):
@@ -170,22 +157,22 @@ if __name__ == "__main__":
     device = "cuda:0"
     # torch.cuda.set_device(device)
     args = parse_args()
-    '''update cfg'''
-    prj_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-    yaml_fname = os.path.join(prj_dir, 'experiments/%s/%s.yaml' % (args.script, args.config))
-    print("yaml_fname: {}".format(yaml_fname))
-    config_module = importlib.import_module('lib.config.%s.config' % args.script)
+    """update cfg"""
+    prj_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    yaml_fname = os.path.join(prj_dir, "experiments/%s/%s.yaml" % (args.script, args.config))
+    print(f"yaml_fname: {yaml_fname}")
+    config_module = importlib.import_module("lib.config.%s.config" % args.script)
     cfg = config_module.cfg
     config_module.update_config_from_file(yaml_fname)
-    print("cfg: {}".format(cfg))
-    '''set some values'''
+    print(f"cfg: {cfg}")
+    """set some values"""
     bs = 1
     z_sz = cfg.TEST.TEMPLATE_SIZE
     x_sz = cfg.TEST.SEARCH_SIZE
     cfg.MODEL.BACKBONE.FREEZE_BN = False
     cfg.MODEL.HEAD_FREEZE_BN = False
-    '''import stark network module'''
-    model_module = importlib.import_module('lib.models.mixformer')
+    """import stark network module"""
+    model_module = importlib.import_module("lib.models.mixformer")
     if args.script == "mixformer_online":
         model_constructor = model_module.build_mixformer_online_score
         model = model_constructor(cfg)

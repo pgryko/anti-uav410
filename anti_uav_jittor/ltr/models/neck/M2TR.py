@@ -1,18 +1,22 @@
-import numpy as np
-#from efficientnet_pytorch import EfficientNet
-from jittor import nn
-from ..backbone import *
 import jittor as jt
+import numpy as np
+
+# from efficientnet_pytorch import EfficientNet
+from jittor import nn
+
+from ..backbone import *
+
 
 class Extra_fq(jt.nn.Module):
     """
     img_size : the size of train image
     out_c : the channel of feature map extracted by this block(the channel mast be same as the spatial domain feature map)
     """
+
     def __init__(self, img_size, out_c):
         super(Extra_fq, self).__init__()
         self.img_size = img_size
-        #self.batch_size = batch_size
+        # self.batch_size = batch_size
 
         def get_DCTf(img_size):
             timg = jt.zeros((img_size, img_size))
@@ -23,8 +27,6 @@ class Extra_fq(jt.nn.Module):
                 for j in range(N):
                     timg[i, j] = jt.cos(np.pi * i * (2 * j + 1) / (2 * N)) * jt.sqrt(2 / N)
             return timg
-
-
 
         def create_f(img_size):
             resolution = (img_size, img_size)
@@ -38,7 +40,7 @@ class Extra_fq(jt.nn.Module):
                 for j in range(t_1[1] - i):
                     low_f[i, j] = 1
             for i in range(t_2[0]):
-                for j in range(t_2[1]-i):
+                for j in range(t_2[1] - i):
                     high_f[i, j] = 0
             mid_f = mid_f - low_f
             mid_f = mid_f - high_f
@@ -48,30 +50,23 @@ class Extra_fq(jt.nn.Module):
 
         self.low_f, self.mid_f, self.high_f = create_f(img_size=img_size)
 
-
         self.block = nn.Sequential(
             jt.nn.Conv2d(3, int(out_c / 2), kernel_size=3, stride=1, padding=1),
             jt.nn.BatchNorm2d(int(out_c / 2)),
             jt.nn.ReLU(inplace=True),
             jt.nn.MaxPool2d(kernel_size=2, stride=2),
-
             jt.nn.Conv2d(int(out_c / 2), out_c, kernel_size=3, stride=1, padding=1),
             jt.nn.BatchNorm2d(out_c),
             jt.nn.ReLU(inplace=True),
-            jt.nn.MaxPool2d(kernel_size=2, stride=2)
-
-
-
+            jt.nn.MaxPool2d(kernel_size=2, stride=2),
         )
 
     def DCT(self, img):
-
         dst = self.dct_filter * img
         dst = dst * self.dct_filter.permute(0, 1)
         return dst
 
     def IDCT(self, img):
-
         dst = self.dct_filter.permute(0, 1) * img
         dst = dst * self.dct_filter
         return dst
@@ -100,6 +95,7 @@ class PatchEmbed(jt.nn.Module):
     in_c : the channel of the feature map extracted by spatial domain
     embed_dim:the embeding dimension
     """
+
     def __init__(self, img_size=56, patch_size=56, in_c=32, embed_dim=768, norm_layer=None):
         super().__init__()
         img_size = (img_size, img_size)
@@ -127,20 +123,22 @@ class ATT(jt.nn.Module):
     attn_drop_ratio : the dropout rate of the attention
     proj_drop_ratio : the dropout rate of the projection
     """
-    def __init__(self,
 
-                 in_c,
-                 patch_size,
-                 dim,
-                 num_heads=8,
-                 qkv_bias=False,
-                 attn_drop_ratio=0.,
-                 proj_drop_ratio=0.):
+    def __init__(
+        self,
+        in_c,
+        patch_size,
+        dim,
+        num_heads=8,
+        qkv_bias=False,
+        attn_drop_ratio=0.0,
+        proj_drop_ratio=0.0,
+    ):
         super(ATT, self).__init__()
         self.num_heads = num_heads
         self.patch_size = patch_size
         # self.in_c = in_c
-        #head_dim = dim // num_heads
+        # head_dim = dim // num_heads
         self.scale = (patch_size * patch_size * in_c) ** -0.5
         self.qkv = jt.nn.Linear(dim, dim * 3, bias=qkv_bias)
         self.attn_drop = jt.nn.Dropout(attn_drop_ratio)
@@ -149,7 +147,9 @@ class ATT(jt.nn.Module):
 
     def forward(self, x):
         B, N, C = x.shape
-        qkv = self.qkv(x).reshape(B, N, 3, self.num_heads, C // self.num_heads).permute(2, 0, 3, 1, 4)
+        qkv = (
+            self.qkv(x).reshape(B, N, 3, self.num_heads, C // self.num_heads).permute(2, 0, 3, 1, 4)
+        )
         q, k, v = qkv[0], qkv[1], qkv[2]
 
         attn = (q @ k.transpose(-2, -1)) * self.scale
@@ -170,11 +170,8 @@ class MSMHTR(jt.nn.Module):
     n_dim : the embed dimension of the patch embed
     drop_ratio : the dropout rate
     """
-    def __init__(self,
-                 img_size,
-                 in_c,
-                 n_dim,
-                 drop_ratio):
+
+    def __init__(self, img_size, in_c, n_dim, drop_ratio):
         super(MSMHTR, self).__init__()
         self.patch_size = img_size
         self.in_c = in_c
@@ -237,9 +234,7 @@ class CMF(jt.nn.Module):
     img_size : the size of the feature map stacked by spatial domain, frequency domain and MSMHTR
     """
 
-    def __init__(self,
-                 in_c,
-                 img_size=56):
+    def __init__(self, in_c, img_size=56):
         super(CMF, self).__init__()
         self.convq = jt.nn.Conv2d(in_c, in_c, kernel_size=1, bias=False)
         self.convk = jt.nn.Conv2d(in_c, in_c, kernel_size=1, bias=False)
@@ -267,16 +262,15 @@ class M2TR(nn.Module):
     n_dim :  the dimension of patch embeding
     drop_ratio :  the dropout rate
     """
+
     def __init__(self, img_size, n_dim, drop_ratio):
         super(M2TR, self).__init__()
-      #  self.model = EfficientNet.from_name('efficientnet-b4')
+        #  self.model = EfficientNet.from_name('efficientnet-b4')
         self.model = resnet50()
-       # state_dict = torch.load(r'C:\Users\satomi ishihara\za\desktop\fakeface\efficientnet-b4.pth')
-        #self.model.load_state_dict(state_dict)
+        # state_dict = torch.load(r'C:\Users\satomi ishihara\za\desktop\fakeface\efficientnet-b4.pth')
+        # self.model.load_state_dict(state_dict)
         self.backbone1 = jt.nn.Sequential(
-            jt.nn.PixelShuffle(2),
-            jt.nn.PixelShuffle(2),
-            jt.nn.PixelShuffle(2)
+            jt.nn.PixelShuffle(2), jt.nn.PixelShuffle(2), jt.nn.PixelShuffle(2)
         )
 
         self.ex_fq = Extra_fq(img_size=img_size, out_c=28)
@@ -289,29 +283,26 @@ class M2TR(nn.Module):
             jt.nn.BatchNorm2d(32),
             jt.nn.ReLU(inplace=True),
             jt.nn.MaxPool2d(kernel_size=2, stride=2),
-
             jt.nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1),
             jt.nn.BatchNorm2d(64),
             jt.nn.ReLU(inplace=True),
             jt.nn.MaxPool2d(kernel_size=2, stride=2),
-
             jt.nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1),
             jt.nn.BatchNorm2d(128),
             jt.nn.ReLU(inplace=True),
             jt.nn.MaxPool2d(kernel_size=2, stride=2),
-
         )
         self.fc = jt.nn.Sequential(
             jt.nn.Linear(int(((img_size / 32) ** 2) * 128), 512),
             jt.nn.Linear(512, 2),
-            jt.nn.ReLU(inplace=True)
+            jt.nn.ReLU(inplace=True),
         )
 
     def feature_forward(self, x):
         return self.backbone1(self.model.extract_features(x))
 
     def forward(self, x):
-        #x_ = self.model.extract_features(x)
+        # x_ = self.model.extract_features(x)
         f_s = self.feature_forward(x)
         f_fq = self.ex_fq(x)
         f_mt = self.mt(f_s)
@@ -321,10 +312,14 @@ class M2TR(nn.Module):
         out = jt.flatten(out, 1)
         out = self.fc(out)
         return out.softmax(dim=-1)  # , f_s
+
+
 def binary_cross_entropy(input, target):
     # 计算二进制交叉熵损失
     loss = -target * jt.log(input) - (1 - target) * jt.log(1 - input)
     return jt.mean(loss)
+
+
 class FocalLoss(nn.Module):
     def __init__(self, alpha=1, gamma=2, logits=False, reduce=True):
         super(FocalLoss, self).__init__()
@@ -339,17 +334,18 @@ class FocalLoss(nn.Module):
         else:
             BCE_loss = binary_cross_entropy(inputs, targets, reduce=False)
         pt = jt.exp(-BCE_loss)
-        F_loss = self.alpha * (1-pt)**self.gamma * BCE_loss
+        F_loss = self.alpha * (1 - pt) ** self.gamma * BCE_loss
 
         if self.reduce:
             return jt.mean(F_loss)
         else:
             return F_loss
 
+
 def create_FocalLoss(alpha, gamma, logits=False, reduce=True):
     return FocalLoss(alpha=alpha, gamma=gamma, logits=logits, reduce=reduce)
 
 
 def create_model(img_size=224, n_dim=768, drop_ratio=0.1):
-    #modify hera to change your img_size, embed_dim, and drop_ratio
-    return  M2TR(img_size=img_size, n_dim=n_dim, drop_ratio=drop_ratio)
+    # modify hera to change your img_size, embed_dim, and drop_ratio
+    return M2TR(img_size=img_size, n_dim=n_dim, drop_ratio=drop_ratio)

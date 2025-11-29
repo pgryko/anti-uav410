@@ -1,12 +1,12 @@
 import argparse
 import os
-import _init_paths
-from lib.train.admin import create_default_local_file_ITP_train
+
 from lib.test.evaluation import create_default_local_file_ITP_test
+from lib.train.admin import create_default_local_file_ITP_train
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description='Create default local file on ITP or PAI')
+    parser = argparse.ArgumentParser(description="Create default local file on ITP or PAI")
     parser.add_argument("--workspace_dir", type=str, required=True)  # workspace dir
     parser.add_argument("--data_dir", type=str, required=True)
     parser.add_argument("--save_dir", type=str, required=True)

@@ -1,11 +1,14 @@
-import numpy as np
-from pytracking.evaluation.environment import env_settings
-from ltr.data.image_loader import imread_indexed
 from collections import OrderedDict
+
+import numpy as np
+from ltr.data.image_loader import imread_indexed
+
+from pytracking.evaluation.environment import env_settings
 
 
 class BaseDataset:
     """Base class for all datasets."""
+
     def __init__(self):
         self.env_settings = env_settings()
 
@@ -20,8 +23,20 @@ class BaseDataset:
 
 class Sequence:
     """Class for the sequence in an evaluation."""
-    def __init__(self, name, frames, dataset, ground_truth_rect, ground_truth_seg=None, init_data=None,
-                 object_class=None, target_visible=None, object_ids=None, multiobj_mode=False):
+
+    def __init__(
+        self,
+        name,
+        frames,
+        dataset,
+        ground_truth_rect,
+        ground_truth_seg=None,
+        init_data=None,
+        object_class=None,
+        target_visible=None,
+        object_ids=None,
+        multiobj_mode=False,
+    ):
         self.name = name
         self.frames = frames
         self.dataset = dataset
@@ -42,50 +57,56 @@ class Sequence:
             if self.ground_truth_rect is not None:
                 if isinstance(self.ground_truth_rect, (dict, OrderedDict)):
                     for obj_id, gt in self.ground_truth_rect.items():
-                        self.ground_truth_rect[obj_id] = gt[start_frame:,:]
+                        self.ground_truth_rect[obj_id] = gt[start_frame:, :]
                 else:
-                    self.ground_truth_rect = self.ground_truth_rect[start_frame:,:]
+                    self.ground_truth_rect = self.ground_truth_rect[start_frame:, :]
             if self.ground_truth_seg is not None:
                 self.ground_truth_seg = self.ground_truth_seg[start_frame:]
                 assert len(self.frames) == len(self.ground_truth_seg)
 
             if self.target_visible is not None:
                 self.target_visible = self.target_visible[start_frame:]
-            self.init_data = {frame-start_frame: val for frame, val in self.init_data.items()}
+            self.init_data = {frame - start_frame: val for frame, val in self.init_data.items()}
 
     def _construct_init_data(self, init_data):
         if init_data is not None:
             if not self.multiobj_mode:
                 assert self.object_ids is None or len(self.object_ids) == 1
                 for frame, init_val in init_data.items():
-                    if 'bbox' in init_val and isinstance(init_val['bbox'], (dict, OrderedDict)):
-                        init_val['bbox'] = init_val['bbox'][self.object_ids[0]]
+                    if "bbox" in init_val and isinstance(init_val["bbox"], (dict, OrderedDict)):
+                        init_val["bbox"] = init_val["bbox"][self.object_ids[0]]
             # convert to list
             for frame, init_val in init_data.items():
-                if 'bbox' in init_val:
-                    if isinstance(init_val['bbox'], (dict, OrderedDict)):
-                        init_val['bbox'] = OrderedDict({obj_id: list(init) for obj_id, init in init_val['bbox'].items()})
+                if "bbox" in init_val:
+                    if isinstance(init_val["bbox"], (dict, OrderedDict)):
+                        init_val["bbox"] = OrderedDict(
+                            {obj_id: list(init) for obj_id, init in init_val["bbox"].items()}
+                        )
                     else:
-                        init_val['bbox'] = list(init_val['bbox'])
+                        init_val["bbox"] = list(init_val["bbox"])
         else:
-            init_data = {0: dict()}     # Assume start from frame 0
+            init_data = {0: dict()}  # Assume start from frame 0
 
             if self.object_ids is not None:
-                init_data[0]['object_ids'] = self.object_ids
+                init_data[0]["object_ids"] = self.object_ids
 
             if self.ground_truth_rect is not None:
                 if self.multiobj_mode:
                     assert isinstance(self.ground_truth_rect, (dict, OrderedDict))
-                    init_data[0]['bbox'] = OrderedDict({obj_id: list(gt[0,:]) for obj_id, gt in self.ground_truth_rect.items()})
+                    init_data[0]["bbox"] = OrderedDict(
+                        {obj_id: list(gt[0, :]) for obj_id, gt in self.ground_truth_rect.items()}
+                    )
                 else:
                     assert self.object_ids is None or len(self.object_ids) == 1
                     if isinstance(self.ground_truth_rect, (dict, OrderedDict)):
-                        init_data[0]['bbox'] = list(self.ground_truth_rect[self.object_ids[0]][0, :])
+                        init_data[0]["bbox"] = list(
+                            self.ground_truth_rect[self.object_ids[0]][0, :]
+                        )
                     else:
-                        init_data[0]['bbox'] = list(self.ground_truth_rect[0,:])
+                        init_data[0]["bbox"] = list(self.ground_truth_rect[0, :])
 
             if self.ground_truth_seg is not None:
-                init_data[0]['mask'] = self.ground_truth_seg[0]
+                init_data[0]["mask"] = self.ground_truth_seg[0]
 
         return init_data
 
@@ -98,10 +119,10 @@ class Sequence:
         return info
 
     def init_bbox(self, frame_num=0):
-        return self.object_init_data(frame_num=frame_num).get('init_bbox')
+        return self.object_init_data(frame_num=frame_num).get("init_bbox")
 
     def init_mask(self, frame_num=0):
-        return self.object_init_data(frame_num=frame_num).get('init_mask')
+        return self.object_init_data(frame_num=frame_num).get("init_mask")
 
     def get_info(self, keys, frame_num=None):
         info = dict()
@@ -121,18 +142,18 @@ class Sequence:
         for key, val in self.init_data[frame_num].items():
             if val is None:
                 continue
-            init_data['init_'+key] = val
+            init_data["init_" + key] = val
 
-        if 'init_mask' in init_data and init_data['init_mask'] is not None:
-            anno = imread_indexed(init_data['init_mask'])
+        if "init_mask" in init_data and init_data["init_mask"] is not None:
+            anno = imread_indexed(init_data["init_mask"])
             if not self.multiobj_mode and self.object_ids is not None:
                 assert len(self.object_ids) == 1
                 anno = (anno == int(self.object_ids[0])).astype(np.uint8)
-            init_data['init_mask'] = anno
+            init_data["init_mask"] = anno
 
         if self.object_ids is not None:
-            init_data['object_ids'] = self.object_ids
-            init_data['sequence_object_ids'] = self.object_ids
+            init_data["object_ids"] = self.object_ids
+            init_data["sequence_object_ids"] = self.object_ids
 
         return init_data
 
@@ -143,18 +164,18 @@ class Sequence:
         return getattr(self, name)(frame_num)
 
     def __repr__(self):
-        return "{self.__class__.__name__} {self.name}, length={len} frames".format(self=self, len=len(self.frames))
-
+        return f"{self.__class__.__name__} {self.name}, length={len(self.frames)} frames"
 
 
 class SequenceList(list):
     """List of sequences. Supports the addition operator to concatenate sequence lists."""
+
     def __getitem__(self, item):
         if isinstance(item, str):
             for seq in self:
                 if seq.name == item:
                     return seq
-            raise IndexError('Sequence name not in the dataset.')
+            raise IndexError("Sequence name not in the dataset.")
         elif isinstance(item, int):
             return super(SequenceList, self).__getitem__(item)
         elif isinstance(item, (tuple, list)):

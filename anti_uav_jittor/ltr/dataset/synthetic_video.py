@@ -1,20 +1,26 @@
 from collections import OrderedDict
-from .base_video_dataset import BaseVideoDataset
+
 from ltr.data.bounding_box_utils import masks_to_bboxes
+
+from .base_video_dataset import BaseVideoDataset
 
 
 class SyntheticVideo(BaseVideoDataset):
     """
     Create a synthetic video dataset from an image dataset by applying a random transformation to images.
     """
+
     def __init__(self, base_image_dataset, transform=None):
         """
         args:
             base_image_dataset - Image dataset used for generating synthetic videos
             transform - Set of transforms to be applied to the images to generate synthetic video.
         """
-        super().__init__(base_image_dataset.get_name() + '_syn_vid', base_image_dataset.root,
-                         base_image_dataset.image_loader)
+        super().__init__(
+            base_image_dataset.get_name() + "_syn_vid",
+            base_image_dataset.root,
+            base_image_dataset.image_loader,
+        )
         self.base_image_dataset = base_image_dataset
         self.transform = transform
 
@@ -61,22 +67,28 @@ class SyntheticVideo(BaseVideoDataset):
             anno_frames[key] = [value[0].clone() for f_id in frame_ids]
 
         if self.transform is not None:
-            if 'mask' in anno_frames.keys():
-                frame_list, anno_frames['bbox'], anno_frames['mask'] = self.transform(image=frame_list,
-                                                                                      bbox=anno_frames['bbox'],
-                                                                                      mask=anno_frames['mask'],
-                                                                                      joint=False)
+            if "mask" in anno_frames.keys():
+                frame_list, anno_frames["bbox"], anno_frames["mask"] = self.transform(
+                    image=frame_list,
+                    bbox=anno_frames["bbox"],
+                    mask=anno_frames["mask"],
+                    joint=False,
+                )
 
-                anno_frames['bbox'] = [masks_to_bboxes(m, fmt='t') for m in anno_frames['mask']]
+                anno_frames["bbox"] = [masks_to_bboxes(m, fmt="t") for m in anno_frames["mask"]]
             else:
-                frame_list, anno_frames['bbox'] = self.transform(image=frame_list,
-                                                                 bbox=anno_frames['bbox'],
-                                                                 joint=False)
+                frame_list, anno_frames["bbox"] = self.transform(
+                    image=frame_list, bbox=anno_frames["bbox"], joint=False
+                )
 
-        object_meta = OrderedDict({'object_class_name': self.get_class_name(seq_id),
-                                   'motion_class': None,
-                                   'major_class': None,
-                                   'root_class': None,
-                                   'motion_adverb': None})
+        object_meta = OrderedDict(
+            {
+                "object_class_name": self.get_class_name(seq_id),
+                "motion_class": None,
+                "major_class": None,
+                "root_class": None,
+                "motion_adverb": None,
+            }
+        )
 
         return frame_list, anno_frames, object_meta

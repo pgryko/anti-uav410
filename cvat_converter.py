@@ -1,7 +1,8 @@
-import os
 import json
-import cv2
+import os
 import xml.etree.ElementTree as ET
+
+import cv2
 
 # Annotation Converter for Anti-UAV / RGBT Drone Datasets
 
@@ -65,13 +66,22 @@ import xml.etree.ElementTree as ET
 
 # or the CVAT REST API, which this script is designed to integrate with in the next stage.
 
+
 # ------------------------------
 # Detect valid annotation keys
 # ------------------------------
 def extract_boxes(data):
     POSSIBLE_KEYS = [
-        "gt_rect", "rgb_rect", "ir_rect", "visible_rect",
-        "gt", "bbox", "target", "annotations", "rect", "boxes"
+        "gt_rect",
+        "rgb_rect",
+        "ir_rect",
+        "visible_rect",
+        "gt",
+        "bbox",
+        "target",
+        "annotations",
+        "rect",
+        "boxes",
     ]
 
     for key in POSSIBLE_KEYS:
@@ -134,13 +144,9 @@ def create_xml(folder, xml_name, width, height, boxes, exist):
     ET.SubElement(lbl, "type").text = "rectangle"
 
     # Track ID
-    track = ET.SubElement(root, "track", {
-        "id": "0",
-        "label": "drone"
-    })
+    track = ET.SubElement(root, "track", {"id": "0", "label": "drone"})
 
     for idx, rect in enumerate(boxes):
-
         # Skip frames where exist flag = 0
         if exist and exist[idx] == 0:
             continue
@@ -156,16 +162,20 @@ def create_xml(folder, xml_name, width, height, boxes, exist):
         xtl, ytl = x, y
         xbr, ybr = x + w, y + h
 
-        ET.SubElement(track, "box", {
-            "frame": str(idx),
-            "xtl": str(xtl),
-            "ytl": str(ytl),
-            "xbr": str(xbr),
-            "ybr": str(ybr),
-            "outside": "0",
-            "occluded": "0",
-            "keyframe": "1"
-        })
+        ET.SubElement(
+            track,
+            "box",
+            {
+                "frame": str(idx),
+                "xtl": str(xtl),
+                "ytl": str(ytl),
+                "xbr": str(xbr),
+                "ybr": str(ybr),
+                "outside": "0",
+                "occluded": "0",
+                "keyframe": "1",
+            },
+        )
 
     ET.ElementTree(root).write(xml_path, encoding="utf-8", xml_declaration=True)
     print(f"   ✔ Saved: {xml_path}\n")
@@ -178,16 +188,12 @@ def process_all(base="."):
     print("🚀 Starting updated conversion...\n")
 
     for root, dirs, files in os.walk(base):
-
         # All video extensions supported for later API upload
-        video_files = [f for f in files if f.lower().endswith(
-            (".mp4", ".mov", ".avi", ".mkv")
-        )]
+        video_files = [f for f in files if f.lower().endswith((".mp4", ".mov", ".avi", ".mkv"))]
 
         json_files = [f for f in files if f.endswith(".json")]
 
         for vid in video_files:
-
             basename = vid.rsplit(".", 1)[0]
             json_name = basename + ".json"
 
@@ -197,11 +203,11 @@ def process_all(base="."):
             video_path = os.path.join(root, vid)
             json_path = os.path.join(root, json_name)
 
-            print(f"⚡ Pair found:")
+            print("⚡ Pair found:")
             print(f"   VIDEO → {video_path}")
             print(f"   JSON  → {json_path}")
 
-            with open(json_path, "r") as f:
+            with open(json_path) as f:
                 data = json.load(f)
 
             boxes = extract_boxes(data)

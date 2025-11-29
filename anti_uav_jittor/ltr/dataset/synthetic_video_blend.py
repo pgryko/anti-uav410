@@ -1,17 +1,26 @@
-from collections import OrderedDict
-from .base_video_dataset import BaseVideoDataset
-from ltr.data.bounding_box_utils import masks_to_bboxes
 import random
+from collections import OrderedDict
 
 import jittor as jt
+
+from ltr.data.bounding_box_utils import masks_to_bboxes
+
+from .base_video_dataset import BaseVideoDataset
+
 
 class SyntheticVideoBlend(BaseVideoDataset):
     """
     Create a synthetic video by applying random transformations to an object (foreground) and pasting it in a
     background image.  Currently, the foreground object is pasted at random locations in different frames.
     """
-    def __init__(self, foreground_image_dataset, background_image_dataset, foreground_transform=None,
-                 background_transform=None):
+
+    def __init__(
+        self,
+        foreground_image_dataset,
+        background_image_dataset,
+        foreground_transform=None,
+        background_transform=None,
+    ):
         """
         args:
             foreground_image_dataset - A segmentation dataset from which foreground objects are cropped using the
@@ -22,8 +31,11 @@ class SyntheticVideoBlend(BaseVideoDataset):
         """
         assert foreground_image_dataset.has_segmentation_info()
 
-        super().__init__(foreground_image_dataset.get_name() + '_syn_vid_blend', foreground_image_dataset.root,
-                         foreground_image_dataset.image_loader)
+        super().__init__(
+            foreground_image_dataset.get_name() + "_syn_vid_blend",
+            foreground_image_dataset.root,
+            foreground_image_dataset.image_loader,
+        )
         self.foreground_image_dataset = foreground_image_dataset
         self.background_image_dataset = background_image_dataset
 
@@ -76,30 +88,45 @@ class SyntheticVideoBlend(BaseVideoDataset):
         x2_pad = max(x2 - bg_image.shape[1], 0)
         y2_pad = max(y2 - bg_image.shape[0], 0)
 
-        bg_mask = jt.zeros((bg_image.shape[0], bg_image.shape[1], 1), dtype=fg_mask.dtype,
-                              device=fg_mask.device)
+        bg_mask = jt.zeros(
+            (bg_image.shape[0], bg_image.shape[1], 1), dtype=fg_mask.dtype, device=fg_mask.device
+        )
 
-        if x1_pad >= fg_mask.shape[1] or x2_pad >= fg_mask.shape[1] or y1_pad >= fg_mask.shape[0] or y2_pad >= \
-                fg_mask.shape[0]:
+        if (
+            x1_pad >= fg_mask.shape[1]
+            or x2_pad >= fg_mask.shape[1]
+            or y1_pad >= fg_mask.shape[0]
+            or y2_pad >= fg_mask.shape[0]
+        ):
             return bg_image, bg_mask.squeeze(-1)
 
-        fg_mask_patch = fg_mask[fg_box[1] + y1_pad:fg_box[1] + fg_box[3] - y2_pad,
-                                fg_box[0] + x1_pad:fg_box[0] + fg_box[2] - x2_pad, :]
+        fg_mask_patch = fg_mask[
+            fg_box[1] + y1_pad : fg_box[1] + fg_box[3] - y2_pad,
+            fg_box[0] + x1_pad : fg_box[0] + fg_box[2] - x2_pad,
+            :,
+        ]
 
-        fg_image_patch = fg_image[fg_box[1] + y1_pad:fg_box[1] + fg_box[3] - y2_pad,
-                         fg_box[0] + x1_pad:fg_box[0] + fg_box[2] - x2_pad, :]
+        fg_image_patch = fg_image[
+            fg_box[1] + y1_pad : fg_box[1] + fg_box[3] - y2_pad,
+            fg_box[0] + x1_pad : fg_box[0] + fg_box[2] - x2_pad,
+            :,
+        ]
 
-        bg_image[y1 + y1_pad:y2 - y2_pad, x1 + x1_pad:x2 - x2_pad, :] = \
-            bg_image[y1 + y1_pad:y2 - y2_pad, x1 + x1_pad:x2 - x2_pad, :] * (1 - fg_mask_patch.numpy()) \
+        bg_image[y1 + y1_pad : y2 - y2_pad, x1 + x1_pad : x2 - x2_pad, :] = (
+            bg_image[y1 + y1_pad : y2 - y2_pad, x1 + x1_pad : x2 - x2_pad, :]
+            * (1 - fg_mask_patch.numpy())
             + fg_mask_patch.numpy() * fg_image_patch
+        )
 
-        bg_mask[y1 + y1_pad:y2 - y2_pad, x1 + x1_pad:x2 - x2_pad, :] = fg_mask_patch
+        bg_mask[y1 + y1_pad : y2 - y2_pad, x1 + x1_pad : x2 - x2_pad, :] = fg_mask_patch
 
         return bg_image, bg_mask.squeeze(-1)
 
     def get_frames(self, seq_id, frame_ids, anno=None):
         # Handle foreground
-        fg_frame, fg_anno, fg_object_meta = self.foreground_image_dataset.get_image(seq_id, anno=anno)
+        fg_frame, fg_anno, fg_object_meta = self.foreground_image_dataset.get_image(
+            seq_id, anno=anno
+        )
 
         fg_frame_list = [fg_frame.copy() for _ in frame_ids]
 
@@ -108,11 +135,14 @@ class SyntheticVideoBlend(BaseVideoDataset):
             fg_anno_frames[key] = [value[0].clone() for f_id in frame_ids]
 
         if self.foreground_transform is not None:
-            fg_frame_list, fg_anno_frames['bbox'], fg_anno_frames['mask'] = self.foreground_transform(
-                image=fg_frame_list,
-                bbox=fg_anno_frames['bbox'],
-                mask=fg_anno_frames['mask'],
-                joint=False)
+            fg_frame_list, fg_anno_frames["bbox"], fg_anno_frames["mask"] = (
+                self.foreground_transform(
+                    image=fg_frame_list,
+                    bbox=fg_anno_frames["bbox"],
+                    mask=fg_anno_frames["mask"],
+                    joint=False,
+                )
+            )
 
         # Sample a random background
         bg_seq_id = random.randint(0, self.background_image_dataset.get_num_images() - 1)
@@ -127,36 +157,42 @@ class SyntheticVideoBlend(BaseVideoDataset):
             bg_anno_frames[key] = [value.clone() for f_id in frame_ids]
 
         if self.background_transform is not None:
-            if 'mask' in bg_anno_frames.keys():
-                bg_frame_list, bg_anno_frames['bbox'], bg_anno_frames['mask'] = self.background_transform(
-                    image=bg_frame_list,
-                    bbox=bg_anno_frames['bbox'],
-                    mask=bg_anno_frames['mask'],
-                    joint=False)
+            if "mask" in bg_anno_frames.keys():
+                bg_frame_list, bg_anno_frames["bbox"], bg_anno_frames["mask"] = (
+                    self.background_transform(
+                        image=bg_frame_list,
+                        bbox=bg_anno_frames["bbox"],
+                        mask=bg_anno_frames["mask"],
+                        joint=False,
+                    )
+                )
             else:
-                bg_frame_list, bg_anno_frames['bbox'] = self.background_transform(
-                    image=bg_frame_list,
-                    bbox=bg_anno_frames['bbox'],
-                    joint=False)
+                bg_frame_list, bg_anno_frames["bbox"] = self.background_transform(
+                    image=bg_frame_list, bbox=bg_anno_frames["bbox"], joint=False
+                )
 
         for i in range(len(frame_ids)):
             # To be safe, get target bb for the mask
-            bbox = masks_to_bboxes(fg_anno_frames['mask'][i], fmt='t')
+            bbox = masks_to_bboxes(fg_anno_frames["mask"][i], fmt="t")
 
             loc_y = random.randint(0, bg_frame_list[i].shape[0] - 1)
             loc_x = random.randint(0, bg_frame_list[i].shape[1] - 1)
 
             paste_loc = (loc_x, loc_y)
-            fg_frame_list[i], fg_anno_frames['mask'][i] = self._paste_target(fg_frame_list[i], bbox,
-                                                                             fg_anno_frames['mask'][i],
-                                                                             bg_frame_list[i], paste_loc)
+            fg_frame_list[i], fg_anno_frames["mask"][i] = self._paste_target(
+                fg_frame_list[i], bbox, fg_anno_frames["mask"][i], bg_frame_list[i], paste_loc
+            )
 
-            fg_anno_frames['bbox'][i] = masks_to_bboxes(fg_anno_frames['mask'][i], fmt='t')
+            fg_anno_frames["bbox"][i] = masks_to_bboxes(fg_anno_frames["mask"][i], fmt="t")
 
-        object_meta = OrderedDict({'object_class_name': self.get_class_name(seq_id),
-                                   'motion_class': None,
-                                   'major_class': None,
-                                   'root_class': None,
-                                   'motion_adverb': None})
+        object_meta = OrderedDict(
+            {
+                "object_class_name": self.get_class_name(seq_id),
+                "motion_class": None,
+                "major_class": None,
+                "root_class": None,
+                "motion_adverb": None,
+            }
+        )
 
         return fg_frame_list, fg_anno_frames, object_meta

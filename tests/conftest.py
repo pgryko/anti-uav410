@@ -2,7 +2,6 @@
 Pytest fixtures for Anti-UAV test suite.
 """
 
-import os
 import shutil
 import tempfile
 from pathlib import Path
@@ -103,7 +102,7 @@ def sample_dataset(temp_dir, sample_image) -> Path:
         "train": "images/train",
         "val": "images/val",
         "nc": 1,
-        "names": ["drone"]
+        "names": ["drone"],
     }
 
     yaml_path = temp_dir / "dataset.yaml"
@@ -179,12 +178,10 @@ def mock_video_dataset(temp_dir) -> Path:
 
     # Create annotation JSON
     import json
+
     annotations = {
         "exist": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-        "gt_rect": [
-            [100 + i * 40 - 10, 200 + i * 20 - 10, 20, 20]
-            for i in range(10)
-        ]
+        "gt_rect": [[100 + i * 40 - 10, 200 + i * 20 - 10, 20, 20] for i in range(10)],
     }
 
     json_path = seq_dir / "infrared.json"

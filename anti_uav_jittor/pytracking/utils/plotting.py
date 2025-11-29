@@ -1,9 +1,7 @@
+import cv2
 import jittor as jt
 import matplotlib.pyplot as plt
 import numpy as np
-import cv2
-
-
 
 
 def draw_figure(fig):
@@ -12,7 +10,7 @@ def draw_figure(fig):
     plt.pause(0.001)
 
 
-def show_tensor(a: jt.Var, fig_num = None, title = None, range=(None, None), ax=None):
+def show_tensor(a: jt.Var, fig_num=None, title=None, range=(None, None), ax=None):
     """Display a 2D tensor.
     args:
         fig_num: Figure number.
@@ -27,8 +25,8 @@ def show_tensor(a: jt.Var, fig_num = None, title = None, range=(None, None), ax=
         plt.tight_layout()
         plt.cla()
         plt.imshow(a_np, vmin=range[0], vmax=range[1])
-        plt.axis('off')
-        plt.axis('equal')
+        plt.axis("off")
+        plt.axis("equal")
         if title is not None:
             plt.title(title)
         draw_figure(fig)
@@ -36,13 +34,13 @@ def show_tensor(a: jt.Var, fig_num = None, title = None, range=(None, None), ax=
         ax.cla()
         ax.imshow(a_np, vmin=range[0], vmax=range[1])
         ax.set_axis_off()
-        ax.axis('equal')
+        ax.axis("equal")
         if title is not None:
             ax.set_title(title)
         draw_figure(plt.gcf())
 
 
-def plot_graph(a: jt.Var, fig_num = None, title = None):
+def plot_graph(a: jt.Var, fig_num=None, title=None):
     """Plot graph. Data is a 1D tensor.
     args:
         fig_num: Figure number.
@@ -70,19 +68,25 @@ def show_image_with_boxes(im, boxes, iou_pred=None, disp_ids=None):
     for i_ in range(boxes.shape[0]):
         if disp_ids is None or disp_ids[i_]:
             bb = boxes[i_, :]
-            disp_color = (i_*38 % 256, (255 - i_*97) % 256, (123 + i_*66) % 256)
-            cv2.rectangle(im_np, (bb[0], bb[1]), (bb[0] + bb[2], bb[1] + bb[3]),
-                          disp_color, 1)
+            disp_color = (i_ * 38 % 256, (255 - i_ * 97) % 256, (123 + i_ * 66) % 256)
+            cv2.rectangle(im_np, (bb[0], bb[1]), (bb[0] + bb[2], bb[1] + bb[3]), disp_color, 1)
 
             if iou_pred is not None:
                 text_pos = (bb[0], bb[1] - 5)
-                cv2.putText(im_np, 'ID={} IOU = {:3.2f}'.format(i_, iou_pred[i_]), text_pos,
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, bottomLeftOrigin=False)
+                cv2.putText(
+                    im_np,
+                    f"ID={i_} IOU = {iou_pred[i_]:3.2f}",
+                    text_pos,
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    0.5,
+                    (0, 255, 0),
+                    1,
+                    bottomLeftOrigin=False,
+                )
 
     im_tensor = jt.array(im_np.transpose(2, 0, 1)).float()
 
     return im_tensor
-
 
 
 def _pascal_color_map(N=256, normalized=False):
@@ -95,7 +99,7 @@ def _pascal_color_map(N=256, normalized=False):
     def bitget(byteval, idx):
         return (byteval & (1 << idx)) != 0
 
-    dtype = 'float32' if normalized else 'uint8'
+    dtype = "float32" if normalized else "uint8"
     cmap = np.zeros((N, 3), dtype=dtype)
     for i in range(N):
         r = g = b = 0
@@ -113,7 +117,7 @@ def _pascal_color_map(N=256, normalized=False):
 
 
 def overlay_mask(im, ann, alpha=0.5, colors=None, contour_thickness=None):
-    """ Overlay mask over image.
+    """Overlay mask over image.
     Source: https://github.com/albertomontesg/davis-interactive/blob/master/davisinteractive/utils/visualization.py
     This function allows you to overlay a mask over an image with some
     transparency.
@@ -134,9 +138,9 @@ def overlay_mask(im, ann, alpha=0.5, colors=None, contour_thickness=None):
     """
     im, ann = np.asarray(im, dtype=np.uint8), np.asarray(ann, dtype=np.int)
     if im.shape[:-1] != ann.shape:
-        raise ValueError('First two dimensions of `im` and `ann` must match')
+        raise ValueError("First two dimensions of `im` and `ann` must match")
     if im.shape[-1] != 3:
-        raise ValueError('im must have three channels at the 3 dimension')
+        raise ValueError("im must have three channels at the 3 dimension")
 
     colors = colors or _pascal_color_map()
     colors = np.asarray(colors, dtype=np.uint8)
@@ -149,9 +153,10 @@ def overlay_mask(im, ann, alpha=0.5, colors=None, contour_thickness=None):
 
     if contour_thickness:  # pragma: no cover
         import cv2
+
         for obj_id in np.unique(ann[ann > 0]):
-            contours = cv2.findContours((ann == obj_id).astype(
-                np.uint8), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)[-2:]
-            cv2.drawContours(img, contours[0], -1, colors[obj_id].tolist(),
-                             contour_thickness)
+            contours = cv2.findContours(
+                (ann == obj_id).astype(np.uint8), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE
+            )[-2:]
+            cv2.drawContours(img, contours[0], -1, colors[obj_id].tolist(), contour_thickness)
     return img

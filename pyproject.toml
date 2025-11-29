@@ -80,6 +80,8 @@ dev-dependencies = [
     "ruff>=0.1.0",
     "mypy>=1.5.0",
     "pre-commit>=3.4.0",
+    "detect-secrets>=1.5.0",
+    "pyright>=1.1.407",
 ]
 
 [tool.uv.sources]
@@ -116,9 +118,39 @@ select = [
     "UP",     # pyupgrade
 ]
 ignore = [
+    # Style (handled by formatter or legacy patterns)
     "E501",   # line too long (handled by formatter)
-    "B008",   # do not perform function calls in argument defaults
+    "E402",   # module level import not at top (common in ML code with sys.path)
+    "E711",   # comparison to None (legacy pattern)
+    "E712",   # comparison to True/False (legacy pattern)
+    "E722",   # bare except (legacy code, gradually fix)
+    "E731",   # lambda assignment (common in ML code)
+    "E741",   # ambiguous variable name (legacy code uses l, I, O)
+    # Bugbear (legacy patterns)
+    "B007",   # unused loop control variable (legacy code)
+    "B008",   # function calls in argument defaults
+    "B012",   # return in finally (legacy code)
+    "B904",   # raise from (legacy code)
+    "B905",   # zip without strict (legacy code)
+    # Comprehensions
     "C901",   # too complex
+    "C408",   # unnecessary dict call (legacy code style)
+    "C416",   # unnecessary dict comprehension (legacy)
+    # Pyupgrade (legacy code modernization - do gradually)
+    "UP008",  # super() call style
+    "UP031",  # percent format
+    "UP032",  # f-string
+    "UP038",  # isinstance union types (requires Python 3.10+ syntax)
+    # Pyflakes (legacy undefined/unused)
+    "F401",   # imported but unused (re-exports in __init__.py)
+    "F403",   # star imports (legacy code)
+    "F821",   # undefined name (legacy code with dynamic imports)
+    "F841",   # local variable assigned but never used
+    # Additional bugbear
+    "B006",   # mutable default argument (legacy code)
+    "B020",   # loop variable override (legacy code)
+    # Comprehensions
+    "C414",   # list() in sorted() (legacy code)
 ]
 
 [tool.ruff.lint.isort]
@@ -137,9 +169,31 @@ markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
 ]
 
-[tool.mypy]
-python_version = "3.10"
-warn_return_any = true
-warn_unused_configs = true
-ignore_missing_imports = true
-exclude = ["archive", "build", "dist"]
+[tool.pyright]
+pythonVersion = "3.10"
+typeCheckingMode = "basic"
+include = ["src", "tests"]
+exclude = [
+    "**/__pycache__",
+    ".venv",
+    "archive",
+    "build",
+    "dist",
+    "anti_uav_jittor",
+    "Codes",  # Legacy code - gradually migrate
+    "src/tracking",  # Legacy tracking code - needs refactoring
+    "src/evaluation/toolkit",  # Legacy evaluation toolkit
+    "src/detection",  # Legacy detection code
+]
+# Lenient settings for legacy codebase
+reportMissingImports = false
+reportMissingTypeStubs = false
+reportUnknownMemberType = false
+reportUnknownArgumentType = false
+reportUnknownVariableType = false
+reportUnknownParameterType = false
+reportGeneralTypeIssues = false
+reportAttributeAccessIssue = false
+reportCallIssue = false
+reportArgumentType = false
+reportUndefinedVariable = "warning"
