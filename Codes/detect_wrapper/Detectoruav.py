@@ -13,12 +13,12 @@ from PIL import Image
 import pdb
 
 import sys
-from detect_wrapper.models.experimental import attempt_load
-from detect_wrapper.utils.datasets import LoadStreams, LoadImages
-from detect_wrapper.utils.general import (
+from models.experimental import attempt_load
+from utils.datasets import LoadStreams, LoadImages
+from utils.general import (
     check_img_size, non_max_suppression, apply_classifier, scale_coords,
     xyxy2xywh, plot_one_box, strip_optimizer, set_logging)
-from detect_wrapper.utils.torch_utils import select_device, load_classifier, time_synchronized
+from utils.torch_utils import select_device, load_classifier, time_synchronized
 
 
 

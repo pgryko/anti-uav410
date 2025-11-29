@@ -25,8 +25,8 @@ from scipy.signal import butter, filtfilt
 from tqdm import tqdm
 import pdb
 
-from detect_wrapper.utils.google_utils import gsutil_getsize
-from detect_wrapper.utils.torch_utils import is_parallel, init_torch_seeds
+from utils.google_utils import gsutil_getsize
+from utils.torch_utils import is_parallel, init_torch_seeds
 
 # Set printoptions
 torch.set_printoptions(linewidth=320, precision=5, profile='long')
