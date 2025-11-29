@@ -1,0 +1,158 @@
+{
+  "project_name": "anti-uav410",
+  "generated": "2025-11-29",
+  "description": "Comprehensive benchmark and framework for UAV detection and tracking using RGB and Thermal IR videos",
+  "license": "MIT",
+  "languages": ["python"],
+  "python_version": "3.8",
+  "frameworks": ["PyTorch", "Jittor"],
+
+  "structure": {
+    "root": "/home/a/code/personal/anti-uav410",
+    "directories": {
+      "Codes": "Core detection & tracking code",
+      "Codes/detect_wrapper": "UAV detection module (YOLOv5-based)",
+      "Codes/tracking_wrapper": "UAV tracking module",
+      "Codes/metric_uav": "Evaluation metrics",
+      "anti_uav_jittor": "Jittor framework implementations",
+      "anti_uav_jittor/anti_uav410_jit": "Anti-UAV410 Jittor version",
+      "anti_uav_jittor/anti_uav_edtc_jit": "EDTC Jittor version",
+      "anti_uav_jittor/ltr": "Learning to Track training",
+      "anti_uav_jittor/pytracking": "PyTracking framework",
+      "anti_uav_jittor/pysot_toolkit": "PySoT evaluation toolkit",
+      "Eval": "Evaluation scripts & models"
+    }
+  },
+
+  "entry_points": {
+    "inference": {
+      "path": "anti_uav_jittor/pysot_toolkit/test.py",
+      "command": "python pysot_toolkit/test.py",
+      "description": "Main inference script for testing trackers"
+    },
+    "training": {
+      "path": "anti_uav_jittor/ltr/run_training.py",
+      "command": "python ltr/run_training.py modal modal",
+      "description": "Training launcher for tracking models"
+    },
+    "detection_demo": {
+      "path": "Codes/demo_detect_track.py",
+      "description": "Combined detection + tracking demo"
+    },
+    "pipeline": {
+      "path": "Codes/detect_tracking.py",
+      "description": "Full detection-tracking pipeline"
+    },
+    "evaluation": {
+      "path": "anti_uav_jittor/anti_uav410_jit/Evaluation_for_ALL.py",
+      "description": "Comprehensive evaluation"
+    },
+    "notebook": {
+      "path": "anti_uav_jittor/demo.ipynb",
+      "description": "Interactive workflow demo"
+    }
+  },
+
+  "modules": {
+    "detection": {
+      "path": "Codes/detect_wrapper",
+      "main_class": "DroneDetection",
+      "main_file": "Detectoruav.py",
+      "functions": ["detect"],
+      "configs": ["data/drone.yaml", "models/detect*.yaml"]
+    },
+    "tracking": {
+      "path": "Codes/tracking_wrapper",
+      "main_function": "run_video",
+      "main_file": "runtracker.py",
+      "submodules": ["dronetracker", "drtracker"]
+    },
+    "evaluation": {
+      "path": "anti_uav_jittor/pysot_toolkit",
+      "main_file": "test.py",
+      "functions": ["iou", "eval", "_record", "not_exist"]
+    },
+    "dataset": {
+      "path": "anti_uav_jittor/anti_uav410_jit/datasets",
+      "main_class": "AntiUAV410",
+      "main_file": "antiuav410.py"
+    }
+  },
+
+  "trackers": {
+    "SiamDT": {
+      "path": "anti_uav_jittor/anti_uav410_jit/trackers/SiamDT",
+      "description": "Siamese Detection & Tracking with Swin Transformer",
+      "configs": ["configs/siamdt_swin_tiny_adamw.py", "configs/siamdt_swin_tiny_sgd.py"]
+    },
+    "SiamFC": {
+      "path": "anti_uav_jittor/anti_uav410_jit/trackers/SiamFC",
+      "description": "Siamese Fully Convolutional tracker"
+    },
+    "DR_Tracker": {
+      "path": "Codes/tracking_wrapper/drtracker",
+      "description": "Detection + Re-detection tracker with FHOG"
+    }
+  },
+
+  "datasets_supported": [
+    {"name": "Anti-UAV300", "sequences": 300, "modalities": ["RGB", "IR"]},
+    {"name": "Anti-UAV410", "sequences": 410, "modalities": ["IR"]},
+    {"name": "Anti-UAV600", "sequences": 600, "modalities": ["IR"]},
+    {"name": "OTB100", "type": "benchmark"},
+    {"name": "GOT-10k", "type": "benchmark"},
+    {"name": "LaSOT", "type": "benchmark"},
+    {"name": "UAV123", "type": "benchmark"},
+    {"name": "VOT2016-2019", "type": "challenge"}
+  ],
+
+  "key_classes": [
+    {"name": "DroneDetection", "file": "Codes/detect_wrapper/Detectoruav.py", "purpose": "UAV detector wrapper"},
+    {"name": "AntiUAV410", "file": "anti_uav_jittor/anti_uav410_jit/datasets/antiuav410.py", "purpose": "Dataset loader"}
+  ],
+
+  "key_functions": [
+    {"name": "detect", "file": "Codes/detect_wrapper/detect_drone.py", "purpose": "Run detection"},
+    {"name": "run_video", "file": "Codes/tracking_wrapper/runtracker.py", "purpose": "Run tracker on video"},
+    {"name": "iou", "file": "anti_uav_jittor/pysot_toolkit/test.py", "purpose": "Calculate IoU metric"},
+    {"name": "eval", "file": "anti_uav_jittor/pysot_toolkit/test.py", "purpose": "Evaluate performance"},
+    {"name": "imgproc", "file": "Codes/detect_tracking.py", "purpose": "Process frames in pipeline"},
+    {"name": "global_init", "file": "Codes/detect_tracking.py", "purpose": "Initialize global variables"}
+  ],
+
+  "config_files": [
+    {"path": "Codes/detect_wrapper/data/drone.yaml", "purpose": "Drone detection dataset config"},
+    {"path": "Codes/detect_wrapper/models/detects.yaml", "purpose": "Small model architecture"},
+    {"path": "Codes/detect_wrapper/models/detectm.yaml", "purpose": "Medium model architecture"},
+    {"path": "Codes/detect_wrapper/models/detectl.yaml", "purpose": "Large model architecture"},
+    {"path": "Codes/detect_wrapper/models/detectx.yaml", "purpose": "XL model architecture"},
+    {"path": "anti_uav_jittor/anti_uav_edtc_jit/experiments/uavtrack/baseline.yaml", "purpose": "UAV tracking experiment"}
+  ],
+
+  "utilities": {
+    "cvat_converter": {
+      "path": "cvat_converter.py",
+      "functions": ["extract_boxes", "extract_exist", "get_resolution", "create_xml", "process_all"],
+      "purpose": "Convert CVAT annotations"
+    }
+  },
+
+  "dependencies": {
+    "required": ["pytorch", "opencv-python", "numpy", "libjpeg4py"],
+    "optional": ["jittor==1.3.8.5"],
+    "cuda": "11.8 (RTX 30/40 series)"
+  },
+
+  "file_counts": {
+    "python": "150+",
+    "yaml": "70+",
+    "markdown": "90+",
+    "shell": "10"
+  },
+
+  "links": {
+    "website": "https://anti-uav.github.io",
+    "github": "https://github.com/ZhaoJ9014/Anti-UAV",
+    "modelscope": "https://modelscope.cn/models/iic/3rd_Anti-UAV_CVPR23"
+  }
+}

@@ -1,0 +1,218 @@
+# =============================================================================
+# Anti-UAV410 Project .gitignore
+# =============================================================================
+
+# =============================================================================
+# DATA - Large datasets should never be in git
+# =============================================================================
+data/
+*.zip
+*.tar
+*.tar.gz
+*.rar
+*.7z
+
+# Raw video files
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.wmv
+
+# Image datasets (only gitignore large collections)
+# Keep small samples if needed
+/datasets/
+/raw_data/
+
+# =============================================================================
+# MODEL WEIGHTS - Download separately, don't commit
+# =============================================================================
+weights/
+*.pt
+*.pth
+*.onnx
+*.engine
+*.trt
+*.pb
+*.h5
+*.weights
+*.bin
+*.safetensors
+
+# Specific weight directories
+Codes/detect_wrapper/weights/
+Codes/metric_uav/*/weights/
+anti_uav_jittor/*/weights/
+pretrained/
+checkpoints/
+
+# =============================================================================
+# TRAINING OUTPUTS
+# =============================================================================
+outputs/
+runs/
+results/
+logs/
+tensorboard/
+wandb/
+mlruns/
+
+# Training artifacts
+Codes/result/
+Codes/testvideo/
+anti_uav_jittor/result/
+**/runs/
+**/results/
+**/output/
+
+# =============================================================================
+# PYTHON
+# =============================================================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+ENV/
+env/
+.env
+.venv
+
+# uv cache (lock file should be committed)
+.uv_cache/
+
+# =============================================================================
+# JUPYTER NOTEBOOKS
+# =============================================================================
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+*/.ipynb_checkpoints/*
+
+# =============================================================================
+# IDE & EDITORS
+# =============================================================================
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.pydevproject
+.settings/
+*.sublime-workspace
+*.sublime-project
+
+# =============================================================================
+# OS FILES
+# =============================================================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# =============================================================================
+# TESTING & COVERAGE
+# =============================================================================
+.coverage
+.pytest_cache/
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+.hypothesis/
+
+# =============================================================================
+# BUILD & COMPILATION
+# =============================================================================
+*.o
+*.a
+*.lib
+*.dll
+*.dylib
+*.exe
+*.out
+*.app
+
+# CUDA compilation
+*.cubin
+*.fatbin
+*.ptx
+
+# =============================================================================
+# DOCUMENTATION BUILD
+# =============================================================================
+docs/_build/
+site/
+.mkdocs/
+
+# =============================================================================
+# PROJECT SPECIFIC - Legacy directories to ignore
+# =============================================================================
+# These contain data/weights that shouldn't be tracked
+Codes/CameralinkApplication/
+Codes/metric_uav/
+anti_uav_jittor/dectect/
+anti_uav_jittor/model_1/
+
+# Test/demo files
+test*.txt
+result*.txt
+*_test.txt
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+*.log
+
+# =============================================================================
+# SERENA/MCP CACHE
+# =============================================================================
+.serena/
+
+# =============================================================================
+# ARCHIVE - Keep but don't modify
+# =============================================================================
+archive/
+
+# =============================================================================
+# EXCEPTIONS - Files to KEEP even if they match patterns above
+# =============================================================================
+# Keep sample images for documentation
+!docs/images/*.jpg
+!docs/images/*.png
+!Fig/*.png
+!Fig/*.gif
+
+# Keep small config files
+!configs/**/*.yaml
+!configs/**/*.json
+
+# Keep the example data structure (empty)
+!data/.gitkeep
+!weights/.gitkeep
+!outputs/.gitkeep
