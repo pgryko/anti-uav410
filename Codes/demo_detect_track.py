@@ -9,12 +9,12 @@ from tracking_wrapper.dronetracker.trackinguav.evaluation.tracker import Tracker
 
 # sys.path.append((os.path.dirname(__file__)))
 sys.path.append(os.path.join(os.path.dirname(__file__), "detect_wrapper"))
-sys.path.append(os.path.join(os.path.dirname(__file__), "tracking_wrapper\\dronetracker"))
-sys.path.append(os.path.join(os.path.dirname(__file__), "tracking_wrapper\\drtracker"))
+sys.path.append(os.path.join(os.path.dirname(__file__), "tracking_wrapper", "dronetracker"))
+sys.path.append(os.path.join(os.path.dirname(__file__), "tracking_wrapper", "drtracker"))
 
 
 ## Input video
-video_path = os.path.join(os.path.dirname(__file__), "testvideo\\n19.mp4")
+video_path = os.path.join(os.path.dirname(__file__), "testvideo", "n19.mp4")
 
 magnification = 2
 
@@ -51,7 +51,7 @@ def lefttop2center(bbx):
 
 def test():
     IRweights_path = os.path.join(
-        os.path.split(os.path.abspath(__file__))[0], "detect_wrapper\\weights\\best.pt"
+        os.path.dirname(os.path.abspath(__file__)), "detect_wrapper", "weights", "best.pt"
     )
     # spdb.set_trace()
     time_record = []

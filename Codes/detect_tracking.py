@@ -15,8 +15,8 @@ from detect_wrapper.Detectoruav import DroneDetection
 from tracking_wrapper.dronetracker.trackinguav.evaluation.tracker import Tracker
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "detect_wrapper"))
-sys.path.append(os.path.join(os.path.dirname(__file__), "tracking_wrapper\\dronetracker"))
-sys.path.append(os.path.join(os.path.dirname(__file__), "tracking_wrapper\\drtracker"))
+sys.path.append(os.path.join(os.path.dirname(__file__), "tracking_wrapper", "dronetracker"))
+sys.path.append(os.path.join(os.path.dirname(__file__), "tracking_wrapper", "drtracker"))
 
 
 import warnings
@@ -143,7 +143,7 @@ def global_init():
             fh = logging.FileHandler("c:/data/log.txt", mode="a")
             g_logger.addHandler(fh)
         IRweights_path = os.path.join(
-            "D:\\Project_UAV\\Project_UAV_new_window", "detect_wrapper\\weights\\best.pt"
+            os.path.dirname(__file__), "detect_wrapper", "weights", "best.pt"
         )
         g_detector = DroneDetection(IRweights_path=IRweights_path, RGBweights_path=IRweights_path)
         g_tracker = Tracker()
@@ -331,7 +331,7 @@ if __name__ == "__main__":
     print("Start!!")
 
     ## test
-    video_path = os.path.join(os.path.dirname(__file__), "testvideo\\n19.mp4")
+    video_path = os.path.join(os.path.dirname(__file__), "testvideo", "n19.mp4")
     cap = cv2.VideoCapture(video_path)
 
     while True:

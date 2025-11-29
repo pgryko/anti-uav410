@@ -19,7 +19,6 @@ from utils.general import (
     check_img_size,
     clip_coords,
     coco80_to_coco91_class,
-    compute_loss,
     non_max_suppression,
     output_to_target,
     plot_images,
@@ -50,8 +49,11 @@ def test(
     save_txt=False,  # for auto-labelling
     save_conf=False,
     plots=True,
-    log_imgs=0,
-):  # number of logged images
+    log_imgs=0,  # number of logged images
+    wandb_logger=None,  # W&B logger instance
+    compute_loss=None,  # loss function for training mode
+    is_coco=False,  # is COCO dataset
+):
     # Initialize/load model and set device
     training = model is not None
     if training:  # called by train.py
@@ -145,8 +147,8 @@ def test(
             t0 += time_synchronized() - t
 
             # Compute loss
-            if training:  # if model has loss hyperparameters
-                loss += compute_loss([x.float() for x in train_out], targets, model)[1][
+            if compute_loss is not None:
+                loss += compute_loss([x.float() for x in train_out], targets)[1][
                     :3
                 ]  # box, obj, cls
 
@@ -345,8 +347,8 @@ def test(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(prog="test.py")
-    parser.add_argument("--weights", type=str, default=r".\best_drone.pt", help="model.pt path(s)")
-    parser.add_argument("--data", type=str, default=r".\data\drone.yaml", help="*.data path")
+    parser.add_argument("--weights", type=str, default="./best_drone.pt", help="model.pt path(s)")
+    parser.add_argument("--data", type=str, default="./data/drone.yaml", help="*.data path")
     parser.add_argument("--batch-size", type=int, default=128, help="size of each image batch")
     parser.add_argument("--img-size", type=int, default=640, help="inference size (pixels)")
     parser.add_argument("--conf-thres", type=float, default=0.7, help="object confidence threshold")
@@ -364,7 +366,7 @@ if __name__ == "__main__":
         "--save-conf", action="store_true", help="save confidences in --save-txt labels"
     )
     parser.add_argument(
-        "--save-dir", type=str, default=r".\runs\test", help="directory to save results"
+        "--save-dir", type=str, default="./runs/test", help="directory to save results"
     )
     opt = parser.parse_args()
     opt.save_json |= opt.data.endswith("coco.yaml")
