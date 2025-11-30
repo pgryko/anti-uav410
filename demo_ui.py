@@ -16,8 +16,10 @@ import gradio as gr
 import numpy as np
 import torch
 from models.experimental import attempt_load
-from utils.general import non_max_suppression, scale_coords
+from utils.general import non_max_suppression, scale_boxes
 from utils.torch_utils import select_device
+
+print("Imports complete!")
 
 # Global model (load once)
 MODEL = None
@@ -34,7 +36,7 @@ def load_model():
     if MODEL is None:
         print("Loading model...")
         DEVICE = select_device("0" if torch.cuda.is_available() else "cpu")
-        MODEL = attempt_load(str(WEIGHTS_PATH), map_location=DEVICE)
+        MODEL = attempt_load(str(WEIGHTS_PATH), device=DEVICE)
         MODEL.eval()
         if DEVICE.type != "cpu":
             MODEL.half()
@@ -65,7 +67,7 @@ def detect_frame(frame, conf_thresh=0.25):
     detections = []
     if pred is not None and len(pred):
         # Scale boxes back to original frame size
-        pred[:, :4] = scale_coords(img.shape[2:], pred[:, :4], frame.shape).round()
+        pred[:, :4] = scale_boxes(img.shape[2:], pred[:, :4], frame.shape).round()
 
         for *xyxy, conf, cls in pred:
             x1, y1, x2, y2 = map(int, xyxy)
@@ -189,7 +191,9 @@ def get_sample_videos():
 
 
 # Build Gradio UI
-with gr.Blocks(title="Anti-UAV Detection Demo", theme=gr.themes.Soft()) as demo:
+print("Building Gradio UI...")
+with gr.Blocks(title="Anti-UAV Detection Demo") as demo:
+    print("Inside Blocks context...")
     gr.Markdown("""
     # 🎯 Anti-UAV Detection Demo
     Real-time drone detection using YOLOv5 trained on thermal imagery.
@@ -226,14 +230,17 @@ with gr.Blocks(title="Anti-UAV Detection Demo", theme=gr.themes.Soft()) as demo:
             stats_output = gr.Markdown(label="Statistics")
 
     # Event handlers
-    def use_sample(sample_path):
-        return sample_path
-
-    sample_dropdown.change(use_sample, sample_dropdown, video_input)
+    def run_detection(video_path, sample_path, conf_thresh, progress=gr.Progress()):
+        """Run detection on uploaded video or sample video."""
+        # Prefer uploaded video, fall back to sample
+        path = video_path if video_path else sample_path
+        if not path:
+            return None, None, "Please upload a video or select a sample video"
+        return process_video(path, conf_thresh, progress)
 
     run_btn.click(
-        process_video,
-        inputs=[video_input, conf_slider],
+        run_detection,
+        inputs=[video_input, sample_dropdown, conf_slider],
         outputs=[video_output, timeline_output, stats_output],
     )
 
