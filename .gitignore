@@ -12,12 +12,15 @@ data/
 *.rar
 *.7z
 
-# Raw video files
+# Raw video files (except sample videos tracked via git-lfs)
 *.mp4
 *.avi
 *.mov
 *.mkv
 *.wmv
+!sample videos/*.mp4
+!sample videos/*.MP4
+!sample videos/*.MOV
 
 # Image datasets (only gitignore large collections)
 # Keep small samples if needed
