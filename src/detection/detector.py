@@ -2,13 +2,13 @@ import argparse
 
 import cv2
 import torch
-from detect_wrapper.models.experimental import attempt_load
-from detect_wrapper.utils.general import (
+from models.experimental import attempt_load
+from utils.general import (
     check_img_size,
     non_max_suppression,
     scale_coords,
 )
-from detect_wrapper.utils.torch_utils import select_device
+from utils.torch_utils import select_device
 
 
 class DroneDetection:

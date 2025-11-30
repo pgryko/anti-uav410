@@ -23,9 +23,9 @@ from torch.cuda import amp
 from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
-from utils.autoanchor import check_anchors
 from utils.datasets import create_dataloader
 from utils.general import (
+    check_anchors,
     check_dataset,
     check_file,
     check_git_status,
@@ -39,13 +39,16 @@ from utils.general import (
     labels_to_class_weights,
     labels_to_image_weights,
     one_cycle,
+    plot_evolution,
+    plot_images,
+    plot_labels,
+    plot_results,
     print_mutation,
     set_logging,
     strip_optimizer,
 )
 from utils.google_utils import attempt_download
 from utils.loss import ComputeLoss
-from utils.plots import plot_evolution, plot_images, plot_labels, plot_results
 from utils.torch_utils import (
     ModelEMA,
     intersect_dicts,

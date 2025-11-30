@@ -19,12 +19,12 @@ import numpy as np
 import torch
 import torch.nn as nn
 import yaml
-from detect_wrapper.utils.google_utils import gsutil_getsize
-from detect_wrapper.utils.torch_utils import init_torch_seeds, is_parallel
 from PIL import Image
 from scipy.cluster.vq import kmeans
 from scipy.signal import butter, filtfilt
 from tqdm import tqdm
+from utils.google_utils import gsutil_getsize
+from utils.torch_utils import init_torch_seeds, is_parallel
 
 # Set printoptions
 torch.set_printoptions(linewidth=320, precision=5, profile="long")

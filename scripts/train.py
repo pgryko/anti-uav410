@@ -3,10 +3,14 @@ import logging
 import math
 import os
 import random
+import sys
 import time
 from copy import deepcopy
 from pathlib import Path
 from threading import Thread
+
+# Add detection module to path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src" / "detection"))
 
 import numpy as np
 import test  # import test.py to get mAP after each epoch
@@ -23,9 +27,9 @@ from torch.cuda import amp
 from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
-from utils.autoanchor import check_anchors
 from utils.datasets import create_dataloader
 from utils.general import (
+    check_anchors,
     check_dataset,
     check_file,
     check_git_status,
